@@ -7,3 +7,4 @@ test-results/
 *.js
 *.tsbuildinfo
 _tmp_*
+.tmp/

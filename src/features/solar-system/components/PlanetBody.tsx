@@ -24,11 +24,16 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         onClick={handleSelect}
         onPointerDown={handleSelect}
         receiveShadow
+        rotation={body.surfaceRotation}
         scale={focused ? 1.04 : 1}
       >
         <sphereGeometry args={[body.radius, 64, 64]} />
         {body.hasRings ? (
-          <SaturnSurfaceMaterial color={body.color} radius={body.radius} />
+          <SaturnSurfaceMaterial
+            bodyPosition={body.position}
+            color={body.color}
+            radius={body.radius}
+          />
         ) : (
           <meshStandardMaterial color={body.color} metalness={0.02} roughness={0.92} />
         )}

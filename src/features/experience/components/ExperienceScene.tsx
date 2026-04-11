@@ -30,7 +30,7 @@ export function ExperienceScene({
 
   return (
     <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }} shadows>
-      <color attach="background" args={['#040712']} />
+      <color attach="background" args={['#000000']} />
       <ambientLight intensity={0.14} />
       <directionalLight
         castShadow

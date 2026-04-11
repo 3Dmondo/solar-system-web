@@ -76,12 +76,15 @@ Responsibilities:
 
 Current implementation notes:
 
-- Saturn rings now use a lightweight procedural texture for banding and transparency
+- Saturn now uses downloaded local texture assets for the surface and ring alpha map
+- Saturn ring UVs are cropped to the useful span of the downloaded ring texture to avoid edge-margin distortion
+- the visible ring mapping and the Saturn-shadow sampling range are now tunable independently for visual alignment
 - the scene renderer now has real-time shadow support enabled for directional lighting
 - Saturn ring shadow materials now reuse the same radial alpha pattern as the visible ring surface
 - Saturn's ring shadow on the planet is now driven by the custom Saturn surface shader rather than the default ring shadow caster
 - Saturn's ring shadow now fades near the terminator to blend more coherently with the planet lighting model
 - Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
+- Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 
 ### Data Layer
 

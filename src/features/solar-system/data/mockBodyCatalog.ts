@@ -1,4 +1,5 @@
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { SATURN_SPHERE_TILT } from '../rendering/saturnRings';
 
 export const cinematicBodyStates: BodyDefinition[] = [
   {
@@ -8,6 +9,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     radius: 1.35,
     position: [-2.8, 0, 0],
     focusOffset: [0, 0.45, 5.8],
+    surfaceRotation: [SATURN_SPHERE_TILT, 0, 0],
     hasRings: true
   },
   {

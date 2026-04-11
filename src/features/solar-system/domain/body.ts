@@ -7,5 +7,6 @@ export type BodyDefinition = {
   radius: number;
   position: [number, number, number];
   focusOffset: [number, number, number];
+  surfaceRotation?: [number, number, number];
   hasRings?: boolean;
 };
