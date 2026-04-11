@@ -26,6 +26,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     id: 'moon',
     displayName: 'Moon',
     color: '#b0b4be',
+    material: 'moon',
     radius: 0.25,
     position: [1.8, -0.2, 0],
     focusOffset: [0, 0.15, 1.9]

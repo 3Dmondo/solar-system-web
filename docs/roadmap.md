@@ -11,7 +11,7 @@
 - support click and tap focus transitions
 
 Current status:
-The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. Saturn now uses local texture assets for its surface and rings, with corrected ring-texture cropping, aligned sphere tilt, real shadow-capable lighting, and a shader-driven ring shadow on the planet with a softened terminator fade. Earth now also has an asset-based surface material pass plus a first cloud shell layer. The next action is visual inspection before continuing.
+The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. Saturn now uses local texture assets for its surface and rings, with corrected ring-texture cropping, aligned sphere tilt, real shadow-capable lighting, and a shader-driven ring shadow on the planet with a softened terminator fade. Earth now has an asset-based surface material pass plus a first cloud shell layer. Moon now has a first asset-based surface material pass. A first GitHub Pages deployment workflow is also configured. The next action is visual inspection before continuing.
 
 ## Milestone 2: Saturn Rendering Pass
 

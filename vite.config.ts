@@ -2,7 +2,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  base: './',
+  base: process.env.GITHUB_ACTIONS ? '/solar-system-web/' : './',
   plugins: [react()],
   test: {
     include: ['src/**/*.test.{ts,tsx}'],

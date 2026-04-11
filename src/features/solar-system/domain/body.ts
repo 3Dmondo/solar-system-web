@@ -1,6 +1,6 @@
 export type BodyId = 'saturn' | 'earth' | 'moon';
 
-export type BodyMaterial = 'basic' | 'saturn' | 'earth';
+export type BodyMaterial = 'basic' | 'saturn' | 'earth' | 'moon';
 
 export type BodyDefinition = {
   id: BodyId;

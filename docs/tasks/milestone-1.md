@@ -15,7 +15,7 @@ Create a tested foundation for a fullscreen planet showcase with Saturn, Earth, 
 - [x] Render Saturn, Earth, and Moon primitives
 - [x] Support desktop and mobile camera controls
 - [x] Add initial CI-ready scripts
-- [ ] Add GitHub Pages deployment configuration
+- [x] Add GitHub Pages deployment configuration
 
 ## Notes
 

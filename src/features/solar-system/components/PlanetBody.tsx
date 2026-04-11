@@ -3,6 +3,7 @@ import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
+import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
 
@@ -38,6 +39,8 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
           />
         ) : body.material === 'earth' ? (
           <EarthSurfaceMaterial />
+        ) : body.material === 'moon' ? (
+          <MoonSurfaceMaterial />
         ) : (
           <meshStandardMaterial color={body.color} metalness={0.02} roughness={0.92} />
         )}

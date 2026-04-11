@@ -9,6 +9,7 @@
 - Vitest for unit and integration-style tests
 - React Testing Library for UI behavior
 - Playwright for end-to-end smoke tests
+- GitHub Actions for GitHub Pages deployment
 
 ## Why This Stack
 
@@ -87,6 +88,7 @@ Current implementation notes:
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
 - Earth now also has a separate cloud shell layer driven by the local cloud texture and faded by the light-facing term on the night side
+- Moon now has an asset-based first surface pass using the local albedo texture
 
 ### Data Layer
 
@@ -143,3 +145,8 @@ Detailed instructions live in `docs/testing-mobile.md`.
 - implement in small vertical slices
 - update docs together with code changes
 - pause after each meaningful UI or rendering step for visual review
+
+## Deployment
+
+- GitHub Pages deployment is performed through `.github/workflows/deploy-pages.yml`
+- Vite uses the repository-specific base path during GitHub Actions builds
