@@ -50,6 +50,11 @@ Responsibilities:
 - quality tiers
 - lighting environment
 
+Current implementation notes:
+
+- focus transitions are interruptible by user input
+- desktop and coarse-pointer devices use different orbit control tuning
+
 ### Body System
 
 Responsibilities:
@@ -108,6 +113,16 @@ We want strong coverage in the parts we control:
 - smoke tests for desktop and mobile interactions
 
 We do not target synthetic coverage inside browser-owned WebGL internals.
+
+## Mobile Testing
+
+The preferred workflow is:
+
+- use browser device emulation during each small implementation step
+- use same-network real-device testing at the end of meaningful interaction or rendering steps
+- occasionally verify the production preview build on a mobile device
+
+Detailed instructions live in `docs/testing-mobile.md`.
 
 ## Workflow Strategy
 

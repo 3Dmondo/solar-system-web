@@ -29,6 +29,11 @@ body {
     linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
 }
 
+#root,
+.experience-shell {
+  touch-action: none;
+}
+
 button {
   font: inherit;
 }

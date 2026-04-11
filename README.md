@@ -26,9 +26,21 @@ The data layer starts mocked and is intended to evolve toward static assets gene
 - `docs/vision.md`
 - `docs/architecture.md`
 - `docs/roadmap.md`
+- `docs/testing-mobile.md`
 - `docs/tasks/milestone-1.md`
 - `docs/decisions/0001-web-stack.md`
 
-## Next Step
+## Development
 
-Install Node.js, then install dependencies and run the local test/build pipeline.
+Install dependencies and start the app with:
+
+```powershell
+pnpm install
+pnpm dev
+```
+
+For testing on a phone on the same network:
+
+```powershell
+pnpm dev -- --host
+```

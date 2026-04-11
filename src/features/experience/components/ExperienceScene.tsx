@@ -3,12 +3,14 @@ import { useEffect, useRef } from 'react';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
+import { getControlProfile } from '../domain/controlProfile';
 import { cinematicBodyStates } from '../../solar-system/data/mockBodyCatalog';
 import { type BodyId } from '../../solar-system/domain/body';
 import { getFocusCameraPosition, getFocusTarget } from '../../solar-system/domain/focus';
 
 type ExperienceSceneProps = {
   focusedBodyId: BodyId;
+  isCoarsePointer: boolean;
   onFocusBody: (bodyId: BodyId) => void;
 };
 
@@ -19,13 +21,19 @@ type ControlsHandle = {
   removeEventListener: (type: 'start', listener: () => void) => void;
 };
 
-export function ExperienceScene({ focusedBodyId, onFocusBody }: ExperienceSceneProps) {
+export function ExperienceScene({
+  focusedBodyId,
+  isCoarsePointer,
+  onFocusBody
+}: ExperienceSceneProps) {
+  const controlProfile = getControlProfile(isCoarsePointer);
+
   return (
     <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }}>
       <color attach="background" args={['#040712']} />
       <ambientLight intensity={0.18} />
       <directionalLight position={[10, 6, 8]} intensity={2.4} castShadow />
-      <FocusCameraRig focusedBodyId={focusedBodyId} />
+      <FocusCameraRig controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
 
       {cinematicBodyStates.map((body) => (
         <PlanetBody
@@ -39,7 +47,13 @@ export function ExperienceScene({ focusedBodyId, onFocusBody }: ExperienceSceneP
   );
 }
 
-function FocusCameraRig({ focusedBodyId }: { focusedBodyId: BodyId }) {
+function FocusCameraRig({
+  controlProfile,
+  focusedBodyId
+}: {
+  controlProfile: ReturnType<typeof getControlProfile>;
+  focusedBodyId: BodyId;
+}) {
   const { camera } = useThree();
   const controlsRef = useRef<ControlsHandle | null>(null);
   const desiredTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId)));
@@ -99,7 +113,15 @@ function FocusCameraRig({ focusedBodyId }: { focusedBodyId: BodyId }) {
       ref={(value) => {
         controlsRef.current = value as ControlsHandle | null;
       }}
+      dampingFactor={controlProfile.dampingFactor}
       enablePan={false}
+      enableDamping
+      maxDistance={controlProfile.maxDistance}
+      maxPolarAngle={controlProfile.maxPolarAngle}
+      minDistance={controlProfile.minDistance}
+      minPolarAngle={controlProfile.minPolarAngle}
+      rotateSpeed={controlProfile.rotateSpeed}
+      zoomSpeed={controlProfile.zoomSpeed}
     />
   );
 }
