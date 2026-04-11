@@ -1,6 +1,7 @@
 import { type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
 
@@ -28,12 +29,14 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         scale={focused ? 1.04 : 1}
       >
         <sphereGeometry args={[body.radius, 64, 64]} />
-        {body.hasRings ? (
+        {body.material === 'saturn' ? (
           <SaturnSurfaceMaterial
             bodyPosition={body.position}
             color={body.color}
             radius={body.radius}
           />
+        ) : body.material === 'earth' ? (
+          <EarthSurfaceMaterial />
         ) : (
           <meshStandardMaterial color={body.color} metalness={0.02} roughness={0.92} />
         )}

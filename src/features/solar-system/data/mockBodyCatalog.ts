@@ -6,6 +6,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     id: 'saturn',
     displayName: 'Saturn',
     color: '#cdb075',
+    material: 'saturn',
     radius: 1.35,
     position: [-2.8, 0, 0],
     focusOffset: [0, 0.45, 5.8],
@@ -16,6 +17,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     id: 'earth',
     displayName: 'Earth',
     color: '#3a7bd5',
+    material: 'earth',
     radius: 0.72,
     position: [0.5, 0, 0],
     focusOffset: [0, 0.25, 3.2]

@@ -85,6 +85,7 @@ Current implementation notes:
 - Saturn's ring shadow now fades near the terminator to blend more coherently with the planet lighting model
 - Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
+- Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
 
 ### Data Layer
 
