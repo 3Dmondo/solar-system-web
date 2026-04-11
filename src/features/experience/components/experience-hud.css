@@ -1,0 +1,38 @@
+.experience-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.experience-hud {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+.experience-hud__title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.experience-hud__subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .experience-hud {
+    inset: 1.25rem auto auto 1.25rem;
+    max-width: 18rem;
+  }
+}
