@@ -1,6 +1,7 @@
 import { type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
@@ -44,6 +45,8 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
 
       {body.hasRings ? (
         <SaturnRings radius={body.radius} onSelect={() => onSelect(body.id)} />
+      ) : body.material === 'earth' ? (
+        <EarthCloudLayer focused={focused} radius={body.radius} />
       ) : null}
     </group>
   );

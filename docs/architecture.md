@@ -86,6 +86,7 @@ Current implementation notes:
 - Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
+- Earth now also has a separate cloud shell layer driven by the local cloud texture and faded by the light-facing term on the night side
 
 ### Data Layer
 

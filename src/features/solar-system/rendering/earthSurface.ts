@@ -13,3 +13,7 @@ export function loadEarthNightTexture() {
   texture.colorSpace = SRGBColorSpace;
   return texture;
 }
+
+export function loadEarthCloudTexture() {
+  return textureLoader.load('./assets/textures/2k_earth_clouds.jpg');
+}
