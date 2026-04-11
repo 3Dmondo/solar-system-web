@@ -16,7 +16,9 @@ describe('ExperienceHud', () => {
 
     render(<ExperienceHud focusedBodyId="saturn" />);
 
-    await user.click(screen.getAllByRole('button', { name: 'Show interaction help' })[0]);
+    const helpButton = screen.getAllByRole('button', { name: 'Show interaction help' })[0]!;
+
+    await user.click(helpButton);
 
     expect(screen.getByText(/Desktop: drag to orbit/i)).toBeInTheDocument();
     expect(screen.getByText(/Mobile: drag to orbit/i)).toBeInTheDocument();
