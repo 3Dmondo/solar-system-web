@@ -1,6 +1,7 @@
 import { type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { SaturnRings } from './SaturnRings';
 
 type PlanetBodyProps = ThreeElements['mesh'] & {
   body: BodyDefinition;
@@ -27,17 +28,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
       </mesh>
 
       {body.hasRings ? (
-        <mesh rotation={[Math.PI / 2.35, 0, 0]}>
-          <ringGeometry args={[body.radius * 1.25, body.radius * 2.2, 128]} />
-          <meshStandardMaterial
-            color="#bba27c"
-            roughness={0.9}
-            metalness={0}
-            side={2}
-            transparent
-            opacity={0.82}
-          />
-        </mesh>
+        <SaturnRings radius={body.radius} onSelect={() => onSelect(body.id)} />
       ) : null}
     </group>
   );

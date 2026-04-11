@@ -74,6 +74,10 @@ Responsibilities:
 - specular water highlights
 - ring shading and translucency
 
+Current implementation notes:
+
+- Saturn rings now use a lightweight procedural texture for banding and transparency
+
 ### Data Layer
 
 Responsibilities:

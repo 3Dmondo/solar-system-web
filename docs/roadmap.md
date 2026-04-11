@@ -11,7 +11,7 @@
 - support click and tap focus transitions
 
 Current status:
-The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. The next action is visual inspection before continuing.
+The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. Saturn now also has a first procedural ring-material pass ahead of shadows. The next action is visual inspection before continuing.
 
 ## Milestone 2: Saturn Rendering Pass
 
