@@ -29,10 +29,23 @@ export function ExperienceScene({
   const controlProfile = getControlProfile(isCoarsePointer);
 
   return (
-    <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }}>
+    <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }} shadows>
       <color attach="background" args={['#040712']} />
-      <ambientLight intensity={0.18} />
-      <directionalLight position={[10, 6, 8]} intensity={2.4} castShadow />
+      <ambientLight intensity={0.14} />
+      <directionalLight
+        castShadow
+        intensity={2.7}
+        position={[10, 6, 8]}
+        shadow-bias={-0.00015}
+        shadow-mapSize-height={2048}
+        shadow-mapSize-width={2048}
+        shadow-camera-bottom={-8}
+        shadow-camera-far={28}
+        shadow-camera-left={-8}
+        shadow-camera-near={1}
+        shadow-camera-right={8}
+        shadow-camera-top={8}
+      />
       <FocusCameraRig controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
 
       {cinematicBodyStates.map((body) => (

@@ -77,6 +77,7 @@ Responsibilities:
 Current implementation notes:
 
 - Saturn rings now use a lightweight procedural texture for banding and transparency
+- the scene renderer now has real-time shadow support enabled for directional lighting
 
 ### Data Layer
 

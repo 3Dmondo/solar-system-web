@@ -18,13 +18,19 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
   return (
     <group position={body.position}>
       <mesh
+        castShadow
         {...meshProps}
         onClick={handleSelect}
         onPointerDown={handleSelect}
+        receiveShadow
         scale={focused ? 1.04 : 1}
       >
         <sphereGeometry args={[body.radius, 64, 64]} />
-        <meshStandardMaterial color={body.color} roughness={0.92} metalness={0.02} />
+        <meshStandardMaterial
+          color={body.color}
+          metalness={0.02}
+          roughness={body.hasRings ? 0.82 : 0.92}
+        />
       </mesh>
 
       {body.hasRings ? (

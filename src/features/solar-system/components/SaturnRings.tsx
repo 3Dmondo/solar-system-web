@@ -20,9 +20,11 @@ export function SaturnRings({ radius, onSelect }: SaturnRingsProps) {
 
   return (
     <mesh
+      castShadow
       geometry={geometry}
       onClick={onSelect}
       onPointerDown={onSelect}
+      receiveShadow
       rotation={[Math.PI / 2.35, 0, 0]}
     >
       <meshStandardMaterial
