@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
@@ -14,9 +15,29 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
 };
 
 export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
-  const handleSelect = (event: ThreeEvent<MouseEvent | PointerEvent>) => {
+  const lastTouchTapRef = useRef(0);
+
+  const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
     onSelect(body.id);
+  };
+
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+
+    if (event.pointerType !== 'touch') {
+      return;
+    }
+
+    const now = performance.now();
+
+    if (now - lastTouchTapRef.current < 320) {
+      onSelect(body.id);
+      lastTouchTapRef.current = 0;
+      return;
+    }
+
+    lastTouchTapRef.current = now;
   };
 
   return (
@@ -24,8 +45,8 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
       <mesh
         castShadow
         {...meshProps}
-        onClick={handleSelect}
-        onPointerDown={handleSelect}
+        onDoubleClick={handleDoubleClick}
+        onPointerDown={handlePointerDown}
         receiveShadow
         rotation={body.surfaceRotation}
         scale={focused ? 1.04 : 1}
@@ -47,7 +68,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
       </mesh>
 
       {body.hasRings ? (
-        <SaturnRings radius={body.radius} onSelect={() => onSelect(body.id)} />
+        <SaturnRings bodyId={body.id} onSelect={onSelect} radius={body.radius} />
       ) : body.material === 'earth' ? (
         <EarthCloudLayer focused={focused} radius={body.radius} />
       ) : null}

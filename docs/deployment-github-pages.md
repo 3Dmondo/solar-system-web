@@ -11,6 +11,7 @@ This repository includes a GitHub Actions workflow for deploying the static Vite
 - Vite uses the GitHub Pages base path during GitHub Actions builds.
 - The workflow file is `.github/workflows/deploy-pages.yml`.
 - The workflow builds the app with `pnpm` and deploys the `dist/` folder through the official GitHub Pages actions.
+- The workflow opts into the GitHub Actions Node 24 runtime to avoid the current Node 20 deprecation warnings.
 
 ## Manual Steps
 

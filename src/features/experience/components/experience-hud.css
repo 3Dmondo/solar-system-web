@@ -18,16 +18,40 @@
   pointer-events: none;
 }
 
+.experience-hud__help-button {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.7rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
 .experience-hud__title {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  padding-right: 2.25rem;
 }
 
 .experience-hud__subtitle {
   color: var(--text-muted);
   font-size: 0.85rem;
+}
+
+.experience-hud__instructions {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 @media (min-width: 768px) {

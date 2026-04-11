@@ -55,6 +55,7 @@ Current implementation notes:
 
 - focus transitions are interruptible by user input
 - desktop and coarse-pointer devices use different orbit control tuning
+- body focus now requires double click on desktop or double tap on touch to reduce accidental selection changes
 
 ### Body System
 
@@ -150,3 +151,4 @@ Detailed instructions live in `docs/testing-mobile.md`.
 
 - GitHub Pages deployment is performed through `.github/workflows/deploy-pages.yml`
 - Vite uses the repository-specific base path during GitHub Actions builds
+- Planet textures are resolved through Vite asset URLs so they load correctly on GitHub Pages project-site paths

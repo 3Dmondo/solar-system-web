@@ -10,9 +10,11 @@ export const SATURN_RING_VISIBLE_TEXTURE_MIN_U = 0.105;
 export const SATURN_RING_VISIBLE_TEXTURE_MAX_U = 0.915;
 
 const textureLoader = new TextureLoader();
+const saturnRingTextureUrl = new URL('../../../../assets/textures/2k_saturn_ring_alpha.png', import.meta.url)
+  .href;
 
 export function createSaturnRingTexture() {
-  const texture = textureLoader.load('./assets/textures/2k_saturn_ring_alpha.png');
+  const texture = textureLoader.load(saturnRingTextureUrl);
   texture.colorSpace = SRGBColorSpace;
   return texture;
 }
