@@ -11,7 +11,7 @@
 - support click and tap focus transitions
 
 Current status:
-The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. Saturn now also has a procedural ring-material pass, real shadow-capable lighting, and a shader-driven ring shadow on the planet with a softened terminator fade. The next action is visual inspection before continuing.
+The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The current interaction layer includes body-specific focus targets, interruptible focus animation, overlap-safe selection, and tuned desktop/mobile orbit controls. Saturn now also has a procedural ring-material pass, real shadow-capable lighting, and a shader-driven ring shadow on the planet with a softened terminator fade, while the rings themselves rely on the generic shadow-map system for cross-body compatibility. The next action is visual inspection before continuing.
 
 ## Milestone 2: Saturn Rendering Pass
 

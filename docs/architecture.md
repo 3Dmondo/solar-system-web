@@ -81,6 +81,7 @@ Current implementation notes:
 - Saturn ring shadow materials now reuse the same radial alpha pattern as the visible ring surface
 - Saturn's ring shadow on the planet is now driven by the custom Saturn surface shader rather than the default ring shadow caster
 - Saturn's ring shadow now fades near the terminator to blend more coherently with the planet lighting model
+- Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
 
 ### Data Layer
 
