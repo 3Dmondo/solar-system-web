@@ -10,9 +10,9 @@ Create a tested foundation for a fullscreen planet showcase with Saturn, Earth, 
 - [x] Add test tooling and coverage configuration
 - [x] Add fullscreen app shell
 - [x] Add scene entry point
-- [ ] Define body data types and mocked provider
-- [ ] Add focus state and camera target behavior
-- [ ] Render Saturn, Earth, and Moon primitives
+- [x] Define body data types and mocked provider
+- [x] Add focus state and camera target behavior
+- [x] Render Saturn, Earth, and Moon primitives
 - [ ] Support desktop and mobile camera controls
 - [x] Add initial CI-ready scripts
 - [ ] Add GitHub Pages deployment configuration

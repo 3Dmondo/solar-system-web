@@ -1,20 +1,31 @@
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useRef } from 'react';
+import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
 import { cinematicBodyStates } from '../../solar-system/data/mockBodyCatalog';
 import { type BodyId } from '../../solar-system/domain/body';
+import { getFocusCameraPosition, getFocusTarget } from '../../solar-system/domain/focus';
 
 type ExperienceSceneProps = {
   focusedBodyId: BodyId;
   onFocusBody: (bodyId: BodyId) => void;
 };
 
+type ControlsHandle = {
+  target: Vector3;
+  update: () => void;
+  addEventListener: (type: 'start', listener: () => void) => void;
+  removeEventListener: (type: 'start', listener: () => void) => void;
+};
+
 export function ExperienceScene({ focusedBodyId, onFocusBody }: ExperienceSceneProps) {
   return (
-    <Canvas camera={{ position: [0, 2.2, 7.5], fov: 40 }}>
+    <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }}>
       <color attach="background" args={['#040712']} />
       <ambientLight intensity={0.18} />
       <directionalLight position={[10, 6, 8]} intensity={2.4} castShadow />
+      <FocusCameraRig focusedBodyId={focusedBodyId} />
 
       {cinematicBodyStates.map((body) => (
         <PlanetBody
@@ -24,8 +35,71 @@ export function ExperienceScene({ focusedBodyId, onFocusBody }: ExperienceSceneP
           onSelect={onFocusBody}
         />
       ))}
-
-      <OrbitControls enablePan={false} />
     </Canvas>
+  );
+}
+
+function FocusCameraRig({ focusedBodyId }: { focusedBodyId: BodyId }) {
+  const { camera } = useThree();
+  const controlsRef = useRef<ControlsHandle | null>(null);
+  const desiredTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId)));
+  const desiredCameraPosition = useRef(new Vector3(...getFocusCameraPosition(focusedBodyId)));
+  const isTransitioning = useRef(false);
+
+  useEffect(() => {
+    desiredTarget.current.set(...getFocusTarget(focusedBodyId));
+    desiredCameraPosition.current.set(...getFocusCameraPosition(focusedBodyId));
+    isTransitioning.current = true;
+  }, [focusedBodyId]);
+
+  useEffect(() => {
+    const controls = controlsRef.current;
+
+    if (!controls) {
+      return;
+    }
+
+    const handleStart = () => {
+      isTransitioning.current = false;
+    };
+
+    controls.addEventListener('start', handleStart);
+
+    return () => {
+      controls.removeEventListener('start', handleStart);
+    };
+  }, []);
+
+  useFrame((_, delta) => {
+    if (!isTransitioning.current) {
+      return;
+    }
+
+    const easing = 1 - Math.exp(-delta * 4.5);
+
+    camera.position.lerp(desiredCameraPosition.current, easing);
+    controlsRef.current?.target.lerp(desiredTarget.current, easing);
+    controlsRef.current?.update();
+
+    const cameraSettled =
+      camera.position.distanceToSquared(desiredCameraPosition.current) < 0.0001;
+    const targetSettled =
+      controlsRef.current?.target.distanceToSquared(desiredTarget.current) ?? 0;
+
+    if (cameraSettled && targetSettled < 0.0001) {
+      camera.position.copy(desiredCameraPosition.current);
+      controlsRef.current?.target.copy(desiredTarget.current);
+      controlsRef.current?.update();
+      isTransitioning.current = false;
+    }
+  });
+
+  return (
+    <OrbitControls
+      ref={(value) => {
+        controlsRef.current = value as ControlsHandle | null;
+      }}
+      enablePan={false}
+    />
   );
 }

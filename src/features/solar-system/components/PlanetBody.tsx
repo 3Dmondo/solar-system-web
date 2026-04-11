@@ -1,4 +1,5 @@
 import { type ThreeElements } from '@react-three/fiber';
+import { type ThreeEvent } from '@react-three/fiber';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 
 type PlanetBodyProps = ThreeElements['mesh'] & {
@@ -8,12 +9,17 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
 };
 
 export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
+  const handleSelect = (event: ThreeEvent<MouseEvent | PointerEvent>) => {
+    event.stopPropagation();
+    onSelect(body.id);
+  };
+
   return (
     <group position={body.position}>
       <mesh
         {...meshProps}
-        onClick={() => onSelect(body.id)}
-        onPointerDown={() => onSelect(body.id)}
+        onClick={handleSelect}
+        onPointerDown={handleSelect}
         scale={focused ? 1.04 : 1}
       >
         <sphereGeometry args={[body.radius, 64, 64]} />

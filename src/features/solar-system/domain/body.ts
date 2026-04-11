@@ -6,5 +6,6 @@ export type BodyDefinition = {
   color: string;
   radius: number;
   position: [number, number, number];
+  focusOffset: [number, number, number];
   hasRings?: boolean;
 };

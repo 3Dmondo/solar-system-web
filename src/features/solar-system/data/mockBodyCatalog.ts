@@ -7,6 +7,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     color: '#cdb075',
     radius: 1.35,
     position: [-2.8, 0, 0],
+    focusOffset: [0, 0.45, 5.8],
     hasRings: true
   },
   {
@@ -14,14 +15,16 @@ export const cinematicBodyStates: BodyDefinition[] = [
     displayName: 'Earth',
     color: '#3a7bd5',
     radius: 0.72,
-    position: [0.5, 0, 0]
+    position: [0.5, 0, 0],
+    focusOffset: [0, 0.25, 3.2]
   },
   {
     id: 'moon',
     displayName: 'Moon',
     color: '#b0b4be',
     radius: 0.25,
-    position: [1.8, -0.2, 0]
+    position: [1.8, -0.2, 0],
+    focusOffset: [0, 0.15, 1.9]
   }
 ];
 

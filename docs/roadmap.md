@@ -11,7 +11,7 @@
 - support click and tap focus transitions
 
 Current status:
-The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The next step is the first real scene interaction pass, followed by visual inspection.
+The scaffold, documentation baseline, pnpm setup, and initial validation pipeline are complete. The first real scene interaction pass now adds body-specific focus targets and smooth camera retargeting. The next action is visual inspection before continuing.
 
 ## Milestone 2: Saturn Rendering Pass
 
