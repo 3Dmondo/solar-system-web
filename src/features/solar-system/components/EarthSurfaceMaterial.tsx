@@ -1,21 +1,26 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Vector3 } from 'three';
+import { TangentSpaceNormalMap, Vector2, Vector3 } from 'three';
 import { EARTH_CLOUD_UV_SPEED, EARTH_CLOUD_SHADOW_SHELL_RADIUS } from '../rendering/earthMotion';
 import {
   loadEarthCloudTexture,
   loadEarthDayTexture,
-  loadEarthNightTexture
+  loadEarthNormalTexture,
+  loadEarthNightTexture,
+  loadEarthSpecularTexture
 } from '../rendering/earthSurface';
 
 export function EarthSurfaceMaterial() {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
   const nightTexture = useMemo(() => loadEarthNightTexture(), []);
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
+  const normalTexture = useMemo(() => loadEarthNormalTexture(), []);
+  const specularTexture = useMemo(() => loadEarthSpecularTexture(), []);
   const shaderRef = useRef<{
     uniforms: {
       earthCloudTexture?: { value: unknown };
       earthCloudOffset?: { value: number };
+      earthSpecularTexture?: { value: unknown };
     };
   } | null>(null);
 
@@ -34,9 +39,13 @@ export function EarthSurfaceMaterial() {
       color="#ffffff"
       map={dayTexture}
       metalness={0.02}
+      normalMap={normalTexture}
+      normalMapType={TangentSpaceNormalMap}
+      normalScale={new Vector2(3.0, 3.0)}
       onBeforeCompile={(shader) => {
         shader.uniforms.earthNightTexture = { value: nightTexture };
         shader.uniforms.earthCloudTexture = { value: cloudTexture };
+        shader.uniforms.earthSpecularTexture = { value: specularTexture };
         shader.uniforms.earthCloudOffset = { value: 0 };
         shader.uniforms.earthLightDirection = { value: new Vector3(10, 6, 8).normalize() };
         shaderRef.current = shader as typeof shaderRef.current;
@@ -72,6 +81,7 @@ vEarthWorldPosition = worldPosition.xyz;`
           `#include <common>
 uniform sampler2D earthNightTexture;
 uniform sampler2D earthCloudTexture;
+uniform sampler2D earthSpecularTexture;
 uniform float earthCloudOffset;
 uniform vec3 earthLightDirection;
 varying vec2 vEarthUv;
@@ -125,8 +135,8 @@ vec3 applyEarthNightLights(vec3 baseColor) {
   float cloudShadow = smoothstep(0.1, 0.9, cloudMask) * lightFacing * 0.3;
   vec3 viewDirection = normalize(cameraPosition - vEarthWorldPosition);
   vec3 halfVector = normalize(lightDirection + viewDirection);
-  float blueBias = baseColor.b - max(baseColor.r, baseColor.g);
-  float waterMask = smoothstep(0.02, 0.16, blueBias);
+  float rawSpecular = texture2D(earthSpecularTexture, vEarthUv).r;
+  float waterMask = smoothstep(0.72, 0.98, rawSpecular);
   float specularTerm = pow(max(dot(worldNormal, halfVector), 0.0), 10.0);
   float fresnel = pow(1.0 - max(dot(worldNormal, viewDirection), 0.0), 2.5);
   float oceanSpecular = waterMask * specularTerm * lightFacing * (0.18 + fresnel * 0.32);

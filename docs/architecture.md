@@ -89,8 +89,9 @@ Current implementation notes:
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 - Earth and Saturn now have slow surface self-rotation to keep the showcase scene from feeling static
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
+- Earth surface lighting now also uses local PNG normal and specular maps to avoid the TIFF decoding artifacts seen in earlier passes
 - Earth now also has a separate cloud shell layer driven by the local cloud texture and faded by the light-facing term on the night side
-- Earth ocean highlights now use the local specular map through the custom Earth surface shader, with a repair pass for obviously broken decoded scanlines
+- Earth ocean highlights now use the local specular map through the custom Earth surface shader
 - Earth surface shading now also applies a light cloud-shadow term derived from the moving cloud texture
 - Earth cloud cover now rotates slowly as a separate shell layer
 - Earth cloud rotation and projected cloud-shadow drift are now derived from the Earth's surface rotation speed, with the cloud shell following Earth spin plus a small linked drift while the shadow uses that same relative drift over the surface

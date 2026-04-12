@@ -23,8 +23,12 @@ Textures currently included in assets/textures:
 - 8k_earth_nightmap.jpg
 - 2k_earth_clouds.jpg
 - 8k_earth_clouds.jpg
+- 2k_earth_normal_map.png
+- 8k_earth_normal_map.png
 - 2k_earth_normal_map.tif
 - 8k_earth_normal_map.tif
+- 2k_earth_specular_map.png
+- 8k_earth_specular_map.png
 - 2k_earth_specular_map.tif
 - 8k_earth_specular_map.tif
 - 2k_moon.jpg
