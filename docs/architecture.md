@@ -30,6 +30,11 @@ Reasons:
 
 Shader-heavy impostor techniques can be introduced later where they clearly improve performance.
 
+Known deferred rendering issue:
+
+- equirectangular texture rendering still shows visible pole artifacts on some bodies
+- future solutions to evaluate include cube-sphere geometry with compatible UV/material handling and shader/impostor-based rendering paths
+
 ## Module Boundaries
 
 ### App Shell
