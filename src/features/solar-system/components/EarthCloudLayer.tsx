@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
-import { FrontSide, Vector3 } from 'three';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { FrontSide, Mesh, Vector3 } from 'three';
 import { loadEarthCloudTexture } from '../rendering/earthSurface';
 
 type EarthCloudLayerProps = {
@@ -10,9 +11,18 @@ type EarthCloudLayerProps = {
 export function EarthCloudLayer({ focused, radius }: EarthCloudLayerProps) {
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
   const shellScale = focused ? 1.05 : 1.01;
+  const cloudMeshRef = useRef<Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (!cloudMeshRef.current) {
+      return;
+    }
+
+    cloudMeshRef.current.rotation.y += delta * 0.005;
+  });
 
   return (
-    <mesh scale={shellScale}>
+    <mesh ref={cloudMeshRef} scale={shellScale}>
       <sphereGeometry args={[radius, 64, 64]} />
       <meshStandardMaterial
         alphaMap={cloudTexture}

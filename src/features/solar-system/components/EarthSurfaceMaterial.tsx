@@ -1,10 +1,36 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
-import { loadEarthDayTexture, loadEarthNightTexture } from '../rendering/earthSurface';
+import {
+  loadEarthCloudTexture,
+  loadEarthDayTexture,
+  loadEarthNightTexture
+} from '../rendering/earthSurface';
+
+const EARTH_CLOUD_ROTATION_SPEED = 0.005;
+const EARTH_CLOUD_UV_SPEED = EARTH_CLOUD_ROTATION_SPEED / (Math.PI * 2);
+const EARTH_CLOUD_SHADOW_SHELL_RADIUS = 1.018;
 
 export function EarthSurfaceMaterial() {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
   const nightTexture = useMemo(() => loadEarthNightTexture(), []);
+  const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
+  const shaderRef = useRef<{
+    uniforms: {
+      earthCloudTexture?: { value: unknown };
+      earthCloudOffset?: { value: number };
+    };
+  } | null>(null);
+
+  useFrame((_, delta) => {
+    const earthCloudOffset = shaderRef.current?.uniforms.earthCloudOffset;
+
+    if (!earthCloudOffset) {
+      return;
+    }
+
+    earthCloudOffset.value = (earthCloudOffset.value + delta * EARTH_CLOUD_UV_SPEED) % 1;
+  });
 
   return (
     <meshStandardMaterial
@@ -13,7 +39,10 @@ export function EarthSurfaceMaterial() {
       metalness={0.02}
       onBeforeCompile={(shader) => {
         shader.uniforms.earthNightTexture = { value: nightTexture };
+        shader.uniforms.earthCloudTexture = { value: cloudTexture };
+        shader.uniforms.earthCloudOffset = { value: 0 };
         shader.uniforms.earthLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+        shaderRef.current = shader as typeof shaderRef.current;
 
         shader.vertexShader = shader.vertexShader.replace(
           '#include <common>',
@@ -45,10 +74,20 @@ vEarthWorldPosition = worldPosition.xyz;`
           '#include <common>',
           `#include <common>
 uniform sampler2D earthNightTexture;
+uniform sampler2D earthCloudTexture;
+uniform float earthCloudOffset;
 uniform vec3 earthLightDirection;
 varying vec2 vEarthUv;
 varying vec3 vEarthWorldNormal;
 varying vec3 vEarthWorldPosition;
+const float EARTH_CLOUD_SHADOW_SHELL_RADIUS = ${EARTH_CLOUD_SHADOW_SHELL_RADIUS.toFixed(3)};
+
+vec2 directionToCloudUv(vec3 direction) {
+  vec3 dir = normalize(direction);
+  float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
+  float v = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+  return vec2(fract(1.0 - u - earthCloudOffset), clamp(v, 0.001, 0.999));
+}
 
 vec3 applyEarthNightLights(vec3 baseColor) {
   vec3 worldNormal = normalize(vEarthWorldNormal);
@@ -56,6 +95,17 @@ vec3 applyEarthNightLights(vec3 baseColor) {
   float lightFacing = max(dot(worldNormal, lightDirection), 0.0);
   float nightMask = 1.0 - smoothstep(0.08, 0.24, lightFacing);
   vec3 nightColor = texture2D(earthNightTexture, vEarthUv).rgb;
+  float normalLightDot = dot(worldNormal, lightDirection);
+  float shellIntersection = -normalLightDot + sqrt(
+    max(
+      normalLightDot * normalLightDot + (EARTH_CLOUD_SHADOW_SHELL_RADIUS * EARTH_CLOUD_SHADOW_SHELL_RADIUS - 1.0),
+      0.0
+    )
+  );
+  vec3 cloudSampleDirection = normalize(worldNormal + lightDirection * shellIntersection);
+  vec2 cloudUv = directionToCloudUv(cloudSampleDirection);
+  float cloudMask = 3.0 * texture2D(earthCloudTexture, cloudUv).r;
+  float cloudShadow = smoothstep(0.1, 0.9, cloudMask) * lightFacing * 0.3;
   vec3 viewDirection = normalize(cameraPosition - vEarthWorldPosition);
   vec3 halfVector = normalize(lightDirection + viewDirection);
   float blueBias = baseColor.b - max(baseColor.r, baseColor.g);
@@ -64,7 +114,7 @@ vec3 applyEarthNightLights(vec3 baseColor) {
   float fresnel = pow(1.0 - max(dot(worldNormal, viewDirection), 0.0), 2.5);
   float oceanSpecular = waterMask * specularTerm * lightFacing * (0.18 + fresnel * 0.32);
 
-  vec3 darkenedDay = baseColor * mix(0.18, 1.0, 1.0 - nightMask);
+  vec3 darkenedDay = baseColor * mix(0.18, 1.0 - cloudShadow, 1.0 - nightMask);
   vec3 specularColor = vec3(0.7, 0.84, 0.96) * oceanSpecular * 2.0;
 
   return darkenedDay + nightColor * nightMask * 0.7 + specularColor;
