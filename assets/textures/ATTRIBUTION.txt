@@ -29,6 +29,20 @@ Textures currently included in assets/textures:
 - 8k_earth_specular_map.tif
 - 2k_moon.jpg
 - 8k_moon.jpg
+- lroc_color_2k.jpg
+- ldem_3_8bit.jpg
 
 Attribution note for downstream reuse:
 Contains adapted or redistributed planetary textures from Solar System Scope, licensed under CC BY 4.0.
+
+NASA Moon texture attribution:
+CGI Moon Kit
+NASA Scientific Visualization Studio
+https://svs.gsfc.nasa.gov/4720
+
+Please give credit for this item to:
+NASA's Scientific Visualization Studio
+
+Relevant source data noted on the NASA page:
+- DEM (Digital Elevation Map) [LRO: LOLA]
+- LROC WAC Color Mosaic (Natural Color Hapke Normalized WAC Mosaic)

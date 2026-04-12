@@ -89,7 +89,7 @@ Current implementation notes:
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
 - Earth now also has a separate cloud shell layer driven by the local cloud texture and faded by the light-facing term on the night side
-- Moon now has an asset-based first surface pass using the local albedo texture
+- Moon now has an asset-based surface pass using NASA SVS color and height-map assets
 
 ### Data Layer
 
