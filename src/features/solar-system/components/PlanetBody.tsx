@@ -9,6 +9,7 @@ import { MockPlanetMaterial } from './MockPlanetMaterial';
 import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
+import { VenusCloudLayer } from './VenusCloudLayer';
 
 type PlanetBodyProps = ThreeElements['mesh'] & {
   body: BodyDefinition;
@@ -88,6 +89,13 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         />
       ) : body.material === 'earth' ? (
         <EarthCloudLayer bodyPosition={body.position} focused={focused} radius={body.radius} />
+      ) : body.material === 'venus' ? (
+        <VenusCloudLayer
+          bodyPosition={body.position}
+          focused={focused}
+          radius={body.radius}
+          rotationSpeed={body.surfaceRotationSpeed ?? 0}
+        />
       ) : null}
     </group>
   );

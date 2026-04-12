@@ -62,6 +62,7 @@ Solar System Scope textures currently used directly in the app:
 - 2k_sun.jpg
 - 2k_mercury.jpg
 - 2k_venus_atmosphere.jpg
+- 2k_venus_surface.jpg
 - 2k_earth_daymap.jpg
 - 2k_earth_nightmap.jpg
 - 2k_earth_clouds.jpg

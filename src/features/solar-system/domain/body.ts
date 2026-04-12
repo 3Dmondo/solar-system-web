@@ -12,7 +12,7 @@ export type BodyId =
 
 export type ViewTargetId = BodyId | 'overview';
 
-export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon';
+export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon' | 'venus';
 
 export type BodyDefinition = {
   id: BodyId;

@@ -21,6 +21,7 @@ Current implementation notes:
 - planets are now spread across different mocked orbital angles to cover more of the ecliptic disk
 - the Moon is kept in the mocked scene for continuity with the original showcase flow
 - the Sun and the remaining overview planets now use local Solar System Scope texture maps
+- Venus now uses a dedicated surface texture plus a semi-transparent cloud shell built on the same reusable cloud-layer component as Earth
 - Earth and Saturn are back on the shared Sun-based lighting model after correcting the light-direction convention used by the custom materials
 
 ## Notes

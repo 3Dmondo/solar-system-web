@@ -34,6 +34,7 @@ export const mockedSolarSystemBodies: BodyDefinition[] = [
     id: 'venus',
     displayName: 'Venus',
     color: '#d2a777',
+    material: 'venus',
     radius: 0.52,
     position: orbitalPosition(6.5, 84),
     focusOffset: [0, 0.18, 2.6],

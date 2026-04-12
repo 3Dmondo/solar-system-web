@@ -118,6 +118,7 @@ Current implementation notes:
 - Moon now has an asset-based surface pass using NASA SVS color and height-map assets, with a first displacement-style relief pass on denser Moon geometry
 - the next rendering phase shifts emphasis from per-body material polish to rendering the mocked full solar-system scene around the existing high-value bodies
 - the Sun and the remaining overview planets now use local Solar System Scope texture maps instead of the earlier procedural placeholders
+- Venus now uses the Solar System Scope surface map for the body plus a separate semi-transparent cloud shell that reuses the same generic cloud-layer technique as Earth with Venus-specific transparency tuning
 
 ### Data Layer
 
