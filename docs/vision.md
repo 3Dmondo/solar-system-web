@@ -4,9 +4,9 @@
 
 Build a web-based solar system visualizer for GitHub Pages that feels like a realistic educational explorer.
 
-## Initial Experience
+## Current Experience
 
-The first public milestone is a fullscreen planet showcase focused on:
+The current public milestone is a fullscreen planet showcase focused on:
 
 - Saturn
 - Earth
@@ -16,7 +16,32 @@ The user can:
 
 - orbit the camera around the focused body
 - zoom in and out
-- click or tap a body to focus it
+- double click or double tap a body to focus it
+
+This milestone is considered complete and serves as the rendering and interaction foundation for the broader solar-system view.
+
+## Next Experience
+
+The next implementation focus is a mocked full-solar-system scene including:
+
+- Sun
+- Mercury
+- Venus
+- Earth
+- Mars
+- Jupiter
+- Saturn
+- Uranus
+- Neptune
+
+The user should be able to:
+
+- start from an overall solar-system view
+- focus any single body from that larger scene
+- move back and forth between overview and focused exploration
+- see mocked orbital trails
+- see a star background behind the system
+- observe continuous self-rotation on the rendered bodies
 
 ## Design Direction
 
@@ -34,11 +59,12 @@ The user can:
 - expand beyond planets to additional solar system objects
 - keep the final site fully static and offline-capable on GitHub Pages
 
-## Non-Goals For Milestone 1
+## Non-Goals For The Next Mocked Solar-System Step
 
-- full solar system navigation with realistic interplanet distances
 - production ephemerides integration
-- educational text overlays beyond minimal interaction feedback
+- realistic orbital mechanics
+- final-scale body and distance realism
+- additional object classes beyond Sun and planets
 
 ## Workflow Expectations
 

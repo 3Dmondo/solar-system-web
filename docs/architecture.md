@@ -53,14 +53,15 @@ Responsibilities:
 - renderer setup
 - camera setup
 - orbit controls
-- quality tiers
 - lighting environment
+- overview and focus camera modes
 
 Current implementation notes:
 
 - focus transitions are interruptible by user input
 - desktop and coarse-pointer devices use different orbit control tuning
 - body focus now requires double click on desktop or double tap on touch to reduce accidental selection changes
+- the next scene expansion will need to support both solar-system overview framing and single-body focus framing in the same interaction model
 
 ### Body System
 
@@ -70,6 +71,13 @@ Responsibilities:
 - body transforms
 - focus targets
 - planet and ring composition
+- overview layout and mocked orbital placement
+
+Future expansion notes:
+
+- extend the current body catalog from the Saturn/Earth/Moon showcase set to Sun plus all planets
+- support both overview-scale transforms and close-focus transforms without duplicating body definitions
+- add mocked orbital trails as a renderable companion to the body catalog
 
 ### Render Features
 
@@ -80,6 +88,8 @@ Responsibilities:
 - cloud shells
 - specular water highlights
 - ring shading and translucency
+- star background
+- orbital trails
 
 Current implementation notes:
 
@@ -102,6 +112,7 @@ Current implementation notes:
 - Earth cloud cover now rotates slowly as a separate shell layer
 - Earth cloud rotation and projected cloud-shadow drift are now derived from the Earth's surface rotation speed, with the cloud shell following Earth spin plus a small linked drift while the shadow uses that same relative drift over the surface
 - Moon now has an asset-based surface pass using NASA SVS color and height-map assets, with a first displacement-style relief pass on denser Moon geometry
+- the next rendering phase shifts emphasis from per-body material polish to rendering the mocked full solar-system scene around the existing high-value bodies
 
 ### Data Layer
 
@@ -129,6 +140,11 @@ Planned display modes:
 - `realistic`
 
 Milestone 1 uses `cinematic` by default.
+
+Next-step scaling notes:
+
+- the immediate solar-system overview should use a mocked but readable scale model rather than real distances
+- the overview scale model should still leave room for a future realistic-proportions mode
 
 ## Testing Strategy
 
