@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Vector3, type ColorRepresentation } from 'three';
+import { Vector3 } from 'three';
 import {
   createSaturnRingNormal,
   createSaturnRingTexture,
@@ -14,13 +14,11 @@ import { getSunLightDirection } from '../rendering/sunLighting';
 
 type SaturnSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
-  color: ColorRepresentation;
   radius: number;
 };
 
 export function SaturnSurfaceMaterial({
   bodyPosition,
-  color,
   radius
 }: SaturnSurfaceMaterialProps) {
   const ringTexture = useMemo(() => createSaturnRingTexture(), []);
@@ -33,7 +31,7 @@ export function SaturnSurfaceMaterial({
 
   return (
     <meshStandardMaterial
-      color={color}
+      color="#ffffff"
       map={surfaceTexture}
       metalness={0.02}
       onBeforeCompile={(shader) => {

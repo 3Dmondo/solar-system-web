@@ -68,7 +68,6 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         {body.material === 'saturn' ? (
           <SaturnSurfaceMaterial
             bodyPosition={body.position}
-            color={body.color}
             radius={body.radius}
           />
         ) : body.material === 'earth' ? (
@@ -76,7 +75,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial />
         ) : (
-          <MockPlanetMaterial bodyId={body.id} color={body.color} />
+          <MockPlanetMaterial bodyId={body.id} />
         )}
       </mesh>
 

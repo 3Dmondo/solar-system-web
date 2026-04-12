@@ -7,7 +7,7 @@ export function MoonSurfaceMaterial() {
 
   return (
     <meshStandardMaterial
-      color="#f2f4f7"
+      color="#ffffff"
       bumpMap={moonHeightTexture}
       bumpScale={1.5}
       displacementMap={moonHeightTexture}
