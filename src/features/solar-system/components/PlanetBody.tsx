@@ -5,6 +5,7 @@ import { Mesh } from 'three';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
+import { MockPlanetMaterial } from './MockPlanetMaterial';
 import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
@@ -18,7 +19,7 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
 export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
   const meshRef = useRef<Mesh>(null);
-  const sphereSegments = body.material === 'moon' ? 128 : 64;
+  const sphereSegments = body.material === 'sun' ? 96 : body.material === 'moon' ? 128 : 64;
 
   useFrame((_, delta) => {
     if (!meshRef.current || !body.surfaceRotationSpeed) {
@@ -71,11 +72,11 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
             radius={body.radius}
           />
         ) : body.material === 'earth' ? (
-          <EarthSurfaceMaterial />
+          <EarthSurfaceMaterial bodyPosition={body.position} />
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial />
         ) : (
-          <meshStandardMaterial color={body.color} metalness={0.02} roughness={0.92} />
+          <MockPlanetMaterial bodyId={body.id} color={body.color} />
         )}
       </mesh>
 
@@ -87,7 +88,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
           radius={body.radius}
         />
       ) : body.material === 'earth' ? (
-        <EarthCloudLayer focused={focused} radius={body.radius} />
+        <EarthCloudLayer bodyPosition={body.position} focused={focused} radius={body.radius} />
       ) : null}
     </group>
   );

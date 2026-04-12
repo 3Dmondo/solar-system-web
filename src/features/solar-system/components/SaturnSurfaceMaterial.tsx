@@ -10,6 +10,7 @@ import {
   SATURN_RING_SHADOW_TEXTURE_MIN_U
 } from '../rendering/saturnRings';
 import { loadSaturnSurfaceTexture } from '../rendering/saturnSurface';
+import { getSunLightDirection } from '../rendering/sunLighting';
 
 type SaturnSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
@@ -26,6 +27,7 @@ export function SaturnSurfaceMaterial({
   const surfaceTexture = useMemo(() => loadSaturnSurfaceTexture(), []);
   const ringNormal = useMemo(() => new Vector3(...createSaturnRingNormal()).normalize(), []);
   const bodyCenter = useMemo(() => new Vector3(...bodyPosition), [bodyPosition]);
+  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
   const ringInnerRadius = radius * SATURN_RING_INNER_MULTIPLIER;
   const ringOuterRadius = radius * SATURN_RING_OUTER_MULTIPLIER;
 
@@ -43,7 +45,7 @@ export function SaturnSurfaceMaterial({
         shader.uniforms.ringTextureMaxU = { value: SATURN_RING_SHADOW_TEXTURE_MAX_U };
         shader.uniforms.ringTextureMinU = { value: SATURN_RING_SHADOW_TEXTURE_MIN_U };
         shader.uniforms.ringShadowStrength = { value: 0.72 };
-        shader.uniforms.saturnLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+        shader.uniforms.saturnLightDirection = { value: lightDirection };
 
         shader.vertexShader = shader.vertexShader.replace(
           '#include <common>',
@@ -54,7 +56,8 @@ varying vec3 vWorldPosition;`
         shader.vertexShader = shader.vertexShader.replace(
           '#include <worldpos_vertex>',
           `#include <worldpos_vertex>
-vWorldPosition = worldPosition.xyz;`
+vec4 saturnWorldPosition = modelMatrix * vec4(transformed, 1.0);
+vWorldPosition = saturnWorldPosition.xyz;`
         );
 
         shader.fragmentShader = shader.fragmentShader.replace(

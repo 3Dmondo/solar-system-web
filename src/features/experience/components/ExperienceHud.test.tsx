@@ -8,13 +8,13 @@ describe('ExperienceHud', () => {
     render(<ExperienceHud focusedBodyId="saturn" />);
 
     expect(screen.getByText('Saturn')).toBeInTheDocument();
-    expect(screen.getByText('Double tap or double click a body to focus')).toBeInTheDocument();
+    expect(screen.getByText(/zoom out to reframe the wider system/i)).toBeInTheDocument();
   });
 
   it('toggles interaction instructions', async () => {
     const user = userEvent.setup();
 
-    render(<ExperienceHud focusedBodyId="saturn" />);
+    render(<ExperienceHud focusedBodyId="overview" />);
 
     const helpButton = screen.getAllByRole('button', { name: 'Show interaction help' })[0]!;
 
@@ -22,5 +22,6 @@ describe('ExperienceHud', () => {
 
     expect(screen.getByText(/Desktop: drag to orbit/i)).toBeInTheDocument();
     expect(screen.getByText(/Mobile: drag to orbit/i)).toBeInTheDocument();
+    expect(screen.getByText(/Zoom farther out/i)).toBeInTheDocument();
   });
 });

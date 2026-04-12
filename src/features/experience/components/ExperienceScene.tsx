@@ -4,12 +4,12 @@ import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
 import { getControlProfile } from '../domain/controlProfile';
-import { cinematicBodyStates } from '../../solar-system/data/mockBodyCatalog';
-import { type BodyId } from '../../solar-system/domain/body';
+import { MOCK_SUN_POSITION, mockedSolarSystemBodies } from '../../solar-system/data/mockBodyCatalog';
+import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import { getFocusCameraPosition, getFocusTarget } from '../../solar-system/domain/focus';
 
 type ExperienceSceneProps = {
-  focusedBodyId: BodyId;
+  focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
   onFocusBody: (bodyId: BodyId) => void;
 };
@@ -29,26 +29,13 @@ export function ExperienceScene({
   const controlProfile = getControlProfile(isCoarsePointer);
 
   return (
-    <Canvas camera={{ position: getFocusCameraPosition('saturn'), fov: 40 }} shadows>
+    <Canvas camera={{ position: getFocusCameraPosition('overview'), fov: 40 }} shadows>
       <color attach="background" args={['#000000']} />
-      <ambientLight intensity={0.14} />
-      <directionalLight
-        castShadow
-        intensity={2.7}
-        position={[10, 6, 8]}
-        shadow-bias={-0.00015}
-        shadow-mapSize-height={2048}
-        shadow-mapSize-width={2048}
-        shadow-camera-bottom={-8}
-        shadow-camera-far={28}
-        shadow-camera-left={-8}
-        shadow-camera-near={1}
-        shadow-camera-right={8}
-        shadow-camera-top={8}
-      />
+      <ambientLight intensity={0.1} />
+      <pointLight decay={0} distance={0} intensity={4.8} position={MOCK_SUN_POSITION} />
       <FocusCameraRig controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
 
-      {cinematicBodyStates.map((body) => (
+      {mockedSolarSystemBodies.map((body) => (
         <PlanetBody
           key={body.id}
           body={body}
@@ -65,7 +52,7 @@ function FocusCameraRig({
   focusedBodyId
 }: {
   controlProfile: ReturnType<typeof getControlProfile>;
-  focusedBodyId: BodyId;
+  focusedBodyId: ViewTargetId;
 }) {
   const { camera } = useThree();
   const controlsRef = useRef<ControlsHandle | null>(null);

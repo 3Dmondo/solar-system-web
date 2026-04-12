@@ -28,6 +28,7 @@ The next implementation focus is a mocked full-solar-system scene including:
 - Mercury
 - Venus
 - Earth
+- Moon
 - Mars
 - Jupiter
 - Saturn

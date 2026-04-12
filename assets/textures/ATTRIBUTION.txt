@@ -13,6 +13,14 @@ Referenced source page statement:
 "Distributed under Attribution 4.0 International license: You may use, adapt, and share these textures for any purpose, even commercially."
 
 Textures currently included in assets/textures:
+- 2k_sun.jpg
+- 8k_sun.jpg
+- 2k_mercury.jpg
+- 8k_mercury.jpg
+- 2k_venus_atmosphere.jpg
+- 4k_venus_atmosphere.jpg
+- 2k_venus_surface.jpg
+- 8k_venus_surface.jpg
 - 2k_saturn.jpg
 - 8k_saturn.jpg
 - 2k_saturn_ring_alpha.png
@@ -31,13 +39,40 @@ Textures currently included in assets/textures:
 - 8k_earth_specular_map.png
 - 2k_earth_specular_map.tif
 - 8k_earth_specular_map.tif
+- 2k_mars.jpg
+- 8k_mars.jpg
+- 2k_jupiter.jpg
+- 8k_jupiter.jpg
+- 2k_uranus.jpg
+- 2k_neptune.jpg
+- 8k_neptune.jpg
 - 2k_moon.jpg
 - 8k_moon.jpg
+- 2k_stars.jpg
+- 8k_stars.jpg
+- 2k_stars_milky_way.jpg
+- 8k_stars_milky_way.jpg
 - lroc_color_2k.jpg
 - ldem_3_8bit.jpg
 
 Attribution note for downstream reuse:
 Contains adapted or redistributed planetary textures from Solar System Scope, licensed under CC BY 4.0.
+
+Solar System Scope textures currently used directly in the app:
+- 2k_sun.jpg
+- 2k_mercury.jpg
+- 2k_venus_atmosphere.jpg
+- 2k_earth_daymap.jpg
+- 2k_earth_nightmap.jpg
+- 2k_earth_clouds.jpg
+- 2k_earth_normal_map.png
+- 2k_earth_specular_map.png
+- 2k_mars.jpg
+- 2k_jupiter.jpg
+- 2k_saturn.jpg
+- 2k_saturn_ring_alpha.png
+- 2k_uranus.jpg
+- 2k_neptune.jpg
 
 NASA Moon texture attribution:
 CGI Moon Kit

@@ -4,7 +4,7 @@ import { useCoarsePointer } from './hooks/useCoarsePointer';
 import { useFocusedBody } from './state/useFocusedBody';
 
 export function SolarSystemExperience() {
-  const { focusedBodyId, setFocusedBodyId } = useFocusedBody('saturn');
+  const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
 
   return (

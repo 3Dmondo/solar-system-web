@@ -1,16 +1,19 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { FrontSide, Mesh, Vector3 } from 'three';
+import { FrontSide, Mesh } from 'three';
 import { EARTH_CLOUD_WORLD_ROTATION_SPEED } from '../rendering/earthMotion';
 import { loadEarthCloudTexture } from '../rendering/earthSurface';
+import { getSunLightDirection } from '../rendering/sunLighting';
 
 type EarthCloudLayerProps = {
+  bodyPosition: [number, number, number];
   focused: boolean;
   radius: number;
 };
 
-export function EarthCloudLayer({ focused, radius }: EarthCloudLayerProps) {
+export function EarthCloudLayer({ bodyPosition, focused, radius }: EarthCloudLayerProps) {
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
+  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
   const shellScale = focused ? 1.05 : 1.01;
   const cloudMeshRef = useRef<Mesh>(null);
 
@@ -36,7 +39,7 @@ export function EarthCloudLayer({ focused, radius }: EarthCloudLayerProps) {
         roughness={0.95}
         metalness={0}
         onBeforeCompile={(shader) => {
-          shader.uniforms.earthLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+          shader.uniforms.earthLightDirection = { value: lightDirection };
 
           shader.vertexShader = shader.vertexShader.replace(
             '#include <common>',

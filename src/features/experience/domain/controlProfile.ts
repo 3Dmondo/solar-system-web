@@ -15,19 +15,19 @@ export function getControlProfile(isCoarsePointer: boolean): ControlProfile {
       rotateSpeed: 0.85,
       zoomSpeed: 0.9,
       minDistance: 1.6,
-      maxDistance: 13,
+      maxDistance: 52,
       minPolarAngle: 0.2,
       maxPolarAngle: Math.PI - 0.2
     };
   }
 
-  return {
-    dampingFactor: 0.09,
-    rotateSpeed: 0.65,
-    zoomSpeed: 0.8,
-    minDistance: 1.4,
-    maxDistance: 14,
-    minPolarAngle: 0.12,
-    maxPolarAngle: Math.PI - 0.12
-  };
+    return {
+      dampingFactor: 0.09,
+      rotateSpeed: 0.65,
+      zoomSpeed: 0.8,
+      minDistance: 1.4,
+      maxDistance: 56,
+      minPolarAngle: 0.12,
+      maxPolarAngle: Math.PI - 0.12
+    };
 }

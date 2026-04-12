@@ -1,7 +1,11 @@
 import { getBodyById } from '../data/mockBodyCatalog';
-import { type BodyId } from './body';
+import { type ViewTargetId } from './body';
 
-export function getFocusTarget(bodyId: BodyId): [number, number, number] {
+export function getFocusTarget(bodyId: ViewTargetId): [number, number, number] {
+  if (bodyId === 'overview') {
+    return [0, 0, 0];
+  }
+
   const body = getBodyById(bodyId);
 
   if (!body) {
@@ -11,7 +15,11 @@ export function getFocusTarget(bodyId: BodyId): [number, number, number] {
   return body.position;
 }
 
-export function getFocusCameraPosition(bodyId: BodyId): [number, number, number] {
+export function getFocusCameraPosition(bodyId: ViewTargetId): [number, number, number] {
+  if (bodyId === 'overview') {
+    return [0, 14, 46];
+  }
+
   const body = getBodyById(bodyId);
 
   if (!body) {

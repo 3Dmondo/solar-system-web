@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { TangentSpaceNormalMap, Vector2, Vector3 } from 'three';
+import { TangentSpaceNormalMap, Vector2 } from 'three';
 import { EARTH_CLOUD_UV_SPEED, EARTH_CLOUD_SHADOW_SHELL_RADIUS } from '../rendering/earthMotion';
 import {
   loadEarthCloudTexture,
@@ -9,13 +9,19 @@ import {
   loadEarthNightTexture,
   loadEarthSpecularTexture
 } from '../rendering/earthSurface';
+import { getSunLightDirection } from '../rendering/sunLighting';
 
-export function EarthSurfaceMaterial() {
+type EarthSurfaceMaterialProps = {
+  bodyPosition: [number, number, number];
+};
+
+export function EarthSurfaceMaterial({ bodyPosition }: EarthSurfaceMaterialProps) {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
   const nightTexture = useMemo(() => loadEarthNightTexture(), []);
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
   const normalTexture = useMemo(() => loadEarthNormalTexture(), []);
   const specularTexture = useMemo(() => loadEarthSpecularTexture(), []);
+  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
   const shaderRef = useRef<{
     uniforms: {
       earthCloudTexture?: { value: unknown };
@@ -47,7 +53,7 @@ export function EarthSurfaceMaterial() {
         shader.uniforms.earthCloudTexture = { value: cloudTexture };
         shader.uniforms.earthSpecularTexture = { value: specularTexture };
         shader.uniforms.earthCloudOffset = { value: 0 };
-        shader.uniforms.earthLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+        shader.uniforms.earthLightDirection = { value: lightDirection };
         shaderRef.current = shader as typeof shaderRef.current;
 
         shader.vertexShader = shader.vertexShader.replace(
@@ -73,7 +79,8 @@ vEarthWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
         shader.vertexShader = shader.vertexShader.replace(
           '#include <worldpos_vertex>',
           `#include <worldpos_vertex>
-vEarthWorldPosition = worldPosition.xyz;`
+vec4 earthWorldPosition = modelMatrix * vec4(transformed, 1.0);
+vEarthWorldPosition = earthWorldPosition.xyz;`
         );
 
         shader.fragmentShader = shader.fragmentShader.replace(

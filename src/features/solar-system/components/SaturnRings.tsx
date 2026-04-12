@@ -7,6 +7,7 @@ import {
   createSaturnRingTexture,
   SATURN_RING_TILT
 } from '../rendering/saturnRings';
+import { getSunLightDirection } from '../rendering/sunLighting';
 
 type SaturnRingsProps = {
   bodyId: BodyId;
@@ -19,6 +20,7 @@ export function SaturnRings({ bodyId, bodyPosition, onSelect, radius }: SaturnRi
   const ringTexture = useMemo(() => createSaturnRingTexture(), []);
   const geometry = useMemo(() => createSaturnRingGeometry(radius), [radius]);
   const bodyCenter = useMemo(() => new Vector3(...bodyPosition), [bodyPosition]);
+  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
   const lastTouchTapRef = useRef(0);
 
   const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -61,7 +63,7 @@ export function SaturnRings({ bodyId, bodyPosition, onSelect, radius }: SaturnRi
         onBeforeCompile={(shader) => {
           shader.uniforms.saturnBodyCenter = { value: bodyCenter };
           shader.uniforms.saturnBodyRadius = { value: radius };
-          shader.uniforms.saturnLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+          shader.uniforms.saturnLightDirection = { value: lightDirection };
           shader.uniforms.ringAmbient = { value: 0.84 };
           shader.uniforms.ringDirectional = { value: 0.16 };
           shader.uniforms.planetShadowDarkness = { value: 0.4 };
@@ -82,7 +84,8 @@ vRingWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
           shader.vertexShader = shader.vertexShader.replace(
             '#include <worldpos_vertex>',
             `#include <worldpos_vertex>
-vRingWorldPosition = worldPosition.xyz;`
+vec4 ringWorldPosition = modelMatrix * vec4(transformed, 1.0);
+vRingWorldPosition = ringWorldPosition.xyz;`
           );
 
           shader.fragmentShader = shader.fragmentShader.replace(

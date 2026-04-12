@@ -61,7 +61,8 @@ Current implementation notes:
 - focus transitions are interruptible by user input
 - desktop and coarse-pointer devices use different orbit control tuning
 - body focus now requires double click on desktop or double tap on touch to reduce accidental selection changes
-- the next scene expansion will need to support both solar-system overview framing and single-body focus framing in the same interaction model
+- the scene now supports both solar-system overview framing and single-body focus framing in the same interaction model
+- the overview HUD no longer includes a dedicated return button; the current navigation direction is to allow much farther zooming after focusing
 
 ### Body System
 
@@ -75,9 +76,10 @@ Responsibilities:
 
 Future expansion notes:
 
-- extend the current body catalog from the Saturn/Earth/Moon showcase set to Sun plus all planets
+- the mocked body catalog now includes Sun, all planets, and the Moon for continuity with the original showcase
 - support both overview-scale transforms and close-focus transforms without duplicating body definitions
-- add mocked orbital trails as a renderable companion to the body catalog
+- mocked orbital trails are still pending as the next companion feature to the body catalog
+- the current mocked layout spreads planets across different orbital angles to fill more of the ecliptic disk
 
 ### Render Features
 
@@ -103,6 +105,8 @@ Current implementation notes:
 - Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
 - Saturn's rings now use a simplified custom lighting model with equal two-sided brightness and a direct Saturn-body occlusion term, with built-in ring shadow receiving disabled for now to avoid doubled top-side shadows
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
+- the global built-in lighting now comes from a Sun-centered light source, and the custom Saturn shaders derive their light direction from the body's direction relative to the Sun with no distance falloff
+- Earth and Saturn now use the corrected shared Sun-direction convention, so the richer custom materials are back on the same lighting model as the broader overview scene
 - Earth and Saturn now have slow surface self-rotation to keep the showcase scene from feeling static
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
 - Earth surface lighting now also uses local PNG normal and specular maps to avoid the TIFF decoding artifacts seen in earlier passes
@@ -113,6 +117,7 @@ Current implementation notes:
 - Earth cloud rotation and projected cloud-shadow drift are now derived from the Earth's surface rotation speed, with the cloud shell following Earth spin plus a small linked drift while the shadow uses that same relative drift over the surface
 - Moon now has an asset-based surface pass using NASA SVS color and height-map assets, with a first displacement-style relief pass on denser Moon geometry
 - the next rendering phase shifts emphasis from per-body material polish to rendering the mocked full solar-system scene around the existing high-value bodies
+- the Sun and the remaining overview planets now use local Solar System Scope texture maps instead of the earlier procedural placeholders
 
 ### Data Layer
 

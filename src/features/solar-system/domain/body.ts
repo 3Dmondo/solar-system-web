@@ -1,6 +1,18 @@
-export type BodyId = 'saturn' | 'earth' | 'moon';
+export type BodyId =
+  | 'sun'
+  | 'mercury'
+  | 'venus'
+  | 'earth'
+  | 'moon'
+  | 'mars'
+  | 'jupiter'
+  | 'saturn'
+  | 'uranus'
+  | 'neptune';
 
-export type BodyMaterial = 'basic' | 'saturn' | 'earth' | 'moon';
+export type ViewTargetId = BodyId | 'overview';
+
+export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon';
 
 export type BodyDefinition = {
   id: BodyId;
