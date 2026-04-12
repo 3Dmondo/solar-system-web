@@ -86,6 +86,7 @@ Current implementation notes:
 - Saturn's ring shadow on the planet is now driven by the custom Saturn surface shader rather than the default ring shadow caster
 - Saturn's ring shadow now fades near the terminator to blend more coherently with the planet lighting model
 - Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
+- Saturn's rings now use a simplified custom lighting model with equal two-sided brightness and a direct Saturn-body occlusion term, with built-in ring shadow receiving disabled for now to avoid doubled top-side shadows
 - Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
 - Earth and Saturn now have slow surface self-rotation to keep the showcase scene from feeling static
 - Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement

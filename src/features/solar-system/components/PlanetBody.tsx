@@ -80,7 +80,12 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
       </mesh>
 
       {body.hasRings ? (
-        <SaturnRings bodyId={body.id} onSelect={onSelect} radius={body.radius} />
+        <SaturnRings
+          bodyId={body.id}
+          bodyPosition={body.position}
+          onSelect={onSelect}
+          radius={body.radius}
+        />
       ) : body.material === 'earth' ? (
         <EarthCloudLayer focused={focused} radius={body.radius} />
       ) : null}

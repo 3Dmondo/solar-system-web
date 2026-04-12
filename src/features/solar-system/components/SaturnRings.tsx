@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { type ThreeEvent } from '@react-three/fiber';
-import { DoubleSide } from 'three';
+import { DoubleSide, Vector3 } from 'three';
 import { type BodyId } from '../domain/body';
 import {
   createSaturnRingGeometry,
@@ -10,13 +10,15 @@ import {
 
 type SaturnRingsProps = {
   bodyId: BodyId;
+  bodyPosition: [number, number, number];
   onSelect: (bodyId: BodyId) => void;
   radius: number;
 };
 
-export function SaturnRings({ bodyId, onSelect, radius }: SaturnRingsProps) {
+export function SaturnRings({ bodyId, bodyPosition, onSelect, radius }: SaturnRingsProps) {
   const ringTexture = useMemo(() => createSaturnRingTexture(), []);
   const geometry = useMemo(() => createSaturnRingGeometry(radius), [radius]);
+  const bodyCenter = useMemo(() => new Vector3(...bodyPosition), [bodyPosition]);
   const lastTouchTapRef = useRef(0);
 
   const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -47,20 +49,93 @@ export function SaturnRings({ bodyId, onSelect, radius }: SaturnRingsProps) {
       geometry={geometry}
       onDoubleClick={handleDoubleClick}
       onPointerDown={handlePointerDown}
-      receiveShadow
       rotation={[SATURN_RING_TILT, 0, 0]}
     >
-      <meshStandardMaterial
+      <meshBasicMaterial
         color="#fff6dd"
         depthWrite={false}
-        emissive="#5f4c26"
-        emissiveIntensity={0.22}
         map={ringTexture}
-        metalness={0.02}
         opacity={1}
-        roughness={0.96}
         side={DoubleSide}
         transparent
+        onBeforeCompile={(shader) => {
+          shader.uniforms.saturnBodyCenter = { value: bodyCenter };
+          shader.uniforms.saturnBodyRadius = { value: radius };
+          shader.uniforms.saturnLightDirection = { value: new Vector3(10, 6, 8).normalize() };
+          shader.uniforms.ringAmbient = { value: 0.84 };
+          shader.uniforms.ringDirectional = { value: 0.16 };
+          shader.uniforms.planetShadowDarkness = { value: 0.4 };
+
+          shader.vertexShader = shader.vertexShader.replace(
+            '#include <common>',
+            `#include <common>
+varying vec3 vRingWorldPosition;
+varying vec3 vRingWorldNormal;`
+          );
+
+          shader.vertexShader = shader.vertexShader.replace(
+            '#include <defaultnormal_vertex>',
+            `#include <defaultnormal_vertex>
+vRingWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
+          );
+
+          shader.vertexShader = shader.vertexShader.replace(
+            '#include <worldpos_vertex>',
+            `#include <worldpos_vertex>
+vRingWorldPosition = worldPosition.xyz;`
+          );
+
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <common>',
+            `#include <common>
+uniform vec3 saturnBodyCenter;
+uniform float saturnBodyRadius;
+uniform vec3 saturnLightDirection;
+uniform float ringAmbient;
+uniform float ringDirectional;
+uniform float planetShadowDarkness;
+varying vec3 vRingWorldPosition;
+varying vec3 vRingWorldNormal;
+
+float getSphereShadowMask(vec3 worldPosition, vec3 lightDirection) {
+  vec3 rayOrigin = worldPosition - saturnBodyCenter;
+  float b = dot(rayOrigin, lightDirection);
+  float c = dot(rayOrigin, rayOrigin) - saturnBodyRadius * saturnBodyRadius;
+  float h = b * b - c;
+
+  if (h <= 0.0) {
+    return 0.0;
+  }
+
+  float sqrtH = sqrt(h);
+  float nearHit = -b - sqrtH;
+  float farHit = -b + sqrtH;
+
+  if (farHit <= 0.0001) {
+    return 0.0;
+  }
+
+  return nearHit > 0.0001 || farHit > 0.0001 ? 1.0 : 0.0;
+}`
+          );
+
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <dithering_fragment>',
+            `vec3 ringNormal = normalize(vRingWorldNormal);
+if (!gl_FrontFacing) {
+  ringNormal *= -1.0;
+}
+vec3 lightDirection = normalize(saturnLightDirection);
+float ringLightFacing = abs(dot(ringNormal, lightDirection));
+float planetShadow = getSphereShadowMask(vRingWorldPosition, lightDirection);
+float ringBrightness = ringAmbient + ringDirectional * smoothstep(0.0, 0.3, ringLightFacing);
+
+gl_FragColor.rgb *= ringBrightness;
+gl_FragColor.rgb *= mix(1.0, planetShadowDarkness, planetShadow);
+
+#include <dithering_fragment>`
+          );
+        }}
       />
     </mesh>
   );
