@@ -18,6 +18,7 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
 export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
   const meshRef = useRef<Mesh>(null);
+  const sphereSegments = body.material === 'moon' ? 128 : 64;
 
   useFrame((_, delta) => {
     if (!meshRef.current || !body.surfaceRotationSpeed) {
@@ -62,7 +63,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         rotation={body.surfaceRotation}
         scale={focused ? 1.04 : 1}
       >
-        <sphereGeometry args={[body.radius, 64, 64]} />
+        <sphereGeometry args={[body.radius, sphereSegments, sphereSegments]} />
         {body.material === 'saturn' ? (
           <SaturnSurfaceMaterial
             bodyPosition={body.position}

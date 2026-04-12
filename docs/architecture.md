@@ -95,7 +95,7 @@ Current implementation notes:
 - Earth surface shading now also applies a light cloud-shadow term derived from the moving cloud texture
 - Earth cloud cover now rotates slowly as a separate shell layer
 - Earth cloud rotation and projected cloud-shadow drift are now derived from the Earth's surface rotation speed, with the cloud shell following Earth spin plus a small linked drift while the shadow uses that same relative drift over the surface
-- Moon now has an asset-based surface pass using NASA SVS color and height-map assets
+- Moon now has an asset-based surface pass using NASA SVS color and height-map assets, with a first displacement-style relief pass on denser Moon geometry
 
 ### Data Layer
 
