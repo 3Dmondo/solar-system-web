@@ -11,5 +11,6 @@ export type BodyDefinition = {
   position: [number, number, number];
   focusOffset: [number, number, number];
   surfaceRotation?: [number, number, number];
+  surfaceRotationSpeed?: number;
   hasRings?: boolean;
 };

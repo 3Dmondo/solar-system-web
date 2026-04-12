@@ -1,4 +1,10 @@
-import { LinearFilter, LinearMipMapLinearFilter, SRGBColorSpace, TextureLoader } from 'three';
+import {
+  LinearFilter,
+  LinearMipMapLinearFilter,
+  RepeatWrapping,
+  SRGBColorSpace,
+  TextureLoader
+} from 'three';
 import { TIFFLoader } from 'three/examples/jsm/loaders/TIFFLoader.js';
 
 const textureLoader = new TextureLoader();
@@ -14,17 +20,21 @@ const earthSpecularTextureUrl = new URL('../../../../assets/textures/2k_earth_sp
 export function loadEarthDayTexture() {
   const texture = textureLoader.load(earthDayTextureUrl);
   texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
   return texture;
 }
 
 export function loadEarthNightTexture() {
   const texture = textureLoader.load(earthNightTextureUrl);
   texture.colorSpace = SRGBColorSpace;
+  texture.wrapS = RepeatWrapping;
   return texture;
 }
 
 export function loadEarthCloudTexture() {
-  return textureLoader.load(earthCloudTextureUrl);
+  const texture = textureLoader.load(earthCloudTextureUrl);
+  texture.wrapS = RepeatWrapping;
+  return texture;
 }
 
 export function loadEarthSpecularTexture() {
@@ -73,6 +83,7 @@ export function loadEarthSpecularTexture() {
 
   texture.magFilter = LinearFilter;
   texture.minFilter = LinearMipMapLinearFilter;
+  texture.wrapS = RepeatWrapping;
 
   return texture;
 }

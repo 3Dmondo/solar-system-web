@@ -1,15 +1,12 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
+import { EARTH_CLOUD_UV_SPEED, EARTH_CLOUD_SHADOW_SHELL_RADIUS } from '../rendering/earthMotion';
 import {
   loadEarthCloudTexture,
   loadEarthDayTexture,
   loadEarthNightTexture
 } from '../rendering/earthSurface';
-
-const EARTH_CLOUD_ROTATION_SPEED = 0.005;
-const EARTH_CLOUD_UV_SPEED = EARTH_CLOUD_ROTATION_SPEED / (Math.PI * 2);
-const EARTH_CLOUD_SHADOW_SHELL_RADIUS = 1.018;
 
 export function EarthSurfaceMaterial() {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
@@ -81,12 +78,32 @@ varying vec2 vEarthUv;
 varying vec3 vEarthWorldNormal;
 varying vec3 vEarthWorldPosition;
 const float EARTH_CLOUD_SHADOW_SHELL_RADIUS = ${EARTH_CLOUD_SHADOW_SHELL_RADIUS.toFixed(3)};
+const float EARTH_CLOUD_SEAM_BLEND_WIDTH = 0.01;
 
 vec2 directionToCloudUv(vec3 direction) {
   vec3 dir = normalize(direction);
   float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
   float v = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
   return vec2(fract(1.0 - u - earthCloudOffset), clamp(v, 0.001, 0.999));
+}
+
+float sampleWrappedCloudMask(vec2 uv) {
+  float wrappedU = fract(uv.x);
+  vec2 primaryUv = vec2(wrappedU, uv.y);
+  float primarySample = texture2D(earthCloudTexture, primaryUv).r;
+
+  float seamBlend = 0.0;
+  float seamSample = primarySample;
+
+  if (wrappedU < EARTH_CLOUD_SEAM_BLEND_WIDTH) {
+    seamBlend = 1.0 - smoothstep(0.0, EARTH_CLOUD_SEAM_BLEND_WIDTH, wrappedU);
+    seamSample = texture2D(earthCloudTexture, vec2(wrappedU + 1.0, uv.y)).r;
+  } else if (wrappedU > 1.0 - EARTH_CLOUD_SEAM_BLEND_WIDTH) {
+    seamBlend = smoothstep(1.0 - EARTH_CLOUD_SEAM_BLEND_WIDTH, 1.0, wrappedU);
+    seamSample = texture2D(earthCloudTexture, vec2(wrappedU - 1.0, uv.y)).r;
+  }
+
+  return mix(primarySample, seamSample, seamBlend);
 }
 
 vec3 applyEarthNightLights(vec3 baseColor) {
@@ -104,7 +121,7 @@ vec3 applyEarthNightLights(vec3 baseColor) {
   );
   vec3 cloudSampleDirection = normalize(worldNormal + lightDirection * shellIntersection);
   vec2 cloudUv = directionToCloudUv(cloudSampleDirection);
-  float cloudMask = 3.0 * texture2D(earthCloudTexture, cloudUv).r;
+  float cloudMask = 3.0 * sampleWrappedCloudMask(cloudUv);
   float cloudShadow = smoothstep(0.1, 0.9, cloudMask) * lightFacing * 0.3;
   vec3 viewDirection = normalize(cameraPosition - vEarthWorldPosition);
   vec3 halfVector = normalize(lightDirection + viewDirection);

@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { type ThreeElements } from '@react-three/fiber';
+import { useFrame, type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
+import { Mesh } from 'three';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
@@ -16,6 +17,15 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
 
 export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
+  const meshRef = useRef<Mesh>(null);
+
+  useFrame((_, delta) => {
+    if (!meshRef.current || !body.surfaceRotationSpeed) {
+      return;
+    }
+
+    meshRef.current.rotation.y += delta * body.surfaceRotationSpeed;
+  });
 
   const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
@@ -45,6 +55,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
       <mesh
         castShadow
         {...meshProps}
+        ref={meshRef}
         onDoubleClick={handleDoubleClick}
         onPointerDown={handlePointerDown}
         receiveShadow

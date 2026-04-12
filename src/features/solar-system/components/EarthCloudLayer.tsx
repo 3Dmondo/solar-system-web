@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { FrontSide, Mesh, Vector3 } from 'three';
+import { EARTH_CLOUD_WORLD_ROTATION_SPEED } from '../rendering/earthMotion';
 import { loadEarthCloudTexture } from '../rendering/earthSurface';
 
 type EarthCloudLayerProps = {
@@ -18,7 +19,7 @@ export function EarthCloudLayer({ focused, radius }: EarthCloudLayerProps) {
       return;
     }
 
-    cloudMeshRef.current.rotation.y += delta * 0.005;
+    cloudMeshRef.current.rotation.y += delta * EARTH_CLOUD_WORLD_ROTATION_SPEED;
   });
 
   return (

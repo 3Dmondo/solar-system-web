@@ -1,4 +1,5 @@
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { EARTH_SURFACE_ROTATION_SPEED } from '../rendering/earthMotion';
 import { SATURN_SPHERE_TILT } from '../rendering/saturnRings';
 
 export const cinematicBodyStates: BodyDefinition[] = [
@@ -11,6 +12,7 @@ export const cinematicBodyStates: BodyDefinition[] = [
     position: [-2.8, 0, 0],
     focusOffset: [0, 0.45, 5.8],
     surfaceRotation: [SATURN_SPHERE_TILT, 0, 0],
+    surfaceRotationSpeed: 0.02,
     hasRings: true
   },
   {
@@ -20,7 +22,8 @@ export const cinematicBodyStates: BodyDefinition[] = [
     material: 'earth',
     radius: 0.72,
     position: [0.5, 0, 0],
-    focusOffset: [0, 0.25, 3.2]
+    focusOffset: [0, 0.25, 3.2],
+    surfaceRotationSpeed: EARTH_SURFACE_ROTATION_SPEED
   },
   {
     id: 'moon',
