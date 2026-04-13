@@ -6,43 +6,40 @@ Build a web-based solar system visualizer for GitHub Pages that feels like a rea
 
 ## Current Experience
 
-The current public milestone is a fullscreen planet showcase focused on:
-
-- Saturn
-- Earth
-- Moon
-
-The user can:
-
-- orbit the camera around the focused body
-- zoom in and out
-- double click or double tap a body to focus it
-
-This milestone is considered complete and serves as the rendering and interaction foundation for the broader solar-system view.
-
-## Next Experience
-
-The next implementation focus is a mocked full-solar-system scene including:
+The current public experience is a fullscreen mocked solar-system explorer including:
 
 - Sun
 - Mercury
 - Venus
+- Saturn
 - Earth
 - Moon
 - Mars
 - Jupiter
-- Saturn
 - Uranus
 - Neptune
 
-The user should be able to:
+The user can:
 
 - start from an overall solar-system view
-- focus any single body from that larger scene
-- move back and forth between overview and focused exploration
-- see mocked orbital trails
+- zoom from the overview into individual bodies
+- double click or double tap a body to focus it
 - see a star background behind the system
+- see mocked orbital trails
 - observe continuous self-rotation on the rendered bodies
+
+This current mocked overview serves as the rendering and interaction foundation for later ephemeris-backed positions and more sophisticated navigation.
+
+## Next Experience
+
+The next implementation focus is the interaction/readability pass on top of the current mocked solar-system scene.
+
+This includes:
+
+- refining overview readability with stars and trails present
+- improving multi-body navigation and focus choreography
+- preparing the UI and data boundaries for real ephemeris-driven positions
+- deferring more advanced trail behavior until real positions and reference-frame controls arrive
 
 ## Design Direction
 
@@ -60,7 +57,7 @@ The user should be able to:
 - expand beyond planets to additional solar system objects
 - keep the final site fully static and offline-capable on GitHub Pages
 
-## Non-Goals For The Next Mocked Solar-System Step
+## Non-Goals For The Current Phase
 
 - production ephemerides integration
 - realistic orbital mechanics

@@ -74,6 +74,7 @@ Solar System Scope textures currently used directly in the app:
 - 2k_saturn_ring_alpha.png
 - 2k_uranus.jpg
 - 2k_neptune.jpg
+- 8k_stars_milky_way.jpg
 
 NASA Moon texture attribution:
 CGI Moon Kit

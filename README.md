@@ -4,11 +4,25 @@ Web-based solar system visualizer designed for GitHub Pages, with a polished ful
 
 ## Current Status
 
-This repository is scaffolded for a planet showcase first:
+The current app is a mocked fullscreen solar-system overview with:
 
+- Sun
+- Mercury
+- Venus
 - Saturn
 - Earth
 - Moon
+- Mars
+- Jupiter
+- Uranus
+- Neptune
+
+It currently includes:
+
+- broad overview navigation plus single-body focus
+- star background rendering
+- mocked orbital trails
+- custom higher-fidelity rendering passes for Saturn, Earth, Moon, and Venus
 
 The data layer starts mocked and is intended to evolve toward static assets generated from NASA/JPL ephemerides.
 
@@ -29,6 +43,7 @@ The data layer starts mocked and is intended to evolve toward static assets gene
 - `docs/deployment-github-pages.md`
 - `docs/testing-mobile.md`
 - `docs/tasks/milestone-1.md`
+- `docs/tasks/milestone-2.md`
 - `docs/decisions/0001-web-stack.md`
 
 ## Development

@@ -3,10 +3,12 @@ import { useEffect, useRef } from 'react';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
+import { OrbitalTrails } from '../../solar-system/components/OrbitalTrails';
 import { getControlProfile } from '../domain/controlProfile';
 import { MOCK_SUN_POSITION, mockedSolarSystemBodies } from '../../solar-system/data/mockBodyCatalog';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import { getFocusCameraPosition, getFocusTarget } from '../../solar-system/domain/focus';
+import { StarBackground } from './StarBackground';
 
 type ExperienceSceneProps = {
   focusedBodyId: ViewTargetId;
@@ -31,9 +33,11 @@ export function ExperienceScene({
   return (
     <Canvas camera={{ position: getFocusCameraPosition('overview'), fov: 40 }} shadows>
       <color attach="background" args={['#000000']} />
+      <StarBackground />
       <ambientLight intensity={0.1} />
       <pointLight decay={0} distance={0} intensity={4.8} position={MOCK_SUN_POSITION} />
       <FocusCameraRig controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
+      <OrbitalTrails />
 
       {mockedSolarSystemBodies.map((body) => (
         <PlanetBody

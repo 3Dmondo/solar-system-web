@@ -12,8 +12,8 @@ Expand the current showcase into a mocked full-solar-system scene with overview 
 - [x] Preserve focus transitions from overview to single-body view
 - [x] Allow zooming back out to recover a broad solar-system framing
 - [x] Add self-rotation for all rendered planets
-- [ ] Add mocked orbital trails
-- [ ] Add star background rendering
+- [x] Add mocked orbital trails
+- [x] Add star background rendering
 - [ ] Verify desktop and mobile interaction in both overview and focused modes
 
 Current implementation notes:
@@ -23,10 +23,14 @@ Current implementation notes:
 - the Sun and the remaining overview planets now use local Solar System Scope texture maps
 - Venus now uses a dedicated surface texture plus a semi-transparent cloud shell built on the same reusable cloud-layer component as Earth
 - Earth and Saturn are back on the shared Sun-based lighting model after correcting the light-direction convention used by the custom materials
+- the overview now uses a camera-centered Milky Way star sphere that is intentionally non-interactive so body selection still works cleanly
+- mocked orbital trails are now rendered as a separate non-interactive layer, with the Moon trail centered on Earth and the planet trails centered on the Sun
+- these trails are intentionally placeholder geometry; the later ephemeris-backed system should be sampled from past position sequences and may use smoothing instead of idealized circles
 
 ## Notes
 
 - Keep the new overview readable before chasing realism.
 - Reuse the current focus and interaction patterns where possible.
 - Leave real ephemerides and realistic scaling for later milestones.
+- More sophisticated trail behavior such as frame switching, satellite-relative trails, and epicycles is deferred until after real positions and dedicated UI work arrive.
 - Pole rendering remains a known deferred issue; possible future approaches include cube-sphere geometry or impostor-style rendering.

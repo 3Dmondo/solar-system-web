@@ -78,7 +78,6 @@ Future expansion notes:
 
 - the mocked body catalog now includes Sun, all planets, and the Moon for continuity with the original showcase
 - support both overview-scale transforms and close-focus transforms without duplicating body definitions
-- mocked orbital trails are still pending as the next companion feature to the body catalog
 - the current mocked layout spreads planets across different orbital angles to fill more of the ecliptic disk
 
 ### Render Features
@@ -119,6 +118,10 @@ Current implementation notes:
 - the next rendering phase shifts emphasis from per-body material polish to rendering the mocked full solar-system scene around the existing high-value bodies
 - the Sun and the remaining overview planets now use local Solar System Scope texture maps instead of the earlier procedural placeholders
 - Venus now uses the Solar System Scope surface map for the body plus a separate semi-transparent cloud shell that reuses the same generic cloud-layer technique as Earth with Venus-specific transparency tuning
+- the overview scene now uses a camera-centered star-sphere background with the Solar System Scope Milky Way map, kept non-interactive so it does not interfere with body selection
+- the overview scene now also renders mocked orbital trails as a separate non-interactive layer, with planet trails centered on the Sun and a small Moon trail centered on Earth
+- the current trail layer is intentionally provisional; the later ephemeris-driven version should be built from sampled historical point sequences, optionally smoothed into visually continuous curves, rather than hard-coded circles
+- the later trail system will also need reference-frame-aware rendering so satellite trails can stay centered on their planet when needed and appear as epicycles when the active frame is not the Sun or the solar-system barycenter
 
 ### Data Layer
 
@@ -137,6 +140,10 @@ Planned core concept:
 - `BodyStateProvider`
 
 This allows the app to start with mocked data and later switch to SPICE/JPL-derived assets without rewriting scene logic.
+
+Future trail-data note:
+
+- once NASA/JPL ephemerides are integrated, trail generation should sample body positions over a configurable historical interval and pass those point sequences into the rendering layer, instead of deriving idealized circles from mocked orbital radii
 
 ## Scaling Strategy
 
