@@ -25,9 +25,9 @@ export function VenusCloudLayer({
       focused={focused}
       maxVisibility={0.96}
       minVisibility={0.28}
-      opacity={0.70}
+      opacity={2.5}
       radius={radius}
-      rotationSpeed={rotationSpeed * 0.92}
+      rotationSpeed={rotationSpeed * 0.90}
       shellScaleDefault={1.018}
       shellScaleFocused={1.048}
       transparencyHeuristic={{
