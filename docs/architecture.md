@@ -67,8 +67,8 @@ Passing checks in the current repo state:
 Additional notes:
 
 - `pnpm test` runs Vitest only. It does not cover live canvas interaction in a real browser.
-- `pnpm test:e2e` is separate and requires `pnpm exec playwright install`.
-- The checked-in Playwright smoke spec still reflects an earlier Saturn-first expectation and should be updated before treating e2e coverage as current.
+- `pnpm test:e2e` is separate and requires `pnpm exec playwright install` plus a local preview server at `http://127.0.0.1:4173`.
+- The checked-in Playwright smoke spec now covers the overview HUD startup flow on desktop and mobile browser projects.
 
 ## Deployment
 
@@ -80,7 +80,6 @@ Additional notes:
 ## Known Gaps And Planned Refactors
 
 - Extract a real data-provider boundary instead of importing mocked catalog data directly.
-- Add automated browser coverage that matches the overview-first experience.
 - Finish manual desktop and mobile validation for the current multi-body overview.
 - Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.

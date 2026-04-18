@@ -36,7 +36,6 @@ Focus areas:
 - refine overview-to-focus camera choreography
 - decide whether lightweight labels or other discovery aids are needed
 - improve trail and background readability without cluttering the screen
-- refresh automated smoke coverage for the overview-first flow
 - finish desktop and mobile manual verification for the broader overview scene
 
 ## Long-Term Direction

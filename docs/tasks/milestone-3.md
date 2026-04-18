@@ -15,7 +15,7 @@ Improve navigation clarity and readability in the current mocked overview withou
 - [ ] Refine overview-to-focus camera choreography where it feels abrupt or confusing
 - [ ] Evaluate whether lightweight labels or discovery aids are needed
 - [ ] Improve star and trail readability without overpowering the bodies
-- [ ] Refresh Playwright smoke coverage to match the overview-first startup flow
+- [x] Refresh Playwright smoke coverage to match the overview-first startup flow
 - [ ] Perform manual desktop and mobile verification after the interaction pass
 - [ ] Update roadmap, vision, and architecture docs as the interaction model changes
 

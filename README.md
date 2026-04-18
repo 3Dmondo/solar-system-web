@@ -17,7 +17,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - There is no `BodyStateProvider` abstraction wired into the scene yet.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
-- `pnpm test:e2e` requires Playwright browsers, and the checked-in smoke spec still needs to be refreshed for the overview-first flow.
+- `pnpm test:e2e` requires Playwright browsers and a local preview server.
 
 ## Stack
 

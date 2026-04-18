@@ -24,7 +24,7 @@ Expand the initial showcase into a mocked full-solar-system overview with overvi
 
 ## Remaining Closeout
 
-- [ ] Refresh Playwright smoke coverage for the overview-first experience
+- [x] Refresh Playwright smoke coverage for the overview-first experience
 - [ ] Perform manual desktop and mobile verification in both overview and focused modes
 - [ ] Mark Milestone 2 closed after the verification pass
 

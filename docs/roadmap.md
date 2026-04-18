@@ -3,7 +3,7 @@
 ## Current Snapshot
 
 - Milestone 1 foundation and featured-body rendering work is complete.
-- Milestone 2 overview scene work is implemented in code and validated by lint, unit tests, and build, but closeout manual verification and e2e refresh are still open.
+- Milestone 2 overview scene work is implemented in code and validated by lint, unit tests, build, and refreshed browser smoke coverage, but manual closeout verification is still open.
 - Milestone 3 is the next active implementation milestone.
 
 ## Milestone 1: Foundation And Planet Showcase
@@ -32,7 +32,6 @@ Delivered:
 
 Remaining closeout:
 
-- refresh Playwright smoke coverage for overview-first startup
 - perform manual desktop and mobile verification
 - mark the milestone closed after the verification pass
 

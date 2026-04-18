@@ -5,11 +5,11 @@
 - `pnpm lint` checks the codebase.
 - `pnpm test` runs Vitest unit and component tests under `src/**/*`.
 - `pnpm build` validates TypeScript and the production bundle.
-- `pnpm test:e2e` is separate from the default validation path and requires Playwright browsers.
+- `pnpm test:e2e` is separate from the default validation path and requires Playwright browsers plus a local preview server.
 
 ## Current Gaps
 
-- The checked-in Playwright smoke spec still targets an older Saturn-first startup flow.
+- The checked-in Playwright smoke spec covers the overview HUD startup flow only.
 - Canvas interactions are only partially covered by automated tests today.
 - Manual desktop and mobile verification is still required before closing the overview milestone.
 
@@ -39,6 +39,8 @@ pnpm preview -- --host
 To prepare Playwright locally:
 
 ```powershell
+pnpm build
+pnpm preview -- --host 127.0.0.1 --port 4173
 pnpm exec playwright install
 pnpm test:e2e
 ```
