@@ -1,36 +1,36 @@
 # Milestone 2 Task List
 
+## Status
+
+Implemented in code. Closeout verification still open.
+
 ## Goal
 
-Expand the current showcase into a mocked full-solar-system scene with overview navigation, focus transitions, orbital trails, and a star background.
+Expand the initial showcase into a mocked full-solar-system overview with overview navigation, focus transitions, orbital trails, and a star background.
 
-## Tasks
+## Delivered
 
-- [x] Add Sun and all 8 planets to the mocked body catalog
+- [x] Add the Sun and all 8 planets to the mocked body catalog
 - [x] Define a readable mocked overview scale and placement model
 - [x] Render the full solar system in one scene
+- [x] Start the experience in an overview framing
 - [x] Preserve focus transitions from overview to single-body view
 - [x] Allow zooming back out to recover a broad solar-system framing
-- [x] Add self-rotation for all rendered planets
+- [x] Add self-rotation for all rendered bodies
 - [x] Add mocked orbital trails
 - [x] Add star background rendering
-- [ ] Verify desktop and mobile interaction in both overview and focused modes
+- [x] Keep the HUD and help overlay working in the overview scene
+- [x] Move the remaining overview planets to texture-backed materials
 
-Current implementation notes:
+## Remaining Closeout
 
-- planets are now spread across different mocked orbital angles to cover more of the ecliptic disk
-- the Moon is kept in the mocked scene for continuity with the original showcase flow
-- the Sun and the remaining overview planets now use local Solar System Scope texture maps
-- Venus now uses a dedicated surface texture plus a semi-transparent cloud shell built on the same reusable cloud-layer component as Earth
-- Earth and Saturn are back on the shared Sun-based lighting model after correcting the light-direction convention used by the custom materials
-- the overview now uses a camera-centered Milky Way star sphere that is intentionally non-interactive so body selection still works cleanly
-- mocked orbital trails are now rendered as a separate non-interactive layer, with the Moon trail centered on Earth and the planet trails centered on the Sun
-- these trails are intentionally placeholder geometry; the later ephemeris-backed system should be sampled from past position sequences and may use smoothing instead of idealized circles
+- [ ] Refresh Playwright smoke coverage for the overview-first experience
+- [ ] Perform manual desktop and mobile verification in both overview and focused modes
+- [ ] Mark Milestone 2 closed after the verification pass
 
 ## Notes
 
-- Keep the new overview readable before chasing realism.
-- Reuse the current focus and interaction patterns where possible.
-- Leave real ephemerides and realistic scaling for later milestones.
-- More sophisticated trail behavior such as frame switching, satellite-relative trails, and epicycles is deferred until after real positions and dedicated UI work arrive.
-- Pole rendering remains a known deferred issue; possible future approaches include cube-sphere geometry or impostor-style rendering.
+- Planet positions and trails are intentionally mocked.
+- The Moon remains in the scene for continuity with the original showcase.
+- Returning to a wider view is currently zoom-driven rather than button-driven.
+- Pole rendering remains a known deferred issue.

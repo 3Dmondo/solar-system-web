@@ -2,70 +2,61 @@
 
 ## Product Goal
 
-Build a web-based solar system visualizer for GitHub Pages that feels like a realistic educational explorer.
+Build a static web-based solar system explorer that feels polished, readable, and educational on both desktop and mobile.
 
 ## Current Experience
 
-The current public experience is a fullscreen mocked solar-system explorer including:
+The repository currently ships a mocked overview-first solar-system scene with:
 
-- Sun
-- Mercury
-- Venus
-- Saturn
-- Earth
-- Moon
-- Mars
-- Jupiter
-- Uranus
-- Neptune
+- Sun, all 8 planets, and the Moon
+- overview-to-body focus transitions driven by double click or double tap
+- orbit controls tuned separately for fine and coarse pointers
+- a minimal HUD with a help overlay
+- a Milky Way star background
+- mocked orbital trails
+- continuous body self-rotation
+- custom rendering passes for Venus, Earth, Moon, and Saturn
 
-The user can:
+## Current Constraints
 
-- start from an overall solar-system view
-- zoom from the overview into individual bodies
-- double click or double tap a body to focus it
-- see a star background behind the system
-- see mocked orbital trails
-- observe continuous self-rotation on the rendered bodies
-
-This current mocked overview serves as the rendering and interaction foundation for later ephemeris-backed positions and more sophisticated navigation.
+- Body positions and trails are hard-coded mocked values.
+- The scene imports `mockedSolarSystemBodies` directly. There is no provider abstraction in use yet.
+- The experience uses a cinematic scale model only.
+- Discovery aids are limited to the HUD and direct body interaction.
+- Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
 
-The next implementation focus is the interaction/readability pass on top of the current mocked solar-system scene.
+The next implementation milestone is the interaction and readability pass on top of the current mocked overview.
 
-This includes:
+Focus areas:
 
-- refining overview readability with stars and trails present
-- improving multi-body navigation and focus choreography
-- preparing the UI and data boundaries for real ephemeris-driven positions
-- deferring more advanced trail behavior until real positions and reference-frame controls arrive
-
-## Design Direction
-
-- minimal fullscreen presentation
-- visually polished first
-- mobile and desktop support from day one
-- visually pleasing non-realistic scale by default
-- future option to switch to real proportions
+- make body discovery and re-focusing clearer in the multi-body scene
+- refine overview-to-focus camera choreography
+- decide whether lightweight labels or other discovery aids are needed
+- improve trail and background readability without cluttering the screen
+- refresh automated smoke coverage for the overview-first flow
+- finish desktop and mobile manual verification for the broader overview scene
 
 ## Long-Term Direction
 
-- move from mocked data to NASA/JPL ephemerides-backed positions
-- support arbitrary date/time selection
-- support different time rates
-- expand beyond planets to additional solar system objects
-- keep the final site fully static and offline-capable on GitHub Pages
+- move from mocked data to static offline-generated ephemeris assets
+- introduce a stable body-state provider boundary
+- support date and time selection plus different time rates
+- expand the body catalog and educational context
+- keep the final site compatible with static GitHub Pages hosting
 
 ## Non-Goals For The Current Phase
 
+- live astronomy APIs or server-backed simulation
+- realistic distances and sizes as the default presentation
+- final reference-frame controls
 - production ephemerides integration
-- realistic orbital mechanics
-- final-scale body and distance realism
-- additional object classes beyond Sun and planets
+- final trail UX for satellites and non-sun-centered views
 
 ## Workflow Expectations
 
 - work in small incremental steps
-- after each step, pause for visual inspection before moving on
-- keep project documentation aligned with the implemented state
+- keep docs aligned with code
+- explicitly mark planned work instead of describing it as already implemented
+- pause after each meaningful step for user review

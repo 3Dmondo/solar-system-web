@@ -1,12 +1,16 @@
 # Milestone 1 Task List
 
+## Status
+
+Complete and archived.
+
 ## Goal
 
 Create a tested foundation for a fullscreen planet showcase with Saturn, Earth, and Moon using mocked data.
 
-## Tasks
+## Delivered
 
-- [x] Create React + TypeScript + Vite project structure
+- [x] Create React plus TypeScript plus Vite project structure
 - [x] Add test tooling and coverage configuration
 - [x] Add fullscreen app shell
 - [x] Add scene entry point
@@ -19,28 +23,16 @@ Create a tested foundation for a fullscreen planet showcase with Saturn, Earth, 
 - [x] Add Saturn first-pass cinematic rendering
 - [x] Add Earth surface, clouds, and ocean-light response
 - [x] Add Moon surface texture and relief pass
-- [x] Validate first GitHub Pages deployment
+- [x] Validate the first GitHub Pages deployment
 
-## Closure
+## Closure Notes
 
-Milestone 1 is considered complete.
+- The repository now has a working fullscreen scene shell, local validation pipeline, and static deployment path.
+- The first detailed material passes for Saturn, Earth, and Moon are the visual base that later milestones build on.
+- The milestone is complete. New work continues in the broader overview and interaction milestones.
 
-Delivered state:
+## Deferred Follow-Up
 
-- fullscreen desktop/mobile planet showcase
-- polished interaction model with focus transitions and help overlay
-- first accepted Saturn, Earth, and Moon rendering passes
-- static GitHub Pages deployment
-- test, lint, and build pipeline in place
-
-Deferred issues for later milestones:
-
-- pole rendering artifacts on planet textures remain visible
-- Saturn ring shadows from other bodies are intentionally simplified for now
-- quality tiers are deferred because the current experience already performs well on the user's older mobile device
-
-## Notes
-
-- Keep visuals minimal at first and layer realism incrementally.
-- Avoid coupling rendering code directly to mocked data shape.
-- Pause after each implementation step and wait for visual inspection.
+- Pole rendering artifacts on some body textures remain visible.
+- Saturn ring shadow behavior is intentionally simplified for now.
+- Quality tiers were deferred because the current experience already performs acceptably on the target older mobile device.

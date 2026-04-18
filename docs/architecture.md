@@ -1,195 +1,85 @@
 # Architecture
 
-## Recommended Stack
+## Current Stack
 
-- React
-- TypeScript
-- Vite
-- Three.js through react-three-fiber
-- Vitest for unit and integration-style tests
-- React Testing Library for UI behavior
-- Playwright for end-to-end smoke tests
-- GitHub Actions for GitHub Pages deployment
+- React 19 plus TypeScript 5
+- Vite 7 for local development and static build output
+- Three.js through `@react-three/fiber` and `@react-three/drei`
+- Vitest plus React Testing Library for unit and component tests
+- Playwright for browser smoke coverage
+- GitHub Actions for Pages deployment
+- `pnpm` as the package manager
 
-## Why This Stack
+## Source Map
 
-- good maintainability for a non-JS-expert team
-- clear separation between app logic and rendering
-- static build output suitable for GitHub Pages
-- strong ecosystem for testing and progressive rendering complexity
+- App entry: `src/main.tsx`, `src/App.tsx`
+- Experience shell and HUD: `src/features/experience`
+- Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
+- Static textures: `assets/textures`
+- Browser smoke tests: `tests/e2e`
+- Deployment workflow: `.github/workflows/deploy-pages.yml`
 
-## Rendering Strategy
+## Current Runtime Shape
 
-The core renderer should use real sphere and ring geometry first.
+- `App` renders `SolarSystemExperience`.
+- `SolarSystemExperience` owns the focused target state and coarse-pointer detection.
+- `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list.
+- `ExperienceHud` shows the current target label, short instructions, and the help overlay.
+- The app starts in the `overview` target, with the camera at `[0, 14, 46]`.
 
-Reasons:
+## Interaction Model
 
-- easier path to shadows, rings, atmosphere, and layered materials
-- simpler foundation for camera interaction and selection
-- lower implementation risk for milestone 1
+- Desktop: drag to orbit, wheel to zoom, double click a body to focus it.
+- Mobile: drag to orbit, pinch to zoom, double tap a body to focus it.
+- Focus transitions are eased and can be interrupted by user input.
+- There is no dedicated return-to-overview button. Zooming back out is the current recovery path.
+- Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 
-Shader-heavy impostor techniques can be introduced later where they clearly improve performance.
+## Data And Domain Boundaries
 
-Known deferred rendering issue:
+- `mockedSolarSystemBodies` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current source of truth for body size, mocked position, focus offset, and material selection.
+- `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
+- `focus.ts` contains the current camera target and position helpers.
+- `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
+- The planned `BodyStateProvider` abstraction is not implemented yet. The scene still imports mocked data directly.
 
-- equirectangular texture rendering still shows visible pole artifacts on some bodies
-- future solutions to evaluate include cube-sphere geometry with compatible UV/material handling and shader/impostor-based rendering paths
+## Rendering Model
 
-## Module Boundaries
+- Lighting uses a point light at the Sun plus a small ambient contribution.
+- `StarBackground` renders a camera-centered, non-interactive star sphere.
+- `OrbitalTrails` renders non-interactive circular placeholder trails derived from mocked positions.
+- `PlanetBody` routes each body to either a custom material pipeline or the shared mock texture material.
+- Saturn uses a custom surface material and ring mesh.
+- Earth uses day, night, normal, specular, and cloud layers.
+- Venus uses a textured surface plus a cloud shell.
+- Moon uses texture and height data for extra relief.
+- The remaining bodies use shared texture-driven materials from `mockBodyTextures.ts`.
 
-### App Shell
+## Testing And Validation
 
-Responsibilities:
+Passing checks in the current repo state:
 
-- fullscreen layout
-- minimal chrome
-- responsive behavior
-- loading and error states
+- `pnpm lint`
+- `pnpm test`
+- `pnpm build`
 
-### Scene Core
+Additional notes:
 
-Responsibilities:
-
-- renderer setup
-- camera setup
-- orbit controls
-- lighting environment
-- overview and focus camera modes
-
-Current implementation notes:
-
-- focus transitions are interruptible by user input
-- desktop and coarse-pointer devices use different orbit control tuning
-- body focus now requires double click on desktop or double tap on touch to reduce accidental selection changes
-- the scene now supports both solar-system overview framing and single-body focus framing in the same interaction model
-- the overview HUD no longer includes a dedicated return button; the current navigation direction is to allow much farther zooming after focusing
-
-### Body System
-
-Responsibilities:
-
-- body definitions
-- body transforms
-- focus targets
-- planet and ring composition
-- overview layout and mocked orbital placement
-
-Future expansion notes:
-
-- the mocked body catalog now includes Sun, all planets, and the Moon for continuity with the original showcase
-- support both overview-scale transforms and close-focus transforms without duplicating body definitions
-- the current mocked layout spreads planets across different orbital angles to fill more of the ecliptic disk
-
-### Render Features
-
-Responsibilities:
-
-- shadows
-- layered materials
-- cloud shells
-- specular water highlights
-- ring shading and translucency
-- star background
-- orbital trails
-
-Current implementation notes:
-
-- Saturn now uses downloaded local texture assets for the surface and ring alpha map
-- Saturn ring UVs are cropped to the useful span of the downloaded ring texture to avoid edge-margin distortion
-- the visible ring mapping and the Saturn-shadow sampling range are now tunable independently for visual alignment
-- the scene renderer now has real-time shadow support enabled for directional lighting
-- Saturn ring shadow materials now reuse the same radial alpha pattern as the visible ring surface
-- Saturn's ring shadow on the planet is now driven by the custom Saturn surface shader rather than the default ring shadow caster
-- Saturn's ring shadow now fades near the terminator to blend more coherently with the planet lighting model
-- Saturn's rings now rely on the generic shadow-map system for body-to-ring shadows to stay compatible with future moon/body shadow interactions
-- Saturn's rings now use a simplified custom lighting model with equal two-sided brightness and a direct Saturn-body occlusion term, with built-in ring shadow receiving disabled for now to avoid doubled top-side shadows
-- Saturn's sphere tilt is aligned with the ring plane so the rotation axis stays perpendicular to the rings
-- the global built-in lighting now comes from a Sun-centered light source, and the custom Saturn shaders derive their light direction from the body's direction relative to the Sun with no distance falloff
-- Earth and Saturn now use the corrected shared Sun-direction convention, so the richer custom materials are back on the same lighting model as the broader overview scene
-- Earth and Saturn now have slow surface self-rotation to keep the showcase scene from feeling static
-- Earth now has an asset-based material path with day texture, night lights, and first-pass specular enhancement
-- Earth surface lighting now also uses local PNG normal and specular maps to avoid the TIFF decoding artifacts seen in earlier passes
-- Earth now also has a separate cloud shell layer driven by the local cloud texture and faded by the light-facing term on the night side
-- Earth ocean highlights now use the local specular map through the custom Earth surface shader
-- Earth surface shading now also applies a light cloud-shadow term derived from the moving cloud texture
-- Earth cloud cover now rotates slowly as a separate shell layer
-- Earth cloud rotation and projected cloud-shadow drift are now derived from the Earth's surface rotation speed, with the cloud shell following Earth spin plus a small linked drift while the shadow uses that same relative drift over the surface
-- Moon now has an asset-based surface pass using NASA SVS color and height-map assets, with a first displacement-style relief pass on denser Moon geometry
-- the next rendering phase shifts emphasis from per-body material polish to rendering the mocked full solar-system scene around the existing high-value bodies
-- the Sun and the remaining overview planets now use local Solar System Scope texture maps instead of the earlier procedural placeholders
-- Venus now uses the Solar System Scope surface map for the body plus a separate semi-transparent cloud shell that reuses the same generic cloud-layer technique as Earth with Venus-specific transparency tuning
-- the overview scene now uses a camera-centered star-sphere background with the Solar System Scope Milky Way map, kept non-interactive so it does not interfere with body selection
-- the overview scene now also renders mocked orbital trails as a separate non-interactive layer, with planet trails centered on the Sun and a small Moon trail centered on Earth
-- the current trail layer is intentionally provisional; the later ephemeris-driven version should be built from sampled historical point sequences, optionally smoothed into visually continuous curves, rather than hard-coded circles
-- the later trail system will also need reference-frame-aware rendering so satellite trails can stay centered on their planet when needed and appear as epicycles when the active frame is not the Sun or the solar-system barycenter
-
-### Data Layer
-
-Responsibilities:
-
-- provide body states through interfaces
-- start with mocked body data
-- later support static ephemeris-derived assets
-
-## Data Abstraction
-
-The renderer must depend on an interface rather than a concrete data source.
-
-Planned core concept:
-
-- `BodyStateProvider`
-
-This allows the app to start with mocked data and later switch to SPICE/JPL-derived assets without rewriting scene logic.
-
-Future trail-data note:
-
-- once NASA/JPL ephemerides are integrated, trail generation should sample body positions over a configurable historical interval and pass those point sequences into the rendering layer, instead of deriving idealized circles from mocked orbital radii
-
-## Scaling Strategy
-
-Planned display modes:
-
-- `cinematic`
-- `realistic`
-
-Milestone 1 uses `cinematic` by default.
-
-Next-step scaling notes:
-
-- the immediate solar-system overview should use a mocked but readable scale model rather than real distances
-- the overview scale model should still leave room for a future realistic-proportions mode
-
-## Testing Strategy
-
-We want strong coverage in the parts we control:
-
-- math and transform utilities
-- selection and focus state
-- scaling rules
-- data provider behavior
-- component behavior
-- smoke tests for desktop and mobile interactions
-
-We do not target synthetic coverage inside browser-owned WebGL internals.
-
-## Mobile Testing
-
-The preferred workflow is:
-
-- use browser device emulation during each small implementation step
-- use same-network real-device testing at the end of meaningful interaction or rendering steps
-- occasionally verify the production preview build on a mobile device
-
-Detailed instructions live in `docs/testing-mobile.md`.
-
-## Workflow Strategy
-
-- implement in small vertical slices
-- update docs together with code changes
-- pause after each meaningful UI or rendering step for visual review
+- `pnpm test` runs Vitest only. It does not cover live canvas interaction in a real browser.
+- `pnpm test:e2e` is separate and requires `pnpm exec playwright install`.
+- The checked-in Playwright smoke spec still reflects an earlier Saturn-first expectation and should be updated before treating e2e coverage as current.
 
 ## Deployment
 
-- GitHub Pages deployment is performed through `.github/workflows/deploy-pages.yml`
-- Vite uses the repository-specific base path during GitHub Actions builds
-- Planet textures are resolved through Vite asset URLs so they load correctly on GitHub Pages project-site paths
+- GitHub Pages deployment is defined in `.github/workflows/deploy-pages.yml`.
+- The workflow builds on pushes to `master` and on manual dispatch.
+- `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
+- Static texture imports are bundled through Vite so they work from the project-site base path.
+
+## Known Gaps And Planned Refactors
+
+- Extract a real data-provider boundary instead of importing mocked catalog data directly.
+- Add automated browser coverage that matches the overview-first experience.
+- Finish manual desktop and mobile validation for the current multi-body overview.
+- Address visible pole artifacts on some body textures.
+- Evaluate bundle-size reductions if the current single chunk keeps growing.

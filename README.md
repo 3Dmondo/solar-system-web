@@ -1,42 +1,53 @@
 # Solar System Web
 
-Web-based solar system visualizer designed for GitHub Pages, with a polished fullscreen experience for desktop and mobile.
+Static web-based solar-system explorer built for GitHub Pages. The current repo delivers a fullscreen mocked overview with a cinematic scale model rather than real astronomical distances.
 
-## Current Status
+## Current Experience
 
-The current app is a mocked fullscreen solar-system overview with:
+- Starts in a solar-system overview with the HUD title `Solar System`.
+- Renders the Sun, Mercury, Venus, Earth, Moon, Mars, Jupiter, Saturn, Uranus, and Neptune.
+- Supports desktop orbit plus wheel zoom and mobile drag plus pinch zoom.
+- Uses double click or double tap to focus a body from the overview.
+- Includes a HUD help overlay, a Milky Way star sphere, mocked orbital trails, and continuous self-rotation.
+- Uses custom material pipelines for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-based materials.
 
-- Sun
-- Mercury
-- Venus
-- Saturn
-- Earth
-- Moon
-- Mars
-- Jupiter
-- Uranus
-- Neptune
+## Current Project State
 
-It currently includes:
+- Body positions and trails are mocked.
+- There is no `BodyStateProvider` abstraction wired into the scene yet.
+- `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
+- Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
+- `pnpm test:e2e` requires Playwright browsers, and the checked-in smoke spec still needs to be refreshed for the overview-first flow.
 
-- broad overview navigation plus single-body focus
-- star background rendering
-- mocked orbital trails
-- custom higher-fidelity rendering passes for Saturn, Earth, Moon, and Venus
+## Stack
 
-The data layer starts mocked and is intended to evolve toward static assets generated from NASA/JPL ephemerides.
-
-## Planned Stack
-
-- React
-- TypeScript
-- Vite
-- Three.js via react-three-fiber
-- Vitest
+- React 19
+- TypeScript 5
+- Vite 7
+- Three.js through `@react-three/fiber` and `@react-three/drei`
+- Vitest and React Testing Library
 - Playwright
+- GitHub Actions for Pages deployment
 
-## Documentation
+## Commands
 
+```powershell
+pnpm dev
+pnpm lint
+pnpm test
+pnpm build
+```
+
+For Playwright:
+
+```powershell
+pnpm exec playwright install
+pnpm test:e2e
+```
+
+## Docs
+
+- `AGENTS.md`
 - `docs/vision.md`
 - `docs/architecture.md`
 - `docs/roadmap.md`
@@ -44,25 +55,5 @@ The data layer starts mocked and is intended to evolve toward static assets gene
 - `docs/testing-mobile.md`
 - `docs/tasks/milestone-1.md`
 - `docs/tasks/milestone-2.md`
+- `docs/tasks/milestone-3.md`
 - `docs/decisions/0001-web-stack.md`
-
-## Development
-
-Install dependencies and start the app with:
-
-```powershell
-pnpm install
-pnpm dev
-```
-
-For testing on a phone on the same network:
-
-```powershell
-pnpm dev -- --host
-```
-
-## Deployment
-
-GitHub Pages deployment is handled by the workflow in `.github/workflows/deploy-pages.yml`.
-
-Setup steps are documented in `docs/deployment-github-pages.md`.

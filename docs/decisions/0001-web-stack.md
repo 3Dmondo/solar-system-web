@@ -6,16 +6,30 @@ Accepted
 
 ## Decision
 
-Use React, TypeScript, Vite, Three.js through react-three-fiber, Vitest, React Testing Library, and Playwright.
+Use React, TypeScript, Vite, Three.js through react-three-fiber, Vitest, React Testing Library, Playwright, and GitHub Actions deployment for the static site.
+
+## Context
+
+The project needs:
+
+- a maintainable stack for ongoing iteration
+- static build output suitable for GitHub Pages
+- a clean separation between app shell, scene orchestration, and rendering helpers
+- room for progressively richer custom materials and interaction work
+- automated test tooling that can grow with the project
 
 ## Rationale
 
-- strong maintainability
-- static-site friendly
-- good test ecosystem
-- flexible enough for advanced rendering
+- React and TypeScript keep UI and state changes approachable.
+- Vite provides a fast local loop and simple static output.
+- `@react-three/fiber` lets the repo compose Three.js scenes with React components while still keeping math and rendering helpers in separate modules.
+- Vitest and React Testing Library cover domain logic and UI behavior.
+- Playwright provides a path for real-browser smoke coverage as the interaction model matures.
+- GitHub Actions fits the static deployment target.
 
 ## Consequences
 
-- requires a Node.js toolchain locally and in CI
-- rendering logic should stay decoupled from React-specific components where practical
+- The repo requires a Node.js and `pnpm` toolchain.
+- Rendering helpers should remain decoupled from React components where practical.
+- Large texture assets and a growing single-page bundle must be watched as rendering fidelity increases.
+- The codebase should keep planned abstractions, such as a future body-state provider, separate from the current mocked data layer.

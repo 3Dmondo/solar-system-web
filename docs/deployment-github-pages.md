@@ -1,34 +1,49 @@
 # GitHub Pages Deployment
 
-This repository includes a GitHub Actions workflow for deploying the static Vite build to GitHub Pages.
+## Source Of Truth
 
-## Expected Site URL
+- Workflow: `.github/workflows/deploy-pages.yml`
+- Vite base-path logic: `vite.config.ts`
+
+## Current Deployment Behavior
+
+- GitHub Pages deploys on pushes to `master`.
+- Manual runs are also allowed through `workflow_dispatch`.
+- The build job installs dependencies with `pnpm install --frozen-lockfile` and runs `pnpm build`.
+- `actions/configure-pages@v5` is used with `enablement: true`.
+- The deploy job publishes the `dist/` artifact.
+
+## Expected URL
 
 - `https://3Dmondo.github.io/solar-system-web/`
 
-## What Is Already Configured
+## Base Paths
 
-- Vite uses the GitHub Pages base path during GitHub Actions builds.
-- The workflow file is `.github/workflows/deploy-pages.yml`.
-- The workflow builds the app with `pnpm` and deploys the `dist/` folder through the official GitHub Pages actions.
-- The workflow opts into the GitHub Actions Node 24 runtime to avoid the current Node 20 deprecation warnings.
+- Local builds use `./`.
+- GitHub Actions builds use `/solar-system-web/`.
 
-## Manual Steps
+## Local Verification
 
-1. Push the latest commits to GitHub.
-2. Open the repository on GitHub.
-3. Go to `Settings`.
-4. Open `Pages` in the left sidebar.
-5. If GitHub already shows `GitHub Actions` as the Pages source, leave it as-is.
-6. If GitHub still shows the workflow suggestion screen instead of a save option, do not choose `Jekyll` or `Static HTML`. The repository already contains its own workflow.
-7. Open the `Actions` tab and run or re-run `Deploy To GitHub Pages`.
-8. The workflow is configured to auto-enable Pages on the first successful setup step.
-9. When the workflow succeeds, open `https://3Dmondo.github.io/solar-system-web/`.
+```powershell
+pnpm build
+```
+
+If you want to inspect the production bundle locally:
+
+```powershell
+pnpm preview -- --host
+```
+
+## First-Time Repository Setup
+
+1. Push the workflow to GitHub.
+2. Open the repository `Settings` and then `Pages`.
+3. Leave the Pages source on `GitHub Actions`.
+4. Run or re-run `Deploy To GitHub Pages` from the `Actions` tab if needed.
+5. Open the site URL after the workflow succeeds.
 
 ## Notes
 
-- The workflow currently deploys on pushes to `master`.
-- If the default branch is renamed later, update `.github/workflows/deploy-pages.yml`.
-- The first deployment can take a short while before the site becomes available.
-- If the site shows an old version, hard refresh the browser after the workflow finishes.
-- If an earlier run failed in `Setup Pages`, re-run the workflow after pushing the updated workflow file.
+- Do not switch the repo to Jekyll or static HTML deployment. The repository already owns the workflow.
+- If the default branch changes from `master`, update the workflow trigger.
+- Large assets are bundled into the static build, so deployment size is driven mostly by textures and the main JavaScript bundle.
