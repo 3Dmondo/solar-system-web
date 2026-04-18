@@ -3,8 +3,8 @@
 ## Current Snapshot
 
 - Milestone 1 foundation and featured-body rendering work is complete.
-- Milestone 2 overview scene work is implemented in code and validated by lint, unit tests, build, and refreshed browser smoke coverage, but manual closeout verification is still open.
-- Milestone 3 is active, with a grouped `Jump to` chooser for overview body discovery, preserved-angle focus transitions, and a focused-mode control that returns the camera to the overview without relying on zoom-only recovery.
+- Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
+- Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, preserved-angle focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -20,7 +20,7 @@ Delivered:
 
 ## Milestone 2: Mocked Solar System Overview
 
-Status: Implemented, closeout pending
+Status: Complete
 
 Delivered:
 
@@ -30,14 +30,9 @@ Delivered:
 - star background and mocked orbital trails
 - texture-backed materials for the remaining overview bodies
 
-Remaining closeout:
-
-- perform manual desktop and mobile verification
-- mark the milestone closed after the verification pass
-
 ## Milestone 3: Interaction And Readability Pass
 
-Status: Active
+Status: Complete
 
 Goals:
 

@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented in code. Closeout verification still open.
+Complete
 
 ## Goal
 
@@ -25,8 +25,8 @@ Expand the initial showcase into a mocked full-solar-system overview with overvi
 ## Remaining Closeout
 
 - [x] Refresh Playwright smoke coverage for the overview-first experience
-- [ ] Perform manual desktop and mobile verification in both overview and focused modes
-- [ ] Mark Milestone 2 closed after the verification pass
+- [x] Perform manual desktop and mobile verification in both overview and focused modes
+- [x] Mark Milestone 2 closed after the verification pass
 
 ## Notes
 
