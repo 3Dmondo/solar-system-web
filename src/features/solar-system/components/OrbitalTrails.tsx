@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
+import { Line } from '@react-three/drei';
 import { type Object3D } from 'three';
 import { mockedSolarSystemBodies } from '../data/mockBodyCatalog';
-import { buildCircularTrailPositions, getMockOrbitalTrails } from '../rendering/mockOrbitalTrails';
+import { buildCircularTrailPoints, getMockOrbitalTrails } from '../rendering/mockOrbitalTrails';
 
 const ignoreRaycast: Object3D['raycast'] = () => null;
+const TRAIL_LINE_WIDTH = 1.4;
 
 export function OrbitalTrails() {
   const trails = useMemo(() => getMockOrbitalTrails(mockedSolarSystemBodies), []);
@@ -11,21 +13,19 @@ export function OrbitalTrails() {
   return (
     <group renderOrder={-0.5}>
       {trails.map((trail) => {
-        const positions = buildCircularTrailPositions(trail.radius, trail.verticalOffset);
+        const points = buildCircularTrailPoints(trail.radius, trail.verticalOffset);
 
         return (
-          <lineLoop key={trail.bodyId} position={trail.center} raycast={ignoreRaycast}>
-            <bufferGeometry>
-              <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-            </bufferGeometry>
-            <lineBasicMaterial
-              color={trail.color}
-              depthWrite={false}
-              opacity={trail.opacity}
-              toneMapped={false}
-              transparent
-            />
-          </lineLoop>
+          <Line
+            key={trail.bodyId}
+            color={trail.color}
+            lineWidth={TRAIL_LINE_WIDTH}
+            points={points}
+            position={trail.center}
+            raycast={ignoreRaycast}
+            renderOrder={-0.5}
+            transparent={false}
+          />
         );
       })}
     </group>

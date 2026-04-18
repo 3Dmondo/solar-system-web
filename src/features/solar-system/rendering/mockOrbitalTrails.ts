@@ -4,7 +4,6 @@ type MockOrbitalTrail = {
   bodyId: BodyId;
   center: [number, number, number];
   color: string;
-  opacity: number;
   radius: number;
   verticalOffset: number;
 };
@@ -41,12 +40,12 @@ function fromRgb(r: number, g: number, b: number) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-function lightenHex(hex: string, amount: number) {
+function lightenHex(hex: string) {
   const color = toRgb(hex);
   return fromRgb(
-    color.r + (255 - color.r) * amount,
-    color.g + (255 - color.g) * amount,
-    color.b + (255 - color.b) * amount
+    color.r * 0.4,
+    color.g * 0.4,
+    color.b * 0.4
   );
 }
 
@@ -83,8 +82,7 @@ export function getMockOrbitalTrails(bodies: BodyDefinition[]): MockOrbitalTrail
       {
         bodyId: body.id,
         center: centerBody.position,
-        color: lightenHex(body.color, body.id === 'moon' ? 0.42 : 0.3),
-        opacity: body.id === 'moon' ? 0.6 : 0.6,
+        color: lightenHex(body.color),
         radius,
         verticalOffset: body.position[1] - centerBody.position[1]
       }
@@ -92,17 +90,21 @@ export function getMockOrbitalTrails(bodies: BodyDefinition[]): MockOrbitalTrail
   });
 }
 
-export function buildCircularTrailPositions(
+export function buildCircularTrailPoints(
   radius: number,
   verticalOffset: number,
   segments = 180
 ) {
-  const positions: number[] = [];
+  const points: Array<[number, number, number]> = [];
 
   for (let index = 0; index < segments; index += 1) {
     const angle = (index / segments) * Math.PI * 2;
-    positions.push(Math.cos(angle) * radius, verticalOffset, Math.sin(angle) * radius);
+    points.push([Math.cos(angle) * radius, verticalOffset, Math.sin(angle) * radius]);
   }
 
-  return new Float32Array(positions);
+  if (points.length > 0) {
+    points.push([...points[0]!] as [number, number, number]);
+  }
+
+  return points;
 }

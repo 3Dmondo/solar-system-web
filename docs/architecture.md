@@ -50,7 +50,7 @@
 - Lighting uses a point light at the Sun plus a small ambient contribution.
 - `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
 - The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
-- `OrbitalTrails` renders non-interactive circular placeholder trails derived from mocked positions.
+- `OrbitalTrails` renders non-interactive circular placeholder trails derived from mocked positions, using thicker opaque lines so their appearance stays consistent across body overlaps.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared mock texture material.
 - Saturn uses a custom surface material and ring mesh.
 - Earth uses day, night, normal, specular, and cloud layers.

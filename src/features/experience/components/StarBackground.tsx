@@ -28,10 +28,10 @@ export function StarBackground() {
     >
       <sphereGeometry args={[STAR_BACKGROUND_RADIUS, 48, 48]} />
       <meshBasicMaterial
-        color="#c8d1ff"
+        color="#b8c3f5"
         depthWrite={false}
         map={texture}
-        opacity={0.64}
+        opacity={0.5}
         side={BackSide}
         toneMapped={false}
         transparent

@@ -10,6 +10,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - Uses a `Jump to` HUD menu plus double click or double tap to focus a body.
 - Includes a HUD help overlay, a focused-mode overview return control, a Milky Way star sphere, mocked orbital trails, and continuous self-rotation.
 - Uses directional camera easing, preserves the current viewing angle when entering body focus, and pulls back more decisively when returning to overview.
+- Uses thicker opaque orbital trails so they read consistently even when they cross in front of planets.
 - Uses custom material pipelines for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-based materials.
 
 ## Current Project State

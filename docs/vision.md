@@ -14,7 +14,7 @@ The repository currently ships a mocked overview-first solar-system scene with:
 - orbit controls tuned separately for fine and coarse pointers
 - a minimal HUD with a help overlay and focused-mode overview return
 - a Milky Way star background
-- mocked orbital trails
+- mocked orbital trails rendered as thicker opaque lines
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
 
