@@ -11,9 +11,9 @@ Improve navigation clarity and readability in the current mocked overview withou
 ## Tasks
 
 - [ ] Review current overview pain points on desktop and mobile
-- [ ] Improve multi-body discovery and re-selection in the overview
-- [ ] Refine overview-to-focus camera choreography where it feels abrupt or confusing
-- [ ] Evaluate whether lightweight labels or discovery aids are needed
+- [x] Improve multi-body discovery and re-selection in the overview
+- [x] Refine overview-to-focus camera choreography where it feels abrupt or confusing
+- [x] Evaluate whether lightweight labels or discovery aids are needed
 - [ ] Improve star and trail readability without overpowering the bodies
 - [x] Refresh Playwright smoke coverage to match the overview-first startup flow
 - [ ] Perform manual desktop and mobile verification after the interaction pass

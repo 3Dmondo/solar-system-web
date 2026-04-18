@@ -24,15 +24,16 @@
 - `App` renders `SolarSystemExperience`.
 - `SolarSystemExperience` owns the focused target state and coarse-pointer detection.
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list.
-- `ExperienceHud` shows the current target label, short instructions, and the help overlay.
+- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the help overlay, and a focused-mode return to the overview.
 - The app starts in the `overview` target, with the camera at `[0, 14, 46]`.
 
 ## Interaction Model
 
 - Desktop: drag to orbit, wheel to zoom, double click a body to focus it.
 - Mobile: drag to orbit, pinch to zoom, double tap a body to focus it.
-- Focus transitions are eased and can be interrupted by user input.
-- There is no dedicated return-to-overview button. Zooming back out is the current recovery path.
+- The overview HUD exposes a `Jump to` button that opens a grouped chooser for direct focus and easier body discovery.
+- Focus transitions are eased, can be interrupted by user input, preserve the current viewing angle when entering a body, and use directional profiles so body-to-overview moves pull back faster.
+- The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 
 ## Data And Domain Boundaries
@@ -40,6 +41,7 @@
 - `mockedSolarSystemBodies` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current source of truth for body size, mocked position, focus offset, and material selection.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
+- `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
 - The planned `BodyStateProvider` abstraction is not implemented yet. The scene still imports mocked data directly.
 

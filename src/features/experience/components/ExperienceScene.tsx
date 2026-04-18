@@ -7,7 +7,12 @@ import { OrbitalTrails } from '../../solar-system/components/OrbitalTrails';
 import { getControlProfile } from '../domain/controlProfile';
 import { MOCK_SUN_POSITION, mockedSolarSystemBodies } from '../../solar-system/data/mockBodyCatalog';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
-import { getFocusCameraPosition, getFocusTarget } from '../../solar-system/domain/focus';
+import {
+  getFocusCameraPosition,
+  getFocusCameraPositionForViewDirection,
+  getFocusTarget,
+  getFocusTransitionProfile
+} from '../../solar-system/domain/focus';
 import { StarBackground } from './StarBackground';
 
 type ExperienceSceneProps = {
@@ -62,13 +67,33 @@ function FocusCameraRig({
   const controlsRef = useRef<ControlsHandle | null>(null);
   const desiredTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId)));
   const desiredCameraPosition = useRef(new Vector3(...getFocusCameraPosition(focusedBodyId)));
+  const previousFocusedBodyId = useRef<ViewTargetId>(focusedBodyId);
+  const transitionProfileRef = useRef(
+    getFocusTransitionProfile(focusedBodyId, focusedBodyId)
+  );
   const isTransitioning = useRef(false);
 
   useEffect(() => {
+    const currentTarget = controlsRef.current?.target ?? new Vector3(...getFocusTarget(previousFocusedBodyId.current));
+    const currentViewOffset = camera.position.clone().sub(currentTarget);
+
+    transitionProfileRef.current = getFocusTransitionProfile(
+      previousFocusedBodyId.current,
+      focusedBodyId
+    );
     desiredTarget.current.set(...getFocusTarget(focusedBodyId));
-    desiredCameraPosition.current.set(...getFocusCameraPosition(focusedBodyId));
+    desiredCameraPosition.current.set(
+      ...(focusedBodyId === 'overview'
+        ? getFocusCameraPosition(focusedBodyId)
+        : getFocusCameraPositionForViewDirection(focusedBodyId, [
+            currentViewOffset.x,
+            currentViewOffset.y,
+            currentViewOffset.z
+          ]))
+    );
+    previousFocusedBodyId.current = focusedBodyId;
     isTransitioning.current = true;
-  }, [focusedBodyId]);
+  }, [camera.position, focusedBodyId]);
 
   useEffect(() => {
     const controls = controlsRef.current;
@@ -93,18 +118,22 @@ function FocusCameraRig({
       return;
     }
 
-    const easing = 1 - Math.exp(-delta * 4.5);
+    const cameraEasing =
+      1 - Math.exp(-delta * transitionProfileRef.current.cameraEasingRate);
+    const targetEasing =
+      1 - Math.exp(-delta * transitionProfileRef.current.targetEasingRate);
 
-    camera.position.lerp(desiredCameraPosition.current, easing);
-    controlsRef.current?.target.lerp(desiredTarget.current, easing);
+    camera.position.lerp(desiredCameraPosition.current, cameraEasing);
+    controlsRef.current?.target.lerp(desiredTarget.current, targetEasing);
     controlsRef.current?.update();
 
     const cameraSettled =
-      camera.position.distanceToSquared(desiredCameraPosition.current) < 0.0001;
+      camera.position.distanceToSquared(desiredCameraPosition.current) <
+      transitionProfileRef.current.settleDistanceSquared;
     const targetSettled =
       controlsRef.current?.target.distanceToSquared(desiredTarget.current) ?? 0;
 
-    if (cameraSettled && targetSettled < 0.0001) {
+    if (cameraSettled && targetSettled < transitionProfileRef.current.settleDistanceSquared) {
       camera.position.copy(desiredCameraPosition.current);
       controlsRef.current?.target.copy(desiredTarget.current);
       controlsRef.current?.update();

@@ -14,7 +14,12 @@ export function SolarSystemExperience() {
         isCoarsePointer={isCoarsePointer}
         onFocusBody={setFocusedBodyId}
       />
-      <ExperienceHud focusedBodyId={focusedBodyId} />
+      <ExperienceHud
+        focusedBodyId={focusedBodyId}
+        isCoarsePointer={isCoarsePointer}
+        onFocusBody={setFocusedBodyId}
+        onReturnToOverview={() => setFocusedBodyId('overview')}
+      />
     </main>
   );
 }

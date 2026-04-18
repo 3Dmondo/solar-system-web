@@ -4,7 +4,7 @@
 
 - Milestone 1 foundation and featured-body rendering work is complete.
 - Milestone 2 overview scene work is implemented in code and validated by lint, unit tests, build, and refreshed browser smoke coverage, but manual closeout verification is still open.
-- Milestone 3 is the next active implementation milestone.
+- Milestone 3 is active, with a grouped `Jump to` chooser for overview body discovery, preserved-angle focus transitions, and a focused-mode control that returns the camera to the overview without relying on zoom-only recovery.
 
 ## Milestone 1: Foundation And Planet Showcase
 

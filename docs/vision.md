@@ -9,9 +9,10 @@ Build a static web-based solar system explorer that feels polished, readable, an
 The repository currently ships a mocked overview-first solar-system scene with:
 
 - Sun, all 8 planets, and the Moon
-- overview-to-body focus transitions driven by double click or double tap
+- overview-to-body focus transitions driven by a `Jump to` HUD menu plus double click or double tap
+- directional camera easing that preserves the current viewing angle when moving into focus and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
-- a minimal HUD with a help overlay
+- a minimal HUD with a help overlay and focused-mode overview return
 - a Milky Way star background
 - mocked orbital trails
 - continuous body self-rotation
