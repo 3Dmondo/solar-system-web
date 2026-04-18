@@ -81,7 +81,19 @@ Goals:
 - render satellite trails correctly across frame changes
 - design controls for frame, trail window, and trail style
 
-## Milestone 7: Rendering And Performance Refinement
+## Milestone 7: Sky Catalog And Rendering Controls
+
+Status: Planned
+
+Goals:
+
+- replace the decorative star sphere with a static sky built from a real star catalog such as Hipparcos
+- render stars as point primitives such as `Three.Points`, with apparent size and brightness driven by real catalog data
+- support optional constellation-line overlays from a static reference dataset
+- add a rendering-configuration UI that stays minimized by default and uses as little screen space as possible
+- design the controls so they remain clear and low-friction on both mobile and desktop
+
+## Milestone 8: Rendering And Performance Refinement
 
 Status: Planned
 
@@ -92,7 +104,7 @@ Goals:
 - add quality or performance presets only if needed
 - revisit bundle size and mobile fallbacks as the scene grows
 
-## Milestone 8: Full Solar System Explorer
+## Milestone 9: Full Solar System Explorer
 
 Status: Backlog
 

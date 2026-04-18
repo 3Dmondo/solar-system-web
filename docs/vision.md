@@ -23,6 +23,7 @@ The repository currently ships a mocked overview-first solar-system scene with:
 - The scene imports `mockedSolarSystemBodies` directly. There is no provider abstraction in use yet.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
+- There is no dedicated rendering-configuration UI yet.
 - Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
@@ -41,6 +42,9 @@ Focus areas:
 ## Long-Term Direction
 
 - move from mocked data to static offline-generated ephemeris assets
+- replace the decorative star background with a real star-catalog sky layer
+- support optional constellation-line overlays
+- add a minimized rendering-controls interface that stays usable on both mobile and desktop
 - introduce a stable body-state provider boundary
 - support date and time selection plus different time rates
 - expand the body catalog and educational context

@@ -46,7 +46,8 @@
 ## Rendering Model
 
 - Lighting uses a point light at the Sun plus a small ambient contribution.
-- `StarBackground` renders a camera-centered, non-interactive star sphere.
+- `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
+- The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
 - `OrbitalTrails` renders non-interactive circular placeholder trails derived from mocked positions.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared mock texture material.
 - Saturn uses a custom surface material and ring mesh.
@@ -81,5 +82,7 @@ Additional notes:
 - Extract a real data-provider boundary instead of importing mocked catalog data directly.
 - Add automated browser coverage that matches the overview-first experience.
 - Finish manual desktop and mobile validation for the current multi-body overview.
+- Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
+- Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
