@@ -1,4 +1,4 @@
-import { getBodyById } from '../data/mockBodyCatalog';
+import { getResolvedBodyById } from '../data/bodyStateStore';
 import { type ViewTargetId } from './body';
 
 export type FocusTransitionProfile = {
@@ -12,7 +12,7 @@ export function getFocusDistance(bodyId: ViewTargetId): number {
     return Math.hypot(0, 14, 46);
   }
 
-  const body = getBodyById(bodyId);
+  const body = getResolvedBodyById(bodyId);
 
   if (!body) {
     return Math.hypot(0, 2.2, 7.5);
@@ -26,7 +26,7 @@ export function getFocusTarget(bodyId: ViewTargetId): [number, number, number] {
     return [0, 0, 0];
   }
 
-  const body = getBodyById(bodyId);
+  const body = getResolvedBodyById(bodyId);
 
   if (!body) {
     return [0, 0, 0];
@@ -40,7 +40,7 @@ export function getFocusCameraPosition(bodyId: ViewTargetId): [number, number, n
     return [0, 14, 46];
   }
 
-  const body = getBodyById(bodyId);
+  const body = getResolvedBodyById(bodyId);
 
   if (!body) {
     return [0, 2.2, 7.5];
@@ -61,7 +61,7 @@ export function getFocusCameraPositionForViewDirection(
     return getFocusCameraPosition('overview');
   }
 
-  const body = getBodyById(bodyId);
+  const body = getResolvedBodyById(bodyId);
 
   if (!body) {
     return getFocusCameraPosition(bodyId);

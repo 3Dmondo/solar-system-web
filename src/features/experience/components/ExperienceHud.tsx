@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
-import { getBodyById } from '../../solar-system/data/mockBodyCatalog';
+import {
+  getResolvedBodies,
+  getResolvedBodyMetadataById
+} from '../../solar-system/data/bodyStateStore';
 import './experience-hud.css';
 
 const jumpToGroups: Array<{ label: string; bodyIds: BodyId[] }> = [
@@ -31,7 +34,10 @@ export function ExperienceHud({
   onFocusBody,
   onReturnToOverview
 }: ExperienceHudProps) {
-  const body = focusedBodyId === 'overview' ? null : getBodyById(focusedBodyId);
+  const snapshotBodies = getResolvedBodies();
+  const body = focusedBodyId === 'overview'
+    ? null
+    : snapshotBodies.find((targetBody) => targetBody.id === focusedBodyId);
   const [instructionsVisible, setInstructionsVisible] = useState(false);
   const [jumpMenuVisible, setJumpMenuVisible] = useState(false);
   const jumpButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -172,7 +178,7 @@ export function ExperienceHud({
               <div className="experience-hud__jump-group-label">{group.label}</div>
               <div className="experience-hud__jump-grid">
                 {group.bodyIds.map((bodyId) => {
-                  const targetBody = getBodyById(bodyId);
+                  const targetBody = getResolvedBodyMetadataById(bodyId);
 
                   if (!targetBody) {
                     return null;

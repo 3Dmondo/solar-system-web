@@ -21,7 +21,7 @@ The repository currently ships a mocked overview-first solar-system scene with:
 ## Current Constraints
 
 - Body positions and trails are hard-coded mocked values.
-- The scene imports `mockedSolarSystemBodies` directly. There is no provider abstraction in use yet.
+- The app now uses a synchronous mocked body-state provider, but still serves only hard-coded snapshot data.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
 - There is no dedicated rendering-configuration UI yet.
@@ -29,15 +29,15 @@ The repository currently ships a mocked overview-first solar-system scene with:
 
 ## Next Experience
 
-The next implementation milestone is the interaction and readability pass on top of the current mocked overview.
+The next implementation milestone is real positions and time controls on top of the new provider-backed data boundary.
 
 Focus areas:
 
-- make body discovery and re-focusing clearer in the multi-body scene
-- refine overview-to-focus camera choreography
-- decide whether lightweight labels or other discovery aids are needed
-- improve trail and background readability without cluttering the screen
-- finish desktop and mobile manual verification for the broader overview scene
+- integrate static offline-generated ephemeris assets behind the existing provider shape
+- add time controls without rewriting the current scene consumers again
+- replace circular mocked trails with sampled position history
+- keep the current overview readability and focus behavior intact while the data source changes
+- defer frame-switching and final trail UX until the later reference-frame milestone
 
 ## Long-Term Direction
 

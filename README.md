@@ -16,7 +16,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 ## Current Project State
 
 - Body positions and trails are mocked.
-- There is no `BodyStateProvider` abstraction wired into the scene yet.
+- A synchronous mocked `BodyStateProvider` now feeds the scene through `bodyStateStore.ts`.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
 - `pnpm test:e2e` requires Playwright browsers and a local preview server.
@@ -58,4 +58,5 @@ pnpm test:e2e
 - `docs/tasks/milestone-1.md`
 - `docs/tasks/milestone-2.md`
 - `docs/tasks/milestone-3.md`
+- `docs/tasks/milestone-4.md`
 - `docs/decisions/0001-web-stack.md`

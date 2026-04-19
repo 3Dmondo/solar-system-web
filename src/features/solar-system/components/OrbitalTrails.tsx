@@ -1,14 +1,18 @@
 import { useMemo } from 'react';
 import { Line } from '@react-three/drei';
 import { type Object3D } from 'three';
-import { mockedSolarSystemBodies } from '../data/mockBodyCatalog';
+import { type BodyDefinition } from '../domain/body';
 import { buildCircularTrailPoints, getMockOrbitalTrails } from '../rendering/mockOrbitalTrails';
 
 const ignoreRaycast: Object3D['raycast'] = () => null;
 const TRAIL_LINE_WIDTH = 1.4;
 
-export function OrbitalTrails() {
-  const trails = useMemo(() => getMockOrbitalTrails(mockedSolarSystemBodies), []);
+type OrbitalTrailsProps = {
+  bodies: BodyDefinition[];
+};
+
+export function OrbitalTrails({ bodies }: OrbitalTrailsProps) {
+  const trails = useMemo(() => getMockOrbitalTrails(bodies), [bodies]);
 
   return (
     <group renderOrder={-0.5}>

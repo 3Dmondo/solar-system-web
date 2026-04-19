@@ -1,4 +1,4 @@
-import { type BodyDefinition, type BodyId } from '../domain/body';
+import { type BodyDefinition, type BodyId, type BodyState } from '../domain/body';
 
 type MockOrbitalTrail = {
   bodyId: BodyId;
@@ -49,7 +49,7 @@ function lightenHex(hex: string) {
   );
 }
 
-function getBodyMap(bodies: BodyDefinition[]) {
+function getBodyMap(bodies: BodyState[]) {
   return new Map(bodies.map((body) => [body.id, body]));
 }
 

@@ -38,12 +38,14 @@
 
 ## Data And Domain Boundaries
 
-- `mockedSolarSystemBodies` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current source of truth for body size, mocked position, focus offset, and material selection.
+- `mockBodyStateProvider` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current synchronous source for mocked snapshot state.
+- Static body metadata and mocked snapshot positions are now separated in the mock data layer and merged only at scene-consumption boundaries.
+- `bodyStateStore.ts` is the current selector layer that resolves provider output into merged body definitions for scene, HUD, and focus helpers.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
-- The planned `BodyStateProvider` abstraction is not implemented yet. The scene still imports mocked data directly.
+- The provider boundary is synchronous for now and still serves the existing mocked overview layout.
 
 ## Rendering Model
 
@@ -81,7 +83,6 @@ Additional notes:
 
 ## Known Gaps And Planned Refactors
 
-- Extract a real data-provider boundary instead of importing mocked catalog data directly.
 - Finish manual desktop and mobile validation for the current multi-body overview.
 - Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.

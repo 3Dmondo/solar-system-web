@@ -5,6 +5,7 @@
 - Milestone 1 foundation and featured-body rendering work is complete.
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, preserved-angle focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
+- Milestone 4 data-abstraction work is complete, including the synchronous mocked `BodyStateProvider`, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -44,13 +45,23 @@ Goals:
 
 ## Milestone 4: Data Abstraction
 
-Status: Planned
+Status: Complete
 
 Goals:
 
 - introduce a stable `BodyStateProvider`-style boundary
+- split static body metadata from time-varying snapshot state
 - support clean fixed-time snapshots
+- route scene consumers through provider-backed data
 - prepare the path for offline-generated ephemeris assets
+
+Delivered:
+
+- static body metadata split from time-varying mocked state
+- synchronous `BodyStateProvider` types and mocked provider implementation
+- `bodyStateStore` selectors for merged body definitions and metadata lookups
+- provider-backed scene, HUD, focus, and trail consumers
+- unit coverage for provider helpers and selector resolution
 
 ## Milestone 5: Real Positions And Time
 

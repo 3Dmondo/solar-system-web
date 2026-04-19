@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { mockedSolarSystemBodies } from '../data/mockBodyCatalog';
+import {
+  getMockBodySnapshot,
+  mergeBodySnapshotWithMetadata
+} from '../data/mockBodyCatalog';
 import { buildCircularTrailPoints, getMockOrbitalTrails } from './mockOrbitalTrails';
+
+const mockedSolarSystemBodies = mergeBodySnapshotWithMetadata(getMockBodySnapshot());
 
 function toBrightness(hex: string) {
   const normalized = hex.replace('#', '');
