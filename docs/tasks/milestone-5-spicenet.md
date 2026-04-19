@@ -17,12 +17,14 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - The manifest now explicitly describes sample layout and timestamp reconstruction so the browser runtime does not depend on implicit decoder rules.
 - The generator now accepts optional text metadata kernels and emits first-pass per-body radii, GM, pole, axial-tilt, and rotation metadata when direct `BODYnnn_*` assignments are available.
 - The current metadata workflow keeps the upstream NAIF text kernels out of git, downloads them into a local cache when refreshing, and versions only the parsed `body-metadata.json` snapshot.
+- The current scripted ephemeris refresh workflow uses cached official NAIF kernels and regenerates the mixed-cadence local baseline without versioning the upstream binaries or generated chunk set.
 - Output should be directly consumable by the Milestone 5 web data layer.
 
 ## Tasks
 
 - [x] Add a generator CLI or equivalent scripted entry point that accepts kernel inputs, coverage window, output path, and per-body cadence settings.
 - [ ] Support the kernel set needed for the first benchmark, including leap-second and body-metadata sources in addition to `de441t`.
+  Current status: the repository now has a repeatable cached-download script for the current `de440s + naif0012 + pck00011 + gm_de440` baseline. `de441t` still needs a pinned download source before it can replace the scripted default.
 - [x] Emit a manifest plus chunk files for the Sun, planets, and Moon in a compact JSON-array format suitable for HTTP compression.
 - [x] Include sampled velocities so the web app can use cubic Hermite interpolation.
 - [ ] Extract all useful kernel-derived body metadata that can be gathered reliably, with radii, axial tilt, and rotation period treated as first-priority outputs.
@@ -32,6 +34,7 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - [ ] Keep output deterministic so the generated assets can be cached, diffed, and validated.
 - [x] Add validation that compares generated chunk samples back to `SpiceNet` live queries at representative timestamps.
 - [ ] Document the local cache workflow for downloaded kernels and the CI workflow for non-versioned kernel acquisition.
+  Current status: `SpiceNet` now documents and scripts both the metadata refresh flow and the local ephemeris baseline refresh flow, with CI expected to run the same scripts in a fresh workspace.
 
 ## Acceptance Notes
 
@@ -39,4 +42,5 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - Output is stable enough for the web app to parse and benchmark repeatedly.
 - Kernel binaries are not required to be committed to either repository.
 - The official text metadata kernels are downloaded when refreshing and are not committed; the parsed metadata snapshot is committed so the web side can consume stable small JSON.
+- The current local ephemeris baseline is regenerated into ignored artifacts from cached downloaded kernels rather than being committed.
 - The generator can be run locally against a cached kernel folder and in CI against freshly downloaded kernels.
