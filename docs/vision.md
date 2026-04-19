@@ -33,9 +33,11 @@ The next implementation milestone is real positions and time controls on top of 
 
 Focus areas:
 
-- integrate static offline-generated ephemeris assets behind the existing provider shape
-- add time controls without rewriting the current scene consumers again
-- replace circular mocked trails with sampled position history
+- integrate static offline-generated chunked ephemeris assets behind the existing provider shape
+- keep browser work focused on loading and interpolating prepared chunks instead of raw-kernel parsing unless later benchmarks prove that unnecessary
+- use kernel-derived body facts where they help the app, while keeping cinematic scale and focus tuning separate from physical metadata
+- start the simulation from the current datetime with real-time advancement, pause, reverse, and rate controls without rewriting the current scene consumers again
+- replace circular mocked trails with sampled position history derived from the same chunk data
 - keep the current overview readability and focus behavior intact while the data source changes
 - defer frame-switching and final trail UX until the later reference-frame milestone
 

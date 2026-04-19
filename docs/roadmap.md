@@ -69,11 +69,16 @@ Status: Planned
 
 Goals:
 
-- integrate JPL or SPICE-derived static data assets
-- add time controls
-- replace circular mock trails with sampled historical positions
-- support body-specific trail windows
-- evaluate smoothing only where it materially improves readability
+- add a deployment-time preprocessing step that turns JPL or SPICE ephemerides into small static chunked assets plus kernel-derived body metadata
+- benchmark a first `de441t` output spanning 1950 through 2050, then choose the final chunk duration empirically
+- prefer compressed JSON as the first browser format and move to a custom binary payload only if benchmarks justify it
+- keep the browser runtime focused on loading, caching, and interpolating prepared chunks rather than parsing raw kernel data by default
+- consume `SpiceNet` as a pinned external preprocessing dependency
+- download ephemeris files during CI or CD instead of versioning them in this repo
+- evolve the provider path to support async snapshot loading and visible loading states without rewriting the whole scene again
+- start from the current datetime with real-time advancement plus pause, reverse, and rate controls
+- replace circular mock trails with sampled position history and support body-specific default trail windows
+- benchmark chunk size, prefetch behavior, and startup latency so the overview stays smooth on mobile and desktop
 
 ## Milestone 6: Reference Frames And Trail UX
 

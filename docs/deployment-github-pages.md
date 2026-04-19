@@ -47,3 +47,9 @@ pnpm preview -- --host
 - Do not switch the repo to Jekyll or static HTML deployment. The repository already owns the workflow.
 - If the default branch changes from `master`, update the workflow trigger.
 - Large assets are bundled into the static build, so deployment size is driven mostly by textures and the main JavaScript bundle.
+
+## Planned Milestone 5 Changes
+
+- Milestone 5 is planned to download non-versioned ephemeris and supporting kernel files during CI or CD rather than storing them in git.
+- The default `pnpm build` flow should stay focused on the web app build and should not become the normal ephemeris-generation entry point.
+- Local ephemeris generation is planned to use a separate testing script plus a git-ignored kernel cache folder.
