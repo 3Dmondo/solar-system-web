@@ -15,6 +15,8 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - Current benchmark baseline is shared `25` year chunks with mixed per-body cadence rather than uniform sampling.
 - Current output baseline is a compact minified manifest plus flattened per-body state arrays in chunk files.
 - The manifest now explicitly describes sample layout and timestamp reconstruction so the browser runtime does not depend on implicit decoder rules.
+- The generator now accepts optional text metadata kernels and emits first-pass per-body radii, GM, pole, axial-tilt, and rotation metadata when direct `BODYnnn_*` assignments are available.
+- The current metadata workflow keeps the upstream NAIF text kernels out of git, downloads them into a local cache when refreshing, and versions only the parsed `body-metadata.json` snapshot.
 - Output should be directly consumable by the Milestone 5 web data layer.
 
 ## Tasks
@@ -24,6 +26,7 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - [x] Emit a manifest plus chunk files for the Sun, planets, and Moon in a compact JSON-array format suitable for HTTP compression.
 - [x] Include sampled velocities so the web app can use cubic Hermite interpolation.
 - [ ] Extract all useful kernel-derived body metadata that can be gathered reliably, with radii, axial tilt, and rotation period treated as first-priority outputs.
+  Current status: the generator can now merge straightforward text-kernel `BODYnnn_*` assignments, has been exercised against real `pck00011.tpc` and `gm_de440.tpc`, and emits a versioned metadata snapshot for the Sun, planets, and Moon.
 - [ ] Preserve additional metadata fields that may become useful in later educational milestones when extraction is low-risk.
 - [ ] Record source provenance such as kernel names, versions, coverage, and generation settings in the manifest output.
 - [ ] Keep output deterministic so the generated assets can be cached, diffed, and validated.
@@ -35,4 +38,5 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - `SpiceNet` can generate the first 1950 through 2050 benchmark dataset without manual hand-editing of inputs.
 - Output is stable enough for the web app to parse and benchmark repeatedly.
 - Kernel binaries are not required to be committed to either repository.
+- The official text metadata kernels are downloaded when refreshing and are not committed; the parsed metadata snapshot is committed so the web side can consume stable small JSON.
 - The generator can be run locally against a cached kernel folder and in CI against freshly downloaded kernels.
