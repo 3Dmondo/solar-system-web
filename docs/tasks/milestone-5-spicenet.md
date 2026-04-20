@@ -18,6 +18,7 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - The generator now accepts optional text metadata kernels and emits first-pass per-body radii, GM, pole, axial-tilt, and rotation metadata when direct `BODYnnn_*` assignments are available.
 - The current metadata workflow keeps the upstream NAIF text kernels out of git, downloads them into a local cache when refreshing, and versions only the parsed `body-metadata.json` snapshot.
 - The current scripted ephemeris refresh workflow uses cached official NAIF kernels and regenerates the mixed-cadence local baseline without versioning the upstream binaries or generated chunk set.
+- Current manifest provenance uses stable source-file metadata instead of absolute local paths, and reproducible timestamps can be driven through `SOURCE_DATE_EPOCH`.
 - Output should be directly consumable by the Milestone 5 web data layer.
 
 ## Tasks
@@ -31,7 +32,9 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
   Current status: the generator can now merge straightforward text-kernel `BODYnnn_*` assignments, has been exercised against real `pck00011.tpc` and `gm_de440.tpc`, and emits a versioned metadata snapshot for the Sun, planets, and Moon.
 - [ ] Preserve additional metadata fields that may become useful in later educational milestones when extraction is low-risk.
 - [ ] Record source provenance such as kernel names, versions, coverage, and generation settings in the manifest output.
+  Current status: the manifest now records source-file roles, names, byte lengths, and SHA-256 hashes instead of machine-specific paths, but may still benefit from additional explicit generator-version labeling later.
 - [ ] Keep output deterministic so the generated assets can be cached, diffed, and validated.
+  Current status: manifests and metadata snapshots now honor `SOURCE_DATE_EPOCH` for reproducible timestamps and avoid embedding local absolute kernel paths.
 - [x] Add validation that compares generated chunk samples back to `SpiceNet` live queries at representative timestamps.
 - [ ] Document the local cache workflow for downloaded kernels and the CI workflow for non-versioned kernel acquisition.
   Current status: `SpiceNet` now documents and scripts both the metadata refresh flow and the local ephemeris baseline refresh flow, with CI expected to run the same scripts in a fresh workspace.
