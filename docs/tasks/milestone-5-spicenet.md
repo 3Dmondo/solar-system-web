@@ -34,7 +34,7 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - [ ] Preserve additional metadata fields that may become useful in later educational milestones when extraction is low-risk.
   Current status: the emitted metadata now includes low-risk derived shape fields such as equatorial radius, polar radius, volume-equivalent radius, flattening, and simple spherical/tri-axial flags, plus approximate mass, bulk density, surface gravity, and escape velocity derived from GM and the reference radius.
 - [ ] Record source provenance such as kernel names, versions, coverage, and generation settings in the manifest output.
-  Current status: the manifest now records source-file roles, names, byte lengths, and SHA-256 hashes instead of machine-specific paths, and generated outputs now carry explicit tool/profile identity.
+  Current status: the manifest now records source-file roles, names, byte lengths, SHA-256 hashes, and optional canonical source URLs instead of machine-specific paths, and generated outputs now carry explicit tool/profile identity.
 - [ ] Keep output deterministic so the generated assets can be cached, diffed, and validated.
   Current status: manifests and metadata snapshots now honor `SOURCE_DATE_EPOCH` for reproducible timestamps and avoid embedding local absolute kernel paths.
 - [x] Add validation that compares generated chunk samples back to `SpiceNet` live queries at representative timestamps.
