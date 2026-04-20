@@ -30,7 +30,7 @@ Extend the pinned external `SpiceNet` repository so it can generate web-ready ep
 - [x] Emit a manifest plus chunk files for the Sun, planets, and Moon in a compact JSON-array format suitable for HTTP compression.
 - [x] Include sampled velocities so the web app can use cubic Hermite interpolation.
 - [ ] Extract all useful kernel-derived body metadata that can be gathered reliably, with radii, axial tilt, and rotation period treated as first-priority outputs.
-  Current status: the generator can now merge straightforward text-kernel `BODYnnn_*` assignments, has been exercised against real `pck00011.tpc` and `gm_de440.tpc`, emits a versioned metadata snapshot for the Sun, planets, and Moon, and now makes that snapshot self-describing with explicit units and reference conventions.
+  Current status: the generator can now merge straightforward text-kernel `BODYnnn_*` assignments, has been exercised against real `pck00011.tpc` and `gm_de440.tpc`, emits a versioned metadata snapshot for the Sun, planets, and Moon, and now makes that snapshot self-describing with explicit units, reference conventions, and an explicit body-set header.
 - [ ] Preserve additional metadata fields that may become useful in later educational milestones when extraction is low-risk.
   Current status: the emitted metadata now includes low-risk derived shape fields such as equatorial radius, polar radius, volume-equivalent radius, flattening, and simple spherical/tri-axial flags, plus approximate mass, bulk density, surface gravity, and escape velocity derived from GM and the reference radius.
 - [ ] Record source provenance such as kernel names, versions, coverage, and generation settings in the manifest output.
