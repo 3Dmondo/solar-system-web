@@ -1,4 +1,4 @@
-import { getResolvedBodyById } from '../data/bodyStateStore';
+import { getResolvedBodyCatalog, type ResolvedBodyCatalog } from '../data/bodyStateStore';
 import { type ViewTargetId } from './body';
 
 export type FocusTransitionProfile = {
@@ -7,12 +7,15 @@ export type FocusTransitionProfile = {
   settleDistanceSquared: number;
 };
 
-export function getFocusDistance(bodyId: ViewTargetId): number {
+export function getFocusDistance(
+  bodyId: ViewTargetId,
+  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+): number {
   if (bodyId === 'overview') {
     return Math.hypot(0, 14, 46);
   }
 
-  const body = getResolvedBodyById(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
 
   if (!body) {
     return Math.hypot(0, 2.2, 7.5);
@@ -21,12 +24,15 @@ export function getFocusDistance(bodyId: ViewTargetId): number {
   return Math.hypot(...body.focusOffset);
 }
 
-export function getFocusTarget(bodyId: ViewTargetId): [number, number, number] {
+export function getFocusTarget(
+  bodyId: ViewTargetId,
+  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+): [number, number, number] {
   if (bodyId === 'overview') {
     return [0, 0, 0];
   }
 
-  const body = getResolvedBodyById(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
 
   if (!body) {
     return [0, 0, 0];
@@ -35,12 +41,15 @@ export function getFocusTarget(bodyId: ViewTargetId): [number, number, number] {
   return body.position;
 }
 
-export function getFocusCameraPosition(bodyId: ViewTargetId): [number, number, number] {
+export function getFocusCameraPosition(
+  bodyId: ViewTargetId,
+  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+): [number, number, number] {
   if (bodyId === 'overview') {
     return [0, 14, 46];
   }
 
-  const body = getResolvedBodyById(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
 
   if (!body) {
     return [0, 2.2, 7.5];
@@ -55,25 +64,26 @@ export function getFocusCameraPosition(bodyId: ViewTargetId): [number, number, n
 
 export function getFocusCameraPositionForViewDirection(
   bodyId: ViewTargetId,
-  viewDirection: [number, number, number]
+  viewDirection: [number, number, number],
+  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
 ): [number, number, number] {
   if (bodyId === 'overview') {
-    return getFocusCameraPosition('overview');
+    return getFocusCameraPosition('overview', catalog);
   }
 
-  const body = getResolvedBodyById(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
 
   if (!body) {
-    return getFocusCameraPosition(bodyId);
+    return getFocusCameraPosition(bodyId, catalog);
   }
 
   const directionLength = Math.hypot(...viewDirection);
 
   if (directionLength === 0) {
-    return getFocusCameraPosition(bodyId);
+    return getFocusCameraPosition(bodyId, catalog);
   }
 
-  const focusDistance = getFocusDistance(bodyId);
+  const focusDistance = getFocusDistance(bodyId, catalog);
   const normalizedDirection = viewDirection.map((value) => value / directionLength) as [
     number,
     number,

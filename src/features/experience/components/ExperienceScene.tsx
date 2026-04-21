@@ -5,8 +5,8 @@ import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
 import { OrbitalTrails } from '../../solar-system/components/OrbitalTrails';
 import { getControlProfile } from '../domain/controlProfile';
-import { MOCK_SUN_POSITION } from '../../solar-system/data/mockBodyCatalog';
-import { getResolvedBodies } from '../../solar-system/data/bodyStateStore';
+import { translateFocusView } from '../domain/focusTracking';
+import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import {
   getFocusCameraPosition,
@@ -17,6 +17,7 @@ import {
 import { StarBackground } from './StarBackground';
 
 type ExperienceSceneProps = {
+  catalog: ResolvedBodyCatalog;
   focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
   onFocusBody: (bodyId: BodyId) => void;
@@ -30,20 +31,22 @@ type ControlsHandle = {
 };
 
 export function ExperienceScene({
+  catalog,
   focusedBodyId,
   isCoarsePointer,
   onFocusBody
 }: ExperienceSceneProps) {
   const controlProfile = getControlProfile(isCoarsePointer);
-  const bodies = getResolvedBodies();
+  const bodies = catalog.bodies;
+  const sunPosition = bodies.find((body) => body.id === 'sun')?.position ?? [0, 0, 0];
 
   return (
-    <Canvas camera={{ position: getFocusCameraPosition('overview'), fov: 40 }} shadows>
+    <Canvas camera={{ position: getFocusCameraPosition('overview', catalog), fov: 40 }} shadows>
       <color attach="background" args={['#000000']} />
       <StarBackground />
       <ambientLight intensity={0.1} />
-      <pointLight decay={0} distance={0} intensity={4.8} position={MOCK_SUN_POSITION} />
-      <FocusCameraRig controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
+      <pointLight decay={0} distance={0} intensity={4.8} position={sunPosition} />
+      <FocusCameraRig catalog={catalog} controlProfile={controlProfile} focusedBodyId={focusedBodyId} />
       <OrbitalTrails bodies={bodies} />
 
       {bodies.map((body) => (
@@ -59,16 +62,21 @@ export function ExperienceScene({
 }
 
 function FocusCameraRig({
+  catalog,
   controlProfile,
   focusedBodyId
 }: {
+  catalog: ResolvedBodyCatalog;
   controlProfile: ReturnType<typeof getControlProfile>;
   focusedBodyId: ViewTargetId;
 }) {
   const { camera } = useThree();
   const controlsRef = useRef<ControlsHandle | null>(null);
-  const desiredTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId)));
-  const desiredCameraPosition = useRef(new Vector3(...getFocusCameraPosition(focusedBodyId)));
+  const desiredTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId, catalog)));
+  const desiredCameraPosition = useRef(
+    new Vector3(...getFocusCameraPosition(focusedBodyId, catalog))
+  );
+  const trackedFocusTarget = useRef(new Vector3(...getFocusTarget(focusedBodyId, catalog)));
   const previousFocusedBodyId = useRef<ViewTargetId>(focusedBodyId);
   const transitionProfileRef = useRef(
     getFocusTransitionProfile(focusedBodyId, focusedBodyId)
@@ -76,26 +84,65 @@ function FocusCameraRig({
   const isTransitioning = useRef(false);
 
   useEffect(() => {
-    const currentTarget = controlsRef.current?.target ?? new Vector3(...getFocusTarget(previousFocusedBodyId.current));
+    if (previousFocusedBodyId.current === focusedBodyId) {
+      return;
+    }
+
+    const nextFocusTarget = new Vector3(...getFocusTarget(focusedBodyId, catalog));
+    const currentTarget = controlsRef.current?.target ?? trackedFocusTarget.current;
     const currentViewOffset = camera.position.clone().sub(currentTarget);
 
     transitionProfileRef.current = getFocusTransitionProfile(
       previousFocusedBodyId.current,
       focusedBodyId
     );
-    desiredTarget.current.set(...getFocusTarget(focusedBodyId));
+    desiredTarget.current.copy(nextFocusTarget);
     desiredCameraPosition.current.set(
       ...(focusedBodyId === 'overview'
-        ? getFocusCameraPosition(focusedBodyId)
+        ? getFocusCameraPosition(focusedBodyId, catalog)
         : getFocusCameraPositionForViewDirection(focusedBodyId, [
             currentViewOffset.x,
             currentViewOffset.y,
             currentViewOffset.z
-          ]))
+          ], catalog))
     );
+    trackedFocusTarget.current.copy(nextFocusTarget);
     previousFocusedBodyId.current = focusedBodyId;
     isTransitioning.current = true;
-  }, [camera.position, focusedBodyId]);
+  }, [camera, catalog, focusedBodyId]);
+
+  useEffect(() => {
+    const nextFocusTarget = new Vector3(...getFocusTarget(focusedBodyId, catalog));
+    const focusDelta = nextFocusTarget.clone().sub(trackedFocusTarget.current);
+
+    if (focusedBodyId === 'overview' || focusDelta.lengthSq() === 0) {
+      trackedFocusTarget.current.copy(nextFocusTarget);
+      return;
+    }
+
+    const focusView = translateFocusView(
+      {
+        cameraPosition: [camera.position.x, camera.position.y, camera.position.z],
+        target: [
+          controlsRef.current?.target.x ?? trackedFocusTarget.current.x,
+          controlsRef.current?.target.y ?? trackedFocusTarget.current.y,
+          controlsRef.current?.target.z ?? trackedFocusTarget.current.z
+        ]
+      },
+      [focusDelta.x, focusDelta.y, focusDelta.z]
+    );
+
+    if (isTransitioning.current) {
+      desiredTarget.current.set(...focusView.target);
+      desiredCameraPosition.current.set(...focusView.cameraPosition);
+    } else {
+      camera.position.set(...focusView.cameraPosition);
+      controlsRef.current?.target.set(...focusView.target);
+      controlsRef.current?.update();
+    }
+
+    trackedFocusTarget.current.copy(nextFocusTarget);
+  }, [camera, catalog, focusedBodyId]);
 
   useEffect(() => {
     const controls = controlsRef.current;

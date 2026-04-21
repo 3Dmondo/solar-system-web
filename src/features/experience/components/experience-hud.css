@@ -61,6 +61,27 @@
   font-size: 0.85rem;
 }
 
+.experience-hud__clock {
+  display: grid;
+  gap: 0.1rem;
+  margin-top: 0.2rem;
+  color: var(--text);
+  font-size: 0.76rem;
+}
+
+.experience-hud__clock-label {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.experience-hud__status {
+  color: rgba(255, 214, 153, 0.9);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
 .experience-hud__action-row {
   margin-top: 0.45rem;
 }

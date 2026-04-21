@@ -21,10 +21,10 @@
 
 ## Current Runtime Shape
 
-- `App` renders `SolarSystemExperience`.
-- `SolarSystemExperience` owns the focused target state and coarse-pointer detection.
-- `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list.
-- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the help overlay, and a focused-mode return to the overview.
+- `App` renders `SolarSystemExperience` and can opt into the external web-data catalog source through `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER`.
+- `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
+- `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list from the current resolved catalog.
+- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the current simulation time, the help overlay, focused-mode overview recovery, and runtime loading or fallback messages.
 - The app starts in the `overview` target, with the camera at `[0, 14, 46]`.
 
 ## Interaction Model
@@ -40,12 +40,16 @@
 
 - `mockBodyStateProvider` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current synchronous source for mocked snapshot state.
 - Static body metadata and mocked snapshot positions are now separated in the mock data layer and merged only at scene-consumption boundaries.
-- `bodyStateStore.ts` is the current selector layer that resolves provider output into merged body definitions for scene, HUD, and focus helpers.
+- `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by both mocked and async sources.
+- `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that can keep a mocked fallback catalog visible while an async source loads or fails.
+- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime and advances the requested UTC time in real time.
+- `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, and uniform physical scaling into the shared resolved-catalog shape, including focus offsets that scale with the physically derived radii.
+- `webBodyCatalogRuntime.ts` turns the external web-data source on only when the runtime env provides both the data base URL and the physical scale factor.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
-- The provider boundary is synchronous for now and still serves the existing mocked overview layout.
+- The default runtime still falls back to the existing mocked overview layout until the external web-data source is explicitly configured.
 
 ## Rendering Model
 

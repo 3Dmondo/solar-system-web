@@ -6,6 +6,7 @@
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, preserved-angle focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including the synchronous mocked `BodyStateProvider`, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
+- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, and scene or HUD or focus wiring that now runs through a catalog runtime with loading and fallback support for the accepted external `SpiceNet` solar-system-barycenter web-data output while the app still defaults to the mocked source.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -65,12 +66,12 @@ Delivered:
 
 ## Milestone 5: Real Positions And Time
 
-Status: Planned
+Status: In Progress
 
 Goals:
 
 - add a deployment-time preprocessing step that turns JPL or SPICE ephemerides into small static chunked assets plus kernel-derived body metadata
-- benchmark a first `de441t` output spanning 1950 through 2050, then choose the final chunk duration empirically
+- integrate the accepted external `SpiceNet` `de440s` benchmark baseline and choose the final chunk duration empirically from measured browser results
 - prefer compressed JSON as the first browser format and move to a custom binary payload only if benchmarks justify it
 - keep the browser runtime focused on loading, caching, and interpolating prepared chunks rather than parsing raw kernel data by default
 - consume `SpiceNet` as a pinned external preprocessing dependency
@@ -79,6 +80,20 @@ Goals:
 - start from the current datetime with real-time advancement plus pause, reverse, and rate controls
 - replace circular mock trails with sampled position history and support body-specific default trail windows
 - benchmark chunk size, prefetch behavior, and startup latency so the overview stays smooth on mobile and desktop
+
+Current focus:
+
+- validate and normalize the accepted `SpiceNet` web-data schema in the browser data layer before swapping the live provider
+- load and cache the accepted manifest plus kernel-derived body metadata separately from the app's cinematic metadata before wiring real snapshots into the scene
+- match the accepted SpiceNet approximate UTC anchor, shared chunk-boundary rules, and Hermite interpolation math in browser-side runtime helpers before the async provider swap
+- keep raw kilometer ephemeris snapshots in a dedicated async provider layer so the later scene-scale mapping can stay explicit
+- map raw barycentric ephemeris snapshots and kernel-derived mean radii into a physically scaled scene model through one global km-to-scene factor, with focus framing scaled proportionally instead of left at mocked distances
+- compose the async provider and the physical-scale adapter into the same resolved catalog shape the scene already consumes before rewriting scene and HUD wiring
+- route scene, HUD, and focus helpers through a runtime catalog hook that can surface loading and fallback states before the web-data source is turned on by default
+- keep the real web-data source behind explicit runtime configuration until hosted assets and the first physical scale factor are ready for inspection
+- start the simulation clock from the current UTC time and surface that requested time in the HUD before adding pause, reverse, or rate controls
+- defer any optional cinematic non-linear size scaling and moon or satellite spacing offsets to a later dedicated milestone
+- keep the current mocked overview experience stable until async loading, physical scaling, and camera or focus UX are ready together
 
 ## Milestone 6: Reference Frames And Trail UX
 
@@ -91,7 +106,18 @@ Goals:
 - render satellite trails correctly across frame changes
 - design controls for frame, trail window, and trail style
 
-## Milestone 7: Sky Catalog And Rendering Controls
+## Milestone 7: Cinematic View Mode
+
+Status: Planned
+
+Goals:
+
+- add an optional cinematic scale mode alongside the physically scaled view
+- enlarge planet and moon radii non-linearly while keeping the real-scale mode available
+- introduce extra separation offsets only for moons and other satellites so local systems stay readable without moving unrelated bodies
+- label the cinematic mode clearly so it is understood as a non-physical presentation
+
+## Milestone 8: Sky Catalog And Rendering Controls
 
 Status: Planned
 
@@ -103,7 +129,7 @@ Goals:
 - add a rendering-configuration UI that stays minimized by default and uses as little screen space as possible
 - design the controls so they remain clear and low-friction on both mobile and desktop
 
-## Milestone 8: Rendering And Performance Refinement
+## Milestone 9: Rendering And Performance Refinement
 
 Status: Planned
 
@@ -114,7 +140,7 @@ Goals:
 - add quality or performance presets only if needed
 - revisit bundle size and mobile fallbacks as the scene grows
 
-## Milestone 9: Full Solar System Explorer
+## Milestone 10: Full Solar System Explorer
 
 Status: Backlog
 

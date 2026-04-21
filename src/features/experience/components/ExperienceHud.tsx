@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import {
-  getResolvedBodies,
-  getResolvedBodyMetadataById
+  type ResolvedBodyCatalog
 } from '../../solar-system/data/bodyStateStore';
+import { type ResolvedBodyCatalogStatus } from '../state/useResolvedBodyCatalog';
 import './experience-hud.css';
 
 const jumpToGroups: Array<{ label: string; bodyIds: BodyId[] }> = [
@@ -22,19 +22,27 @@ const jumpToGroups: Array<{ label: string; bodyIds: BodyId[] }> = [
 ];
 
 type ExperienceHudProps = {
+  catalog: ResolvedBodyCatalog;
+  catalogError: Error | null;
+  catalogStatus: ResolvedBodyCatalogStatus;
   focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
+  requestedUtc: string;
   onFocusBody: (bodyId: BodyId) => void;
   onReturnToOverview: () => void;
 };
 
 export function ExperienceHud({
+  catalog,
+  catalogError,
+  catalogStatus,
   focusedBodyId,
   isCoarsePointer,
+  requestedUtc,
   onFocusBody,
   onReturnToOverview
 }: ExperienceHudProps) {
-  const snapshotBodies = getResolvedBodies();
+  const snapshotBodies = catalog.bodies;
   const body = focusedBodyId === 'overview'
     ? null
     : snapshotBodies.find((targetBody) => targetBody.id === focusedBodyId);
@@ -43,6 +51,12 @@ export function ExperienceHud({
   const jumpButtonRef = useRef<HTMLButtonElement | null>(null);
   const jumpPanelRef = useRef<HTMLDivElement | null>(null);
   const showingOverview = focusedBodyId === 'overview';
+  const statusMessage =
+    catalogStatus === 'loading'
+      ? 'Loading real positions for the requested time.'
+      : catalogStatus === 'error'
+        ? `Real ephemeris data is unavailable right now. Showing the fallback snapshot. ${catalogError?.message ?? ''}`.trim()
+        : null;
 
   useEffect(() => {
     if (showingOverview) {
@@ -127,6 +141,15 @@ export function ExperienceHud({
           ? 'Use Jump to or double tap or double click a body to focus it from the overview'
           : 'Use Overview to recover the wider system, or double tap or double click another body to refocus'}
       </div>
+      <div className="experience-hud__clock">
+        <span className="experience-hud__clock-label">Simulation time</span>
+        <time dateTime={requestedUtc}>{formatUtcTimestamp(requestedUtc)}</time>
+      </div>
+      {statusMessage ? (
+        <div className="experience-hud__status" aria-live="polite">
+          {statusMessage}
+        </div>
+      ) : null}
       {showingOverview ? (
         <div className="experience-hud__action-row">
           <button
@@ -178,7 +201,7 @@ export function ExperienceHud({
               <div className="experience-hud__jump-group-label">{group.label}</div>
               <div className="experience-hud__jump-grid">
                 {group.bodyIds.map((bodyId) => {
-                  const targetBody = getResolvedBodyMetadataById(bodyId);
+                  const targetBody = catalog.metadata.find((body) => body.id === bodyId);
 
                   if (!targetBody) {
                     return null;
@@ -210,4 +233,21 @@ export function ExperienceHud({
       ) : null}
     </div>
   );
+}
+
+function formatUtcTimestamp(utc: string) {
+  const utcDate = new Date(utc);
+
+  if (Number.isNaN(utcDate.getTime())) {
+    return 'Invalid UTC time';
+  }
+
+  const year = utcDate.getUTCFullYear();
+  const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(utcDate.getUTCDate()).padStart(2, '0');
+  const hours = String(utcDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} UTC`;
 }

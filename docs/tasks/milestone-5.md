@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+In Progress
 
 ## Goal
 
@@ -14,28 +14,37 @@ Replace mocked positions with real ephemeris-driven motion while keeping the sta
 - Use `SpiceNet` as the offline SPK reader, evaluator, and asset generator.
 - Consume `SpiceNet` as a pinned external repository rather than vendoring it into this repo.
 - Emit browser-friendly chunked assets plus a manifest rather than shipping raw `.bsp` parsing logic to the browser.
-- Start the benchmark phase with `de441t` coverage from 1950 through 2050, then choose the final production chunk duration from measured download and parse results.
+- The accepted external benchmark baseline is the current `SpiceNet` `de440s` solar-system-barycenter dataset covering 1950 through 2050 with mixed per-body cadence and `25` year chunks.
 - Prefer compact JSON arrays that benefit from normal HTTP compression before introducing a custom binary format.
 - Keep browser work limited to chunk selection, fetching, caching, interpolation, and scene updates.
-- Keep Milestone 5 sun-centered and defer frame switching to Milestone 6.
+- Use the accepted solar-system barycenter output as the default physical frame for the first live integration and defer selectable frame switching to Milestone 6.
+- Keep Milestone 5 physically scaled with one global km-to-scene factor shared by real positions and real radii.
 - Keep physical metadata from kernels separate from the app's cinematic presentation metadata.
 - Do not hook ephemeris generation into `pnpm build`; provide separate local testing and CI generation workflows instead.
+- The external preprocessing spike is tracked separately in `docs/tasks/milestone-5-spicenet.md`; this repo now starts with browser-side schema parsing, loading, interpolation, and UX work.
+- Kernel-derived physical metadata should be loaded and stored separately from the current cinematic body metadata so later UI work can reuse it without disturbing the render-scale presentation model.
+- Browser-side time conversion and interpolation helpers should match the accepted `SpiceNet` approximate J2000 UTC anchor, shared chunk-boundary rules, and cubic Hermite math so snapshot loading can trust the same contract end to end.
+- Raw ephemeris snapshots should stay in kilometer space inside the async provider layer until a later physical-scale mapping step turns them into scene units with one explicit global factor.
+- The kilometer-to-scene translation should live in its own uniform-scale adapter so Milestone 5 keeps physical proportions explicit instead of hiding scale decisions inside the provider or renderer.
+- Defer any cinematic or logarithmic size scaling and any moon or satellite spacing offsets to a later dedicated cinematic-view milestone.
 
 ## Preferred Asset Shape
 
 - One manifest should describe the kernel set, supported bodies, reference frame, coverage range, chunk duration, trail defaults, physical metadata, presentation metadata, and asset hashes.
 - One chunk should contain all currently rendered bodies for a fixed interval so the overview can update from a single request instead of many per-body fetches.
-- Use the first `de441t` benchmark output covering 1950 through 2050 to decide whether the final chunk duration should stay that large or be reduced.
+- Use the accepted `de440s` benchmark output covering 1950 through 2050 to decide whether the final chunk duration should stay that large or be reduced.
 - Within a chunk, each body should be allowed to use its own sample cadence because the Moon and inner planets need denser sampling than the outer planets.
 - Store sampled positions plus sampled velocities so the browser can use cubic Hermite interpolation instead of linear interpolation.
 - Start with compact JSON array payloads that are easy to inspect and iterate on, and only introduce a custom binary format if benchmarked chunk size or parse time forces that move.
 - Each chunk should include enough overlap or padding to support smooth interpolation and adjacent-chunk prefetching.
 - Include a generated physical-metadata section derived from the SPICE kernel set where available, prioritizing radii, axial tilt, and rotation period, while also carrying forward additional fields that may become useful in later educational milestones.
 - Do not require the browser to evaluate raw SPK Chebyshev records in the first pass.
+- The current accepted benchmark payload uses flattened per-body `xyz_vxvyvz` arrays plus approximate TDB seconds from J2000, so the web data layer should validate that layout explicitly instead of depending on implicit decoder assumptions.
+- The current accepted benchmark payload is solar-system-barycenter output with `CenterBodyId = 0`, so the first live mapping should preserve that physical frame rather than immediately re-centering bodies into a cinematic layout.
 
 ## Initial Benchmark Baseline
 
-- use `de441t` as the initial planetary ephemeris source
+- use the accepted `de440s` external benchmark output as the initial browser integration baseline
 - benchmark a first generated output spanning 1950 through 2050
 - include the kernel companions needed for leap seconds and body metadata extraction
 - measure compressed transfer size, browser parse cost, interpolation quality, and chunk-boundary behavior
@@ -50,10 +59,10 @@ Replace mocked positions with real ephemeris-driven motion while keeping the sta
 
 ## Planned Steps
 
-### 1. Decision and benchmark spike
+### 1. Accepted external benchmark baseline
 
-- lock the first benchmark around `de441t` plus the supporting kernel files needed for leap seconds and metadata extraction
-- generate and inspect a first benchmark output spanning 1950 through 2050
+- lock the first browser integration pass around the accepted `de440s` benchmark baseline plus the supporting kernel files needed for metadata extraction
+- generate and inspect the accepted 1950 through 2050 benchmark output before wiring it into the runtime
 - benchmark compact JSON chunks against at least one denser or lower-level alternative before inventing a custom binary format
 - benchmark at least two interpolation shapes: sampled positions only versus sampled positions plus velocity-backed Hermite interpolation
 - ship all kernel-derived metadata that can be extracted cleanly, with radii, axial tilt, and rotation period treated as the highest-priority fields for the app
@@ -78,10 +87,18 @@ Replace mocked positions with real ephemeris-driven motion while keeping the sta
 
 - evolve the current synchronous provider boundary into a cached async snapshot source without rewriting scene consumers more than necessary
 - keep static body metadata synchronous
+- load the accepted manifest and kernel-derived body metadata through a cached browser-side dataset loader before live snapshot wiring begins
+- add pure runtime helpers for chunk-range selection, approximate UTC-to-TDB conversion, and velocity-backed Hermite interpolation before attaching them to the async provider
+- keep the first async provider focused on loading and caching raw ephemeris snapshots plus adjacent chunk prefetch, with physical scaling deferred to the later integration step
+- add a uniform-scale mapping layer that turns raw barycentric ephemeris snapshots plus kernel-derived mean radii into physically scaled scene state, including proportionate focus framing, before swapping scene consumers to the async path
+- compose the async provider and the physical-scale adapter into the same resolved catalog shape the mocked scene already consumes before replacing scene and HUD wiring
+- route scene, HUD, and focus consumers through a runtime catalog hook that can expose loading and fallback states while the app still defaults to the mocked source
+- keep real web-data activation behind explicit runtime configuration until hosted assets and the first physical scale factor are ready for inspection
 - add chunk selection, prefetch, cache eviction, loading, and error states
 
 ### 5. Time and trail UX
 
+- start the simulation clock at the current real-world datetime and advance it in real time before adding pause or rate controls
 - start the simulation at the current real-world datetime
 - advance the simulation in real time by default
 - support pause, resume, rate changes, and backward playback in the first release
@@ -110,6 +127,7 @@ Replace mocked positions with real ephemeris-driven motion while keeping the sta
 
 ## Open Questions
 
-- What final production chunk duration falls out of the `de441t` 1950 through 2050 benchmark once Moon and inner-planet cadence are factored in?
+- What final production chunk duration falls out of the accepted `de440s` 1950 through 2050 benchmark once Moon and inner-planet cadence are factored in?
+- What global km-to-scene scale factor keeps the physically scaled first pass inspectable without quietly reintroducing a cinematic distortion?
 - Which additional kernel-derived fields are realistically available from the chosen kernel set without introducing brittle parsing work?
 - What local cache path and cleanup policy should the repo standardize for downloaded kernels during development?
