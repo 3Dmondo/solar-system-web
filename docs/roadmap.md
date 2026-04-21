@@ -6,7 +6,7 @@
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, preserved-angle focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including the synchronous mocked `BodyStateProvider`, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
-- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, and scene or HUD or focus wiring that now runs through a catalog runtime with loading and fallback support for the accepted external `SpiceNet` solar-system-barycenter web-data output while the app still defaults to the mocked source.
+- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, a committed `public/ephemeris/body-metadata.json` snapshot, and scene or HUD or focus wiring that now runs through a catalog runtime with loading and fallback support for the accepted external `SpiceNet` solar-system-barycenter web-data output while the app still defaults to the mocked source.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -84,7 +84,7 @@ Goals:
 Current focus:
 
 - validate and normalize the accepted `SpiceNet` web-data schema in the browser data layer before swapping the live provider
-- load and cache the accepted manifest plus kernel-derived body metadata separately from the app's cinematic metadata before wiring real snapshots into the scene
+- keep the committed body metadata snapshot separate from generated manifest and chunk assets while the runtime consumes it alongside cached manifest data and the app's cinematic metadata
 - match the accepted SpiceNet approximate UTC anchor, shared chunk-boundary rules, and Hermite interpolation math in browser-side runtime helpers before the async provider swap
 - keep raw kilometer ephemeris snapshots in a dedicated async provider layer so the later scene-scale mapping can stay explicit
 - map raw barycentric ephemeris snapshots and kernel-derived mean radii into a physically scaled scene model through one global km-to-scene factor, with focus framing scaled proportionally instead of left at mocked distances

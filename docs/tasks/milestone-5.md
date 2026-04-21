@@ -13,7 +13,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Browser-side Milestone 5 runtime foundations are already implemented in this repo: schema parsing, dataset loading, chunk selection, Hermite interpolation, async provider loading, physical scaling, simulation clock wiring, and HUD loading or error messaging.
 - Current code still keeps the mocked catalog as a startup and failure fallback. That no longer matches the agreed Milestone 5 direction and needs to be removed.
 - External preprocessing work is completed separately in `docs/tasks/milestone-5-spicenet.md`.
-- The repo does not yet version `body-metadata.json` as the accepted app input, and it does not yet generate non-versioned ephemeris assets during CI or CD or local development.
+- The repo now versions the accepted kernel-derived metadata snapshot at `public/ephemeris/body-metadata.json`, but it does not yet generate non-versioned ephemeris assets during CI or CD or local development.
 
 ## Agreed Milestone Direction
 
@@ -52,13 +52,13 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [ ] Remove the mocked startup and failure fallback from the runtime path.
 - [ ] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
 - [ ] Keep loading and failure UI explicit while the real dataset is being resolved.
-- [ ] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
+- [x] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
 - [ ] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
 - [ ] Generate ephemeris manifest and chunk files during CI or CD with the pinned `SpiceNet` workflow before deployment.
 - [ ] Publish generated ephemeris assets with the deployed site without committing them to git.
 - [ ] Define a git-ignored local output directory for generated ephemeris assets during development.
 - [ ] Add a local helper script that generates ephemeris assets when the local output directory is missing.
-- [ ] Wire the runtime to consume versioned body metadata together with generated ephemeris manifest and chunk assets.
+- [x] Wire the runtime to consume versioned body metadata together with generated ephemeris manifest and chunk assets.
 
 ### UX And Verification Still To Do
 
@@ -74,7 +74,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 1. Versioned Versus Generated Assets
 
-- Commit `body-metadata.json` as a stable app input generated from the accepted `SpiceNet` metadata flow.
+- Keep the committed `public/ephemeris/body-metadata.json` snapshot aligned with the accepted `SpiceNet` metadata flow.
 - Treat ephemeris manifest and chunk files as generated deployment and development artifacts rather than versioned source files.
 - Keep the Milestone 5 web-data contract aligned with `docs/tasks/milestone-5-spicenet.md`.
 
@@ -117,7 +117,6 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ## Open Questions
 
-- What repo path should hold the versioned `body-metadata.json` snapshot?
 - What local ignored directory and env or base-URL convention should the app use for generated ephemeris assets during development?
 - Should the local helper script only generate data when missing, or also support an explicit refresh mode?
 - What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?

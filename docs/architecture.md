@@ -13,6 +13,7 @@
 ## Source Map
 
 - App entry: `src/main.tsx`, `src/App.tsx`
+- Versioned kernel-derived metadata snapshot: `public/ephemeris/body-metadata.json`
 - Experience shell and HUD: `src/features/experience`
 - Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
 - Static textures: `assets/textures`
@@ -22,6 +23,7 @@
 ## Current Runtime Shape
 
 - `App` renders `SolarSystemExperience` and can opt into the external web-data catalog source through `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER`.
+- When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list from the current resolved catalog.
 - `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or fallback messages.
@@ -44,7 +46,7 @@
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that can keep a mocked fallback catalog visible while an async source loads or fails.
 - `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, and supports pause or resume.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, and uniform physical scaling into the shared resolved-catalog shape, including focus offsets that scale with the physically derived radii.
-- `webBodyCatalogRuntime.ts` turns the external web-data source on only when the runtime env provides both the data base URL and the physical scale factor.
+- `webBodyCatalogRuntime.ts` turns the external web-data source on only when the runtime env provides both the data base URL and the physical scale factor, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
 - Without those two env values, the app keeps using the mocked catalog for positions and radii even though the real-data runtime path is implemented.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
