@@ -27,9 +27,11 @@ type ExperienceHudProps = {
   catalogStatus: ResolvedBodyCatalogStatus;
   focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
+  isSimulationPaused: boolean;
   requestedUtc: string;
   onFocusBody: (bodyId: BodyId) => void;
   onReturnToOverview: () => void;
+  onToggleSimulationPaused: () => void;
 };
 
 export function ExperienceHud({
@@ -38,9 +40,11 @@ export function ExperienceHud({
   catalogStatus,
   focusedBodyId,
   isCoarsePointer,
+  isSimulationPaused,
   requestedUtc,
   onFocusBody,
-  onReturnToOverview
+  onReturnToOverview,
+  onToggleSimulationPaused
 }: ExperienceHudProps) {
   const snapshotBodies = catalog.bodies;
   const body = focusedBodyId === 'overview'
@@ -138,20 +142,31 @@ export function ExperienceHud({
       <div className="experience-hud__title">{body?.displayName ?? 'Solar System'}</div>
       <div className="experience-hud__subtitle">
         {showingOverview
-          ? 'Use Jump to or double tap or double click a body to focus it from the overview'
-          : 'Use Overview to recover the wider system, or double tap or double click another body to refocus'}
+          ? 'Interactive solar system overview'
+          : 'Focused body view'}
       </div>
       <div className="experience-hud__clock">
         <span className="experience-hud__clock-label">Simulation time</span>
         <time dateTime={requestedUtc}>{formatUtcTimestamp(requestedUtc)}</time>
+        <span className="experience-hud__clock-state">
+          {isSimulationPaused ? 'Paused' : 'Running in real time'}
+        </span>
       </div>
       {statusMessage ? (
         <div className="experience-hud__status" aria-live="polite">
           {statusMessage}
         </div>
       ) : null}
-      {showingOverview ? (
-        <div className="experience-hud__action-row">
+      <div className="experience-hud__action-row">
+        <button
+          aria-label={isSimulationPaused ? 'Resume simulation' : 'Pause simulation'}
+          className="experience-hud__control-button"
+          type="button"
+          onClick={onToggleSimulationPaused}
+        >
+          {isSimulationPaused ? 'Resume' : 'Pause'}
+        </button>
+        {showingOverview ? (
           <button
             ref={jumpButtonRef}
             aria-expanded={jumpMenuVisible}
@@ -166,8 +181,8 @@ export function ExperienceHud({
           >
             Jump to
           </button>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
       {showingOverview && jumpMenuVisible ? (
         <div
           ref={jumpPanelRef}

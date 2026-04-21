@@ -19,9 +19,11 @@ describe('ExperienceHud', () => {
         catalogStatus="ready"
         focusedBodyId={focusedBodyId}
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={vi.fn()}
         onReturnToOverview={vi.fn()}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
@@ -37,14 +39,16 @@ describe('ExperienceHud', () => {
         catalogStatus="ready"
         focusedBodyId="saturn"
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={onFocusBody}
         onReturnToOverview={onReturnToOverview}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
     expect(screen.getByText('Saturn')).toBeInTheDocument();
-    expect(screen.getByText(/use overview to recover the wider system/i)).toBeInTheDocument();
+    expect(screen.getByText(/focused body view/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Return to solar system overview' }));
 
@@ -63,9 +67,11 @@ describe('ExperienceHud', () => {
         catalogStatus="ready"
         focusedBodyId="overview"
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={onFocusBody}
         onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
@@ -99,13 +105,20 @@ describe('ExperienceHud', () => {
         catalogStatus="ready"
         focusedBodyId="overview"
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:34:56Z"
         onFocusBody={() => undefined}
         onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
     const helpButton = screen.getAllByRole('button', { name: 'Show interaction help' })[0]!;
+
+    expect(screen.getByText(/interactive solar system overview/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus/i)
+    ).not.toBeInTheDocument();
 
     await user.click(helpButton);
 
@@ -113,6 +126,7 @@ describe('ExperienceHud', () => {
     expect(screen.getByText(/Mobile: drag to orbit, pinch to zoom, double tap a body, or use Jump to focus/i)).toBeInTheDocument();
     expect(screen.getByText(/Use Overview while focused/i)).toBeInTheDocument();
     expect(screen.getByText('2000-01-01 12:34:56 UTC')).toBeInTheDocument();
+    expect(screen.getByText(/running in real time/i)).toBeInTheDocument();
   });
 
   it('shows a fallback status message when real ephemeris loading fails', () => {
@@ -123,9 +137,11 @@ describe('ExperienceHud', () => {
         catalogStatus="error"
         focusedBodyId="overview"
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
         onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
@@ -141,13 +157,41 @@ describe('ExperienceHud', () => {
         catalogStatus="loading"
         focusedBodyId="overview"
         isCoarsePointer={false}
+        isSimulationPaused={false}
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
         onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
       />
     );
 
     expect(screen.getByText(/loading real positions for the requested time/i)).toBeInTheDocument();
     expect(screen.queryByText(/showing the fallback snapshot/i)).not.toBeInTheDocument();
+  });
+
+  it('toggles the pause or resume simulation control', async () => {
+    const user = userEvent.setup();
+    const onToggleSimulationPaused = vi.fn();
+
+    render(
+      <ExperienceHud
+        catalog={catalog}
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="overview"
+        isCoarsePointer={false}
+        isSimulationPaused
+        requestedUtc="2000-01-01T12:00:00Z"
+        onFocusBody={() => undefined}
+        onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={onToggleSimulationPaused}
+      />
+    );
+
+    expect(screen.getByText(/paused/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Resume simulation' }));
+
+    expect(onToggleSimulationPaused).toHaveBeenCalledTimes(1);
   });
 });

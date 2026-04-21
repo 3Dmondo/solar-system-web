@@ -6,128 +6,119 @@ In Progress
 
 ## Goal
 
-Replace mocked positions with real ephemeris-driven motion while keeping the static GitHub Pages experience responsive, predictable, and mobile-friendly.
+Ship real ephemeris-driven positions as the default startup experience so the scene shows bodies in real positions from the beginning, while keeping the static GitHub Pages app responsive, predictable, and mobile-friendly.
 
-## Agreed Direction
+## Current Repo Snapshot
 
-- Milestone 5 is now committed to offline preprocessing rather than raw-kernel parsing in the browser.
-- Use `SpiceNet` as the offline SPK reader, evaluator, and asset generator.
-- Consume `SpiceNet` as a pinned external repository rather than vendoring it into this repo.
-- Emit browser-friendly chunked assets plus a manifest rather than shipping raw `.bsp` parsing logic to the browser.
-- The accepted external benchmark baseline is the current `SpiceNet` `de440s` solar-system-barycenter dataset covering 1950 through 2050 with mixed per-body cadence and `25` year chunks.
-- Prefer compact JSON arrays that benefit from normal HTTP compression before introducing a custom binary format.
-- Keep browser work limited to chunk selection, fetching, caching, interpolation, and scene updates.
-- Use the accepted solar-system barycenter output as the default physical frame for the first live integration and defer selectable frame switching to Milestone 6.
-- Keep Milestone 5 physically scaled with one global km-to-scene factor shared by real positions and real radii.
-- Keep physical metadata from kernels separate from the app's cinematic presentation metadata.
-- Do not hook ephemeris generation into `pnpm build`; provide separate local testing and CI generation workflows instead.
-- The external preprocessing spike is tracked separately in `docs/tasks/milestone-5-spicenet.md`; this repo now starts with browser-side schema parsing, loading, interpolation, and UX work.
-- Kernel-derived physical metadata should be loaded and stored separately from the current cinematic body metadata so later UI work can reuse it without disturbing the render-scale presentation model.
-- Browser-side time conversion and interpolation helpers should match the accepted `SpiceNet` approximate J2000 UTC anchor, shared chunk-boundary rules, and cubic Hermite math so snapshot loading can trust the same contract end to end.
-- Raw ephemeris snapshots should stay in kilometer space inside the async provider layer until a later physical-scale mapping step turns them into scene units with one explicit global factor.
-- The kilometer-to-scene translation should live in its own uniform-scale adapter so Milestone 5 keeps physical proportions explicit instead of hiding scale decisions inside the provider or renderer.
-- Defer any cinematic or logarithmic size scaling and any moon or satellite spacing offsets to a later dedicated cinematic-view milestone.
+- Browser-side Milestone 5 runtime foundations are already implemented in this repo: schema parsing, dataset loading, chunk selection, Hermite interpolation, async provider loading, physical scaling, simulation clock wiring, and HUD loading or error messaging.
+- Current code still keeps the mocked catalog as a startup and failure fallback. That no longer matches the agreed Milestone 5 direction and needs to be removed.
+- External preprocessing work is completed separately in `docs/tasks/milestone-5-spicenet.md`.
+- The repo does not yet version `body-metadata.json` as the accepted app input, and it does not yet generate non-versioned ephemeris assets during CI or CD or local development.
 
-## Preferred Asset Shape
+## Agreed Milestone Direction
 
-- One manifest should describe the kernel set, supported bodies, reference frame, coverage range, chunk duration, trail defaults, physical metadata, presentation metadata, and asset hashes.
-- One chunk should contain all currently rendered bodies for a fixed interval so the overview can update from a single request instead of many per-body fetches.
-- Use the accepted `de440s` benchmark output covering 1950 through 2050 to decide whether the final chunk duration should stay that large or be reduced.
-- Within a chunk, each body should be allowed to use its own sample cadence because the Moon and inner planets need denser sampling than the outer planets.
-- Store sampled positions plus sampled velocities so the browser can use cubic Hermite interpolation instead of linear interpolation.
-- Start with compact JSON array payloads that are easy to inspect and iterate on, and only introduce a custom binary format if benchmarked chunk size or parse time forces that move.
-- Each chunk should include enough overlap or padding to support smooth interpolation and adjacent-chunk prefetching.
-- Include a generated physical-metadata section derived from the SPICE kernel set where available, prioritizing radii, axial tilt, and rotation period, while also carrying forward additional fields that may become useful in later educational milestones.
-- Do not require the browser to evaluate raw SPK Chebyshev records in the first pass.
-- The current accepted benchmark payload uses flattened per-body `xyz_vxvyvz` arrays plus approximate TDB seconds from J2000, so the web data layer should validate that layout explicitly instead of depending on implicit decoder assumptions.
-- The current accepted benchmark payload is solar-system-barycenter output with `CenterBodyId = 0`, so the first live mapping should preserve that physical frame rather than immediately re-centering bodies into a cinematic layout.
+- Use the pinned external `SpiceNet` workflow as the generator for Milestone 5 web data.
+- Show real ephemeris-driven body positions from the beginning of the scene. Do not fall back to mocked positions.
+- If real data is not ready yet, show an explicit loading or error state rather than silently substituting a mocked catalog.
+- Keep ephemeris manifest and chunk files non-versioned and generate them during CI or CD.
+- Keep kernel binaries and generated ephemeris artifacts out of git.
+- Keep `body-metadata.json` versioned in this repo as the accepted small kernel-derived metadata snapshot.
+- Provide a git-ignored local directory for generated ephemeris assets during development.
+- Add a local helper script that generates ephemeris assets when that local directory is missing, reusing the accepted `SpiceNet` flow.
+- Keep the default `pnpm build` path focused on the web app build; ephemeris generation should remain an explicit local or CI or CD step.
+- Preserve the accepted solar-system-barycenter frame, approximate J2000 UTC anchor, and cubic Hermite interpolation contract for Milestone 5.
+- Keep physical metadata separate from cinematic presentation metadata, with one explicit km-to-scene scale factor for the real-data path.
 
-## Initial Benchmark Baseline
+## Progress Checklist
 
-- use the accepted `de440s` external benchmark output as the initial browser integration baseline
-- benchmark a first generated output spanning 1950 through 2050
-- include the kernel companions needed for leap seconds and body metadata extraction
-- measure compressed transfer size, browser parse cost, interpolation quality, and chunk-boundary behavior
-- shrink chunk duration before inventing a more complex runtime format if the first benchmark is too heavy
+### Runtime Foundations Already Landed In This Repo
 
-## Working Budgets
+- [x] Parse and validate the accepted web manifest, chunk, and body-metadata schema.
+- [x] Support the accepted solar-system-barycenter runtime layout, including body-specific cadence and flattened `xyz_vxvyvz` samples.
+- [x] Load and cache manifest and body metadata through a shared browser-side dataset loader.
+- [x] Convert requested UTC time to the accepted approximate J2000 anchor and interpolate chunk samples with cubic Hermite math.
+- [x] Select chunk ranges at runtime, prefetch adjacent chunks, cache loaded chunks, and surface out-of-range or fetch failures.
+- [x] Keep raw ephemeris snapshots in kilometer space inside the async provider.
+- [x] Map kilometer snapshots and kernel-derived mean radii through one explicit km-to-scene scaling adapter.
+- [x] Preserve presentation metadata separately from physical metadata while scaling focus offsets proportionally.
+- [x] Compose the async provider and physical-scale mapping into the shared resolved catalog shape already used by the scene.
+- [x] Start the simulation clock from the current time and advance it in real time.
+- [x] Add pause and resume control plus HUD messaging for loading, fallback, and current simulation time.
+- [x] Keep the default `pnpm build` and current GitHub Pages workflow free of hidden ephemeris generation.
+- [x] Add unit coverage for parsing, dataset loading, interpolation, provider caching, runtime wiring, simulation clock behavior, and HUD state messaging.
 
-- lock explicit size and decode-time budgets before the format is finalized
-- treat visibly smooth motion as the priority, not scientific-grade positional fidelity
-- accept errors on the order of thousands of kilometers if they remain visually negligible in the current cinematic scale model
-- prefer changing sample cadence before introducing a more complex runtime format
+### Data Delivery And Activation Still To Do
 
-## Planned Steps
+- [ ] Remove the mocked startup and failure fallback from the runtime path.
+- [ ] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
+- [ ] Keep loading and failure UI explicit while the real dataset is being resolved.
+- [ ] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
+- [ ] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
+- [ ] Generate ephemeris manifest and chunk files during CI or CD with the pinned `SpiceNet` workflow before deployment.
+- [ ] Publish generated ephemeris assets with the deployed site without committing them to git.
+- [ ] Define a git-ignored local output directory for generated ephemeris assets during development.
+- [ ] Add a local helper script that generates ephemeris assets when the local output directory is missing.
+- [ ] Wire the runtime to consume versioned body metadata together with generated ephemeris manifest and chunk assets.
 
-### 1. Accepted external benchmark baseline
+### UX And Verification Still To Do
 
-- lock the first browser integration pass around the accepted `de440s` benchmark baseline plus the supporting kernel files needed for metadata extraction
-- generate and inspect the accepted 1950 through 2050 benchmark output before wiring it into the runtime
-- benchmark compact JSON chunks against at least one denser or lower-level alternative before inventing a custom binary format
-- benchmark at least two interpolation shapes: sampled positions only versus sampled positions plus velocity-backed Hermite interpolation
-- ship all kernel-derived metadata that can be extracted cleanly, with radii, axial tilt, and rotation period treated as the highest-priority fields for the app
-- keep `SpiceNet` pinned as an external dependency for CI and local generation rather than embedding it into this repo
+- [ ] Replace circular mocked trails with sampled trail geometry derived from loaded chunk data.
+- [ ] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
+- [ ] Add the next playback controls in this order: rate changes, reverse playback.
+- [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
+- [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
+- [ ] Finish chunk-size, startup-latency, and production chunk-duration benchmarking for the browser runtime.
+- [ ] Run milestone closeout manual verification for the real-data path on desktop and mobile.
 
-### 2. Kernel acquisition and local tooling
+## Remaining Plan
 
-- keep ephemeris and kernel files out of git
-- download the required kernel set during the CI or CD workflow instead of versioning it in this repo
-- add a local testing script that fetches or refreshes kernels into a git-ignored cache folder for iterative generation work
-- keep the normal `pnpm build` path free of ephemeris generation so frontend iteration stays lightweight
+### 1. Versioned Versus Generated Assets
 
-### 3. Offline generator
+- Commit `body-metadata.json` as a stable app input generated from the accepted `SpiceNet` metadata flow.
+- Treat ephemeris manifest and chunk files as generated deployment and development artifacts rather than versioned source files.
+- Keep the Milestone 5 web-data contract aligned with `docs/tasks/milestone-5-spicenet.md`.
 
-- extend `SpiceNet` with a generator entry point that loads the needed kernels, resolves the Sun plus planets plus Moon, and emits manifest plus chunk files ready for the web app
-- add metadata extraction for body facts that should come from kernels or related kernel text files instead of remaining hand-authored forever
-- keep output deterministic so it can be cached, diffed, and validated
-- add spot checks that compare generated chunks against the source ephemerides
-- make chunk duration, per-body cadence, and metadata fields configurable so the benchmarks can tune them without redesigning the pipeline
+### 2. CI Or CD And Local Generation
 
-### 4. Browser data layer
+- Add CI or CD steps that fetch kernels through the accepted external `SpiceNet` workflow and generate ephemeris data before deployment.
+- Define a git-ignored local output directory for generated ephemeris assets.
+- Add a local helper script that checks for missing ephemeris assets and generates them when needed.
 
-- evolve the current synchronous provider boundary into a cached async snapshot source without rewriting scene consumers more than necessary
-- keep static body metadata synchronous
-- load the accepted manifest and kernel-derived body metadata through a cached browser-side dataset loader before live snapshot wiring begins
-- add pure runtime helpers for chunk-range selection, approximate UTC-to-TDB conversion, and velocity-backed Hermite interpolation before attaching them to the async provider
-- keep the first async provider focused on loading and caching raw ephemeris snapshots plus adjacent chunk prefetch, with physical scaling deferred to the later integration step
-- add a uniform-scale mapping layer that turns raw barycentric ephemeris snapshots plus kernel-derived mean radii into physically scaled scene state, including proportionate focus framing, before swapping scene consumers to the async path
-- compose the async provider and the physical-scale adapter into the same resolved catalog shape the mocked scene already consumes before replacing scene and HUD wiring
-- route scene, HUD, and focus consumers through a runtime catalog hook that can expose loading and fallback states while the app still defaults to the mocked source
-- keep real web-data activation behind explicit runtime configuration until hosted assets and the first physical scale factor are ready for inspection
-- add chunk selection, prefetch, cache eviction, loading, and error states
+### 3. Runtime Activation
 
-### 5. Time and trail UX
+- Remove the mocked fallback path.
+- Load real positions from the first scene render, with explicit loading or error UX instead of mocked substitutes.
+- Keep the first physical scale factor inspectable in the live scene before any later cinematic scaling work.
 
-- start the simulation clock at the current real-world datetime and advance it in real time before adding pause or rate controls
-- start the simulation at the current real-world datetime
-- advance the simulation in real time by default
-- support pause, resume, rate changes, and backward playback in the first release
-- defer explicit date picking to a later milestone unless the first UX pass shows it is essential
-- add visible loading feedback when chunk fetches block a requested time change
-- replace circular trails with sampled trail geometry derived from the loaded chunk data
-- support body-specific default trail windows while keeping the visible UI minimal in Milestone 5
-- reuse kernel-derived physical metadata where it improves labels, derived defaults, or later educational UI without coupling it to the cinematic render scale
+### 4. Time And Trail UX
 
-### 6. Verification and closeout
+- Replace mocked circular trails with chunk-derived trail geometry.
+- Add the next playback controls in this order: rate changes, reverse playback.
+- Defer explicit date picking unless Milestone 5 usability proves it is necessary.
 
-- add unit coverage for manifest parsing, chunk selection, interpolation, and provider caching
-- add browser coverage for startup, scrubbing, and focused-body recovery while chunks are loading
-- perform manual desktop and mobile validation with network throttling and slower CPU settings
-- update roadmap, vision, architecture, and deployment docs once the implementation lands
+### 5. Verification And Closeout
+
+- Add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery.
+- Manually verify desktop and mobile behavior with throttled network and CPU.
+- Update roadmap, architecture, vision, and deployment docs again once the real-data-first path lands.
 
 ## Acceptance Notes
 
+- The first visible scene should come from real ephemeris data or an explicit loading state, never from mocked positions.
 - Opening the site should not require downloading the full supported ephemeris range.
-- The initial overview should stay responsive while the first real-data chunk loads.
+- The overview should stay responsive while the first real-data chunk loads.
 - Scrubbing within the current chunk should not trigger heavy recomputation.
 - Crossing a chunk boundary should rely on prefetch or a short explicit loading state rather than a long stall.
-- The first release should start from the user's current datetime and advance in real time unless paused or rate-adjusted.
+- The deployed site should use ephemeris manifest and chunk assets generated during CI or CD rather than versioned copies in git.
+- `body-metadata.json` should remain versioned and small enough to diff, review, and consume directly from the web app.
+- Local development should work against a git-ignored generated ephemeris directory plus a helper script when data is missing.
+- The first real-data release should start from the user's current datetime and advance in real time unless paused or rate-adjusted.
 - Real-data integration should not force Milestone 6 frame-selection work into this milestone.
-- Physical metadata from kernels should be available to the app without replacing the current cinematic presentation tuning.
 
 ## Open Questions
 
-- What final production chunk duration falls out of the accepted `de440s` 1950 through 2050 benchmark once Moon and inner-planet cadence are factored in?
-- What global km-to-scene scale factor keeps the physically scaled first pass inspectable without quietly reintroducing a cinematic distortion?
-- Which additional kernel-derived fields are realistically available from the chosen kernel set without introducing brittle parsing work?
-- What local cache path and cleanup policy should the repo standardize for downloaded kernels during development?
+- What repo path should hold the versioned `body-metadata.json` snapshot?
+- What local ignored directory and env or base-URL convention should the app use for generated ephemeris assets during development?
+- Should the local helper script only generate data when missing, or also support an explicit refresh mode?
+- What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?
+- What global km-to-scene scale factor keeps the first physical pass readable without reintroducing hidden cinematic distortion?

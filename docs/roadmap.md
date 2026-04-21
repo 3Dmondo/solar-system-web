@@ -92,6 +92,7 @@ Current focus:
 - route scene, HUD, and focus helpers through a runtime catalog hook that can surface loading and fallback states before the web-data source is turned on by default
 - keep the real web-data source behind explicit runtime configuration until hosted assets and the first physical scale factor are ready for inspection
 - start the simulation clock from the current UTC time and surface that requested time in the HUD before adding pause, reverse, or rate controls
+- add the first playback control slice with pause and resume before rate changes or reverse playback
 - defer any optional cinematic non-linear size scaling and moon or satellite spacing offsets to a later dedicated milestone
 - keep the current mocked overview experience stable until async loading, physical scaling, and camera or focus UX are ready together
 

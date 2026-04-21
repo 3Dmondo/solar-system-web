@@ -76,6 +76,11 @@
   text-transform: uppercase;
 }
 
+.experience-hud__clock-state {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
 .experience-hud__status {
   color: rgba(255, 214, 153, 0.9);
   font-size: 0.76rem;
@@ -83,9 +88,13 @@
 }
 
 .experience-hud__action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-top: 0.45rem;
 }
 
+.experience-hud__control-button,
 .experience-hud__jump-button,
 .experience-hud__jump-close-button,
 .experience-hud__jump-target-button {
@@ -101,6 +110,7 @@
   text-transform: uppercase;
 }
 
+.experience-hud__control-button,
 .experience-hud__jump-button {
   background: rgba(255, 255, 255, 0.08);
 }

@@ -13,10 +13,15 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
     tickIntervalMs = defaultTickIntervalMs
   } = options;
   const [simulationTimeMs, setSimulationTimeMs] = useState(() => normalizeStartAt(startAt).getTime());
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (!Number.isFinite(tickIntervalMs) || tickIntervalMs <= 0) {
       throw new Error('tickIntervalMs must be a finite number greater than zero');
+    }
+
+    if (isPaused) {
+      return;
     }
 
     let previousRealTimeMs = Date.now();
@@ -31,10 +36,14 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [tickIntervalMs]);
+  }, [isPaused, tickIntervalMs]);
 
   return {
-    requestedUtc: new Date(simulationTimeMs).toISOString()
+    isPaused,
+    pause: () => setIsPaused(true),
+    requestedUtc: new Date(simulationTimeMs).toISOString(),
+    resume: () => setIsPaused(false),
+    togglePaused: () => setIsPaused((value) => !value)
   };
 }
 

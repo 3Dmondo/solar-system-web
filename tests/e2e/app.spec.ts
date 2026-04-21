@@ -10,8 +10,9 @@ test('supports overview hud discovery, help, and focus recovery', async ({ page 
 
   await expect(hudTitle).toHaveText('Solar System');
   await expect(jumpButton).toBeVisible();
-  await expect(page.getByText(/use Jump to or double tap or double click a body/i)).toBeVisible();
+  await expect(page.getByText(/interactive solar system overview/i)).toBeVisible();
   await expect(helpButton).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByText(/Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus/i)).not.toBeVisible();
 
   await helpButton.click();
 

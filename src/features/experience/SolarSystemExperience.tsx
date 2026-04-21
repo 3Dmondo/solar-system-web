@@ -15,7 +15,7 @@ type SolarSystemExperienceProps = {
 export function SolarSystemExperience({ catalogSource }: SolarSystemExperienceProps) {
   const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
-  const { requestedUtc } = useSimulationClock();
+  const { isPaused, requestedUtc, togglePaused } = useSimulationClock();
   const { catalog, status, error } = useResolvedBodyCatalog(requestedUtc, catalogSource);
 
   return (
@@ -32,9 +32,11 @@ export function SolarSystemExperience({ catalogSource }: SolarSystemExperiencePr
         catalogStatus={status}
         focusedBodyId={focusedBodyId}
         isCoarsePointer={isCoarsePointer}
+        isSimulationPaused={isPaused}
         requestedUtc={requestedUtc}
         onFocusBody={setFocusedBodyId}
         onReturnToOverview={() => setFocusedBodyId('overview')}
+        onToggleSimulationPaused={togglePaused}
       />
     </main>
   );

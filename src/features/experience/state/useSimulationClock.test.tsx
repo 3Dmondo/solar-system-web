@@ -27,6 +27,47 @@ describe('useSimulationClock', () => {
     expect(result.current.requestedUtc).toBe('2000-01-01T12:00:03.000Z');
   });
 
+  it('can pause and resume the simulation clock without losing the current time', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2000-01-01T12:00:00Z'));
+
+    const { result } = renderHook(() =>
+      useSimulationClock({
+        startAt: '2000-01-01T12:00:00Z',
+        tickIntervalMs: 1000
+      })
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:00:02.000Z');
+    expect(result.current.isPaused).toBe(false);
+
+    act(() => {
+      result.current.pause();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(result.current.isPaused).toBe(true);
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:00:02.000Z');
+
+    act(() => {
+      result.current.resume();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(result.current.isPaused).toBe(false);
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:00:05.000Z');
+  });
+
   it('rejects invalid start times', () => {
     expect(() =>
       renderHook(() =>
