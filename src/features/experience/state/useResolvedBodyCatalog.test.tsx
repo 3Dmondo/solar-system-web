@@ -194,7 +194,8 @@ function createCatalog(
           id: 'earth',
           position: earthPosition
         }
-      ]
+      ],
+      trails: []
     }
   )
 }

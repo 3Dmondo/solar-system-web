@@ -15,6 +15,7 @@ const baseMetadata: BodyMetadata[] = [
     color: '#3a7bd5',
     material: 'earth',
     radius: 0.72,
+    defaultTrailWindowDays: 365,
     focusOffset: [0, 0.25, 3.2],
     surfaceRotationSpeed: 0.01
   },
@@ -24,6 +25,7 @@ const baseMetadata: BodyMetadata[] = [
     color: '#b0b4be',
     material: 'moon',
     radius: 0.22,
+    defaultTrailWindowDays: 35,
     focusOffset: [0, 0.12, 1.7],
     surfaceRotationSpeed: 0.018
   }
@@ -167,6 +169,21 @@ describe('webBodyCatalogSource', () => {
     expect(datasetLoader.load).toHaveBeenCalledTimes(1)
     expect(ephemerisProvider.loadSnapshotAtUtc).toHaveBeenCalledWith('2000-01-01T12:00:00Z')
     expect(catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(catalog.snapshot.trails).toHaveLength(2)
+    expect(catalog.snapshot.trails[0]?.id).toBe('earth')
+    expect(catalog.snapshot.trails[0]?.positions[0]?.[0]).toBeCloseTo(99.8, 9)
+    expect(catalog.snapshot.trails[0]?.positions[0]?.[1]).toBeCloseTo(0, 9)
+    expect(catalog.snapshot.trails[0]?.positions[0]?.[2]).toBeCloseTo(0, 9)
+    expect(catalog.snapshot.trails[0]?.positions[1]?.[0]).toBeCloseTo(100, 9)
+    expect(catalog.snapshot.trails[0]?.positions[1]?.[1]).toBeCloseTo(0, 9)
+    expect(catalog.snapshot.trails[0]?.positions[1]?.[2]).toBeCloseTo(0, 9)
+    expect(catalog.snapshot.trails[1]?.id).toBe('moon')
+    expect(catalog.snapshot.trails[1]?.positions[0]?.[0]).toBeCloseTo(100.2, 9)
+    expect(catalog.snapshot.trails[1]?.positions[0]?.[1]).toBeCloseTo(-0.0994442886, 9)
+    expect(catalog.snapshot.trails[1]?.positions[0]?.[2]).toBeCloseTo(-0.2293705155, 9)
+    expect(catalog.snapshot.trails[1]?.positions[1]?.[0]).toBeCloseTo(100.4, 9)
+    expect(catalog.snapshot.trails[1]?.positions[1]?.[1]).toBeCloseTo(-0.1193331463, 9)
+    expect(catalog.snapshot.trails[1]?.positions[1]?.[2]).toBeCloseTo(-0.2752446186, 9)
     expect(earth?.id).toBe('earth')
     expect(earth?.radius).toBeCloseTo(6.3710084, 9)
     expect(earth?.position[0]).toBeCloseTo(100, 9)
@@ -240,6 +257,22 @@ function createEphemerisProviderStub(): BodyEphemerisProvider & {
             id: 'moon',
             positionKm: [100400, 300, 0],
             velocityKmPerSecond: [0, 0, 0]
+          }
+        ],
+        trails: [
+          {
+            id: 'earth',
+            positionsKm: [
+              [99800, 0, 0],
+              [100000, 0, 0]
+            ]
+          },
+          {
+            id: 'moon',
+            positionsKm: [
+              [100200, 250, 0],
+              [100400, 300, 0]
+            ]
           }
         ]
       }

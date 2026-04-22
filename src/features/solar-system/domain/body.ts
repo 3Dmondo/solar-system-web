@@ -20,6 +20,7 @@ export type BodyMetadata = {
   color: string;
   material?: BodyMaterial;
   radius: number;
+  defaultTrailWindowDays?: number;
   focusOffset: [number, number, number];
   surfaceRotation?: [number, number, number];
   surfaceRotationSpeed?: number;
@@ -81,11 +82,22 @@ export type BodyEphemerisState = {
   velocityKmPerSecond: [number, number, number];
 };
 
+export type BodyTrail = {
+  id: BodyId;
+  positions: Array<[number, number, number]>;
+};
+
+export type BodyEphemerisTrail = {
+  id: BodyId;
+  positionsKm: Array<[number, number, number]>;
+};
+
 export type BodyDefinition = BodyMetadata & BodyState;
 
 export type BodySnapshot = {
   capturedAt: string;
   bodies: BodyState[];
+  trails: BodyTrail[];
 };
 
 export type BodyEphemerisSnapshot = {
@@ -95,6 +107,7 @@ export type BodyEphemerisSnapshot = {
   chunkStartTdbSecondsFromJ2000: number;
   chunkEndTdbSecondsFromJ2000: number;
   bodies: BodyEphemerisState[];
+  trails: BodyEphemerisTrail[];
 };
 
 export type BodyEphemerisProvider = {

@@ -55,6 +55,7 @@
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
 - `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, and supports pause or resume.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
+- `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
@@ -66,7 +67,7 @@
 - Lighting uses a point light at the Sun plus a small ambient contribution.
 - `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
 - The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
-- Orbital trails are currently hidden until the real trail path is implemented.
+- Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.
 - Saturn uses a custom surface material and ring mesh.
 - Earth uses day, night, normal, specular, and cloud layers.

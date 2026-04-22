@@ -20,6 +20,15 @@ const referenceEphemerisSnapshot: BodyEphemerisSnapshot = {
     { id: 'sun', positionKm: [-100, 20, 5], velocityKmPerSecond: [0, 0, 0] },
     { id: 'earth', positionKm: [1_000, 20, 5], velocityKmPerSecond: [0, 0, 0] },
     { id: 'moon', positionKm: [1_004, 23, 5], velocityKmPerSecond: [0, 0, 0] }
+  ],
+  trails: [
+    {
+      id: 'earth',
+      positionsKm: [
+        [900, 20, 5],
+        [1_000, 20, 5]
+      ]
+    }
   ]
 }
 
@@ -124,6 +133,7 @@ describe('ephemerisSceneMapping', () => {
     const sun = mappedSnapshot.bodies.find((body) => body.id === 'sun')
     const earth = mappedSnapshot.bodies.find((body) => body.id === 'earth')
     const moon = mappedSnapshot.bodies.find((body) => body.id === 'moon')
+    const earthTrail = mappedSnapshot.trails.find((trail) => trail.id === 'earth')
     const earthSunDistance = getDistance(earth?.position ?? [0, 0, 0], sun?.position ?? [0, 0, 0])
     const earthMoonDistance = getDistance(moon?.position ?? [0, 0, 0], earth?.position ?? [0, 0, 0])
 
@@ -137,6 +147,13 @@ describe('ephemerisSceneMapping', () => {
     expect(moon?.position[0]).toBeCloseTo(10.04, 9)
     expect(moon?.position[1]).toBeCloseTo(-0.0456146424, 9)
     expect(moon?.position[2]).toBeCloseTo(-0.230909732, 9)
+    expect(earthTrail?.positions).toHaveLength(2)
+    expect(earthTrail?.positions[0]?.[0]).toBeCloseTo(9, 9)
+    expect(earthTrail?.positions[0]?.[1]).toBeCloseTo(-0.0336813277, 9)
+    expect(earthTrail?.positions[0]?.[2]).toBeCloseTo(-0.2033852701, 9)
+    expect(earthTrail?.positions[1]?.[0]).toBeCloseTo(10, 9)
+    expect(earthTrail?.positions[1]?.[1]).toBeCloseTo(-0.0336813277, 9)
+    expect(earthTrail?.positions[1]?.[2]).toBeCloseTo(-0.2033852701, 9)
     expect(earthMoonDistance / earthSunDistance).toBeCloseTo(0.0045454545, 9)
   })
 

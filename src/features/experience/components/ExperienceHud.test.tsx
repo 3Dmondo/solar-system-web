@@ -20,7 +20,8 @@ describe('ExperienceHud', () => {
       bodies: presentationBodyMetadata.map((body, index) => ({
         id: body.id,
         position: [index * 10, 0, 0] as [number, number, number]
-      }))
+      })),
+      trails: []
     }
   )
 

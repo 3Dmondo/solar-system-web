@@ -20,6 +20,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - The runtime now maps raw J2000 ephemeris vectors into one shared ecliptic-aligned render frame before focus, controls, and planet rendering consume body positions.
 - The current focus pass now snaps targeting directly onto the selected body center and uses an initial focused camera distance of about `10 x` the body radius from the authored focus direction.
 - Focused tracking now re-evaluates the authored pose only while a focus transition is settling; once focused, live body updates translate the current camera and target together so manual orbit and zoom adjustments remain intact.
+- The first trail pass now derives sampled position history from the active loaded chunk, clips it with body-specific default trail windows, and renders it without adding visible trail controls yet.
+- Richer trail styling and longer historical lookback for bodies such as the outer planets are explicitly deferred to the later trail UX milestone.
 
 ## Agreed Milestone Direction
 
@@ -75,8 +77,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### UX And Verification Still To Do
 
-- [ ] Add sampled trail geometry derived from loaded chunk data.
-- [ ] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
+- [x] Add sampled trail geometry derived from loaded chunk data.
+- [x] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
 - [ ] Add the next playback controls in this order: rate changes, reverse playback.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
 - [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
@@ -105,11 +107,12 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Keep evaluating whether the single physical scale should remain the long-term Milestone 5 default, but keep camera framing and clipping derived from scene extents while that tuning continues.
 - Keep the runtime contract explicit that raw SPICE positions stay in the accepted J2000 source frame until the scene-mapping layer rotates them into the app's ecliptic-aligned render frame.
 
-### 4. Time And Trail UX
+### 4. Time Controls And Verification
 
-- Add chunk-derived trail geometry.
 - Add the next playback controls in this order: rate changes, reverse playback.
 - Defer explicit date picking unless Milestone 5 usability proves it is necessary.
+- Verify the first chunk-derived trail pass stays readable enough before any richer trail controls are introduced.
+- Keep the Milestone 5 trail pass intentionally simple; defer brighter or thicker styling, non-transparent treatment, tail fading, and deeper historical windows to the later trail UX milestone.
 
 ### 5. Verification And Closeout
 

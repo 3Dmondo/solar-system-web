@@ -14,13 +14,14 @@ The repository currently ships an overview-first solar-system scene with real-da
 - directional camera easing that snaps the target onto the selected body center, approaches from the authored focus direction at about `10 x` body radius, and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
 - a minimal HUD with a help overlay and focused-mode overview return
+- chunk-derived orbital trails clipped by per-body default trail windows
 - a Milky Way star background
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
 
 ## Current Constraints
 
-- Orbital trails are temporarily hidden until chunk-derived trail geometry is ready.
+- Orbital trails currently use fixed per-body default windows, and the richer styling pass plus longer historical lookback for outer planets are deferred to the later trail UX milestone.
 - The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
@@ -33,10 +34,9 @@ The next implementation slice focuses on finishing the real-data milestone after
 
 Focus areas:
 
-- add sampled position history derived from the same chunk data
 - add rate and reverse controls on top of the current real-time and pause behavior
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
-- defer frame-switching and final trail UX until the later reference-frame milestone
+- defer frame-switching, deeper trail history, and final trail UX until the later reference-frame and trail milestone
 
 ## Long-Term Direction
 

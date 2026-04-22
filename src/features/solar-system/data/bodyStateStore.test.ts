@@ -33,6 +33,15 @@ describe('bodyStateStore', () => {
         id: 'moon',
         position: [4, 5, 6]
       }
+    ],
+    trails: [
+      {
+        id: 'earth',
+        positions: [
+          [0, 0, 0],
+          [1, 2, 3]
+        ]
+      }
     ]
   }
 
@@ -60,7 +69,8 @@ describe('bodyStateStore', () => {
     expect(catalog.bodies).toEqual([]);
     expect(catalog.snapshot).toEqual({
       capturedAt: '2000-01-01T12:00:00.000Z',
-      bodies: []
+      bodies: [],
+      trails: []
     });
   });
 })

@@ -16,6 +16,7 @@ import {
 } from './webEphemeris'
 import { type WebDataset, type WebDatasetLoader } from './webDatasetLoader'
 import { presentationBodyMetadata } from './bodyPresentation'
+import { sampleChunkBodyTrailAtTdbTime } from './webEphemerisTrails'
 
 export type WebEphemerisProviderOptions = {
   chunkBaseUrl: string
@@ -36,6 +37,9 @@ export function createWebEphemerisProvider({
 }: WebEphemerisProviderOptions): BodyEphemerisProvider {
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
   const chunkCache = new Map<string, Promise<WebEphemerisChunk>>()
+  const presentationMetadataByBodyId = new Map(
+    presentationMetadata.map((body) => [body.id, body])
+  )
 
   return {
     getBodyMetadata: () => presentationMetadata,
@@ -65,7 +69,21 @@ export function createWebEphemerisProvider({
             positionKm: state.positionKm,
             velocityKmPerSecond: state.velocityKmPerSecond
           }
-        })
+        }),
+        trails: dataset.manifest.bodies
+          .map((body) => {
+            const trailWindowDays =
+              presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+
+            return sampleChunkBodyTrailAtTdbTime(
+              dataset.manifest,
+              chunk,
+              body.bodyId,
+              approximateTdbSecondsFromJ2000,
+              trailWindowDays
+            )
+          })
+          .filter((trail) => trail.positionsKm.length >= 2)
       }
     },
     prefetchAroundUtc: async (utc) => {

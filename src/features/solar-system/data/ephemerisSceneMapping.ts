@@ -35,6 +35,12 @@ export function mapEphemerisSnapshotToSceneSnapshot(
     bodies: snapshot.bodies.map((body) => ({
       id: body.id,
       position: mapJ2000PositionKmToScenePosition(body.positionKm, scale)
+    })),
+    trails: snapshot.trails.map((trail) => ({
+      id: trail.id,
+      positions: trail.positionsKm.map((positionKm) =>
+        mapJ2000PositionKmToScenePosition(positionKm, scale)
+      )
     }))
   }
 }

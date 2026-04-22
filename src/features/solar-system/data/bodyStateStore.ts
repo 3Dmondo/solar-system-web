@@ -27,7 +27,8 @@ export function createEmptyResolvedBodyCatalog(
 ): ResolvedBodyCatalog {
   return resolveBodyCatalog([], {
     capturedAt,
-    bodies: []
+    bodies: [],
+    trails: []
   })
 }
 

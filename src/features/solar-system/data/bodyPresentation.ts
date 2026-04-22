@@ -9,6 +9,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#ffd27a',
     material: 'sun',
     radius: 2.6,
+    defaultTrailWindowDays: 0,
     focusOffset: [0, 0.7, 8.8],
     surfaceRotationSpeed: 0.01
   },
@@ -17,6 +18,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     displayName: 'Mercury',
     color: '#9f9183',
     radius: 0.25,
+    defaultTrailWindowDays: 120,
     focusOffset: [0, 0.12, 1.8],
     surfaceRotationSpeed: 0.014
   },
@@ -26,6 +28,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#d2a777',
     material: 'venus',
     radius: 0.52,
+    defaultTrailWindowDays: 240,
     focusOffset: [0, 0.18, 2.6],
     surfaceRotationSpeed: 0.011
   },
@@ -35,6 +38,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#3a7bd5',
     material: 'earth',
     radius: 0.72,
+    defaultTrailWindowDays: 365,
     focusOffset: [0, 0.25, 3.2],
     surfaceRotationSpeed: EARTH_SURFACE_ROTATION_SPEED
   },
@@ -44,6 +48,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#b0b4be',
     material: 'moon',
     radius: 0.22,
+    defaultTrailWindowDays: 35,
     focusOffset: [0, 0.12, 1.7],
     surfaceRotationSpeed: 0.018
   },
@@ -52,6 +57,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     displayName: 'Mars',
     color: '#bf6c4e',
     radius: 0.38,
+    defaultTrailWindowDays: 720,
     focusOffset: [0, 0.14, 2.2],
     surfaceRotationSpeed: 0.07
   },
@@ -60,6 +66,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     displayName: 'Jupiter',
     color: '#c9a678',
     radius: 1.55,
+    defaultTrailWindowDays: 4_332,
     focusOffset: [0, 0.52, 6.4],
     surfaceRotationSpeed: 0.045
   },
@@ -69,6 +76,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#cdb075',
     material: 'saturn',
     radius: 1.35,
+    defaultTrailWindowDays: 8_000,
     focusOffset: [0, 0.45, 5.8],
     surfaceRotation: [SATURN_SPHERE_TILT, 0, 0],
     surfaceRotationSpeed: 0.02,
@@ -79,6 +87,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     displayName: 'Uranus',
     color: '#92c9d6',
     radius: 0.92,
+    defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.3, 4],
     surfaceRotationSpeed: 0.026
   },
@@ -87,6 +96,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     displayName: 'Neptune',
     color: '#557fda',
     radius: 0.88,
+    defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.28, 3.8],
     surfaceRotationSpeed: 0.024
   }

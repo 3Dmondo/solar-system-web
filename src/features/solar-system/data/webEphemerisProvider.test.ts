@@ -172,6 +172,15 @@ describe('webEphemerisProvider', () => {
         velocityKmPerSecond: [1, 0, 0]
       }
     ])
+    expect(snapshot.trails).toEqual([
+      {
+        id: 'earth',
+        positionsKm: [
+          [172800, 0, 0],
+          [216000, 0, 0]
+        ]
+      }
+    ])
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
