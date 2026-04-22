@@ -1,8 +1,8 @@
-import { RepeatWrapping, SRGBColorSpace, Texture, TextureLoader } from 'three';
-import { type BodyId } from '../domain/body';
+import { RepeatWrapping, SRGBColorSpace, Texture, TextureLoader } from 'three'
+import { type BodyId } from '../domain/body'
 
-const textureLoader = new TextureLoader();
-const textureCache = new Map<BodyId, Texture>();
+const textureLoader = new TextureLoader()
+const textureCache = new Map<BodyId, Texture>()
 
 const textureUrls: Partial<Record<BodyId, string>> = {
   sun: new URL('../../../../assets/textures/2k_sun.jpg', import.meta.url).href,
@@ -13,28 +13,28 @@ const textureUrls: Partial<Record<BodyId, string>> = {
   saturn: new URL('../../../../assets/textures/2k_saturn.jpg', import.meta.url).href,
   uranus: new URL('../../../../assets/textures/2k_uranus.jpg', import.meta.url).href,
   neptune: new URL('../../../../assets/textures/2k_neptune.jpg', import.meta.url).href
-};
-
-function configurePlanetTexture(texture: Texture) {
-  texture.colorSpace = SRGBColorSpace;
-  texture.wrapS = RepeatWrapping;
-  return texture;
 }
 
-export function loadMockBodyTexture(bodyId: BodyId) {
-  const cached = textureCache.get(bodyId);
+function configurePlanetTexture(texture: Texture) {
+  texture.colorSpace = SRGBColorSpace
+  texture.wrapS = RepeatWrapping
+  return texture
+}
+
+export function loadBodyTexture(bodyId: BodyId) {
+  const cached = textureCache.get(bodyId)
 
   if (cached) {
-    return cached;
+    return cached
   }
 
-  const textureUrl = textureUrls[bodyId];
+  const textureUrl = textureUrls[bodyId]
 
   if (!textureUrl) {
-    throw new Error(`No overview texture configured for body: ${bodyId}`);
+    throw new Error(`No texture configured for body: ${bodyId}`)
   }
 
-  const texture = configurePlanetTexture(textureLoader.load(textureUrl));
-  textureCache.set(bodyId, texture);
-  return texture;
+  const texture = configurePlanetTexture(textureLoader.load(textureUrl))
+  textureCache.set(bodyId, texture)
+  return texture
 }

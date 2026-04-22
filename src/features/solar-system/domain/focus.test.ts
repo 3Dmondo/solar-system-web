@@ -7,7 +7,33 @@ import {
   getFocusTarget,
   getFocusTransitionProfile
 } from './focus';
-import { type ResolvedBodyCatalog } from '../data/bodyStateStore';
+import { EMPTY_RESOLVED_BODY_CATALOG, resolveBodyCatalog, type ResolvedBodyCatalog } from '../data/bodyStateStore'
+import { presentationBodyMetadata } from '../data/bodyPresentation'
+
+const focusCatalog = resolveBodyCatalog(
+  presentationBodyMetadata,
+  {
+    capturedAt: '2026-04-22T00:00:00.000Z',
+    bodies: [
+      {
+        id: 'sun',
+        position: [0, 0, 0]
+      },
+      {
+        id: 'earth',
+        position: [100, 0, 50]
+      },
+      {
+        id: 'moon',
+        position: [102, -0.2, 51]
+      },
+      {
+        id: 'saturn',
+        position: [400, 0, -150]
+      }
+    ]
+  }
+)
 
 const physicallyScaledCatalog: ResolvedBodyCatalog = {
   metadata: [],
@@ -54,23 +80,23 @@ const physicallyScaledCatalog: ResolvedBodyCatalog = {
 
 describe('focus helpers', () => {
   it('returns the selected body position as the focus target', () => {
-    expect(getFocusTarget('earth')).toEqual([-7.3723683986009245, 0, 5.162187927159417]);
+    expect(getFocusTarget('earth', focusCatalog)).toEqual([100, 0, 50])
   });
 
   it('returns the selected body position for the Moon', () => {
-    expect(getFocusTarget('moon')).toEqual([-6.3, -0.18, 5.65]);
+    expect(getFocusTarget('moon', focusCatalog)).toEqual([102, -0.2, 51])
   });
 
   it('returns a body-specific camera position for Saturn', () => {
-    const saturnCameraPosition = getFocusCameraPosition('saturn');
+    const saturnCameraPosition = getFocusCameraPosition('saturn', focusCatalog)
 
-    expect(saturnCameraPosition[0]).toBeCloseTo(19.424847042896396, 12);
-    expect(saturnCameraPosition[1]).toBeCloseTo(1.04427543854535, 12);
-    expect(saturnCameraPosition[2]).toBeCloseTo(3.13117571551716, 12);
+    expect(saturnCameraPosition[0]).toBeCloseTo(400, 9)
+    expect(saturnCameraPosition[1]).toBeCloseTo(1.044275439, 9)
+    expect(saturnCameraPosition[2]).toBeCloseTo(-136.54045, 6)
   });
 
   it('returns the overview camera position', () => {
-    expect(getFocusCameraPosition('overview')).toEqual([0, 14, 46]);
+    expect(getFocusCameraPosition('overview', EMPTY_RESOLVED_BODY_CATALOG)).toEqual([0, 14, 46])
   });
 
   it('expands the overview camera distance for large physically scaled scenes', () => {
@@ -80,15 +106,15 @@ describe('focus helpers', () => {
   });
 
   it('returns a focus distance based on the configured body-radius multiplier', () => {
-    expect(getFocusDistance('earth')).toBeCloseTo(7.2, 9);
+    expect(getFocusDistance('earth', focusCatalog)).toBeCloseTo(7.2, 9)
   });
 
   it('preserves the current view direction when deriving a focused camera position', () => {
-    const earthCameraPosition = getFocusCameraPositionForViewDirection('earth', [0, 14, 46]);
+    const earthCameraPosition = getFocusCameraPositionForViewDirection('earth', [0, 14, 46], focusCatalog)
 
-    expect(earthCameraPosition[0]).toBeCloseTo(-7.3723683986009245, 12);
-    expect(earthCameraPosition[1]).toBeCloseTo(2.09636363363541, 12);
-    expect(earthCameraPosition[2]).toBeCloseTo(12.0502398662472, 12);
+    expect(earthCameraPosition[0]).toBeCloseTo(100, 9)
+    expect(earthCameraPosition[1]).toBeCloseTo(2.096363634, 9)
+    expect(earthCameraPosition[2]).toBeCloseTo(56.888052, 6)
   });
 
   it('uses a target-leading profile when moving from overview into a body', () => {

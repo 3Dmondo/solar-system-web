@@ -15,13 +15,12 @@ The repository currently ships an overview-first solar-system scene with real-da
 - orbit controls tuned separately for fine and coarse pointers
 - a minimal HUD with a help overlay and focused-mode overview return
 - a Milky Way star background
-- mocked orbital trails rendered as thicker opaque lines
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
 
 ## Current Constraints
 
-- Orbital trails are still hard-coded mocked circles rather than sampled ephemeris history.
+- Orbital trails are temporarily hidden until chunk-derived trail geometry is ready.
 - The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
@@ -34,14 +33,13 @@ The next implementation slice focuses on finishing the real-data milestone after
 
 Focus areas:
 
-- replace circular mocked trails with sampled position history derived from the same chunk data
+- add sampled position history derived from the same chunk data
 - add rate and reverse controls on top of the current real-time and pause behavior
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
 - defer frame-switching and final trail UX until the later reference-frame milestone
 
 ## Long-Term Direction
 
-- move from mocked data to static offline-generated ephemeris assets
 - replace the decorative star background with a real star-catalog sky layer
 - support optional constellation-line overlays
 - add a minimized rendering-controls interface that stays usable on both mobile and desktop

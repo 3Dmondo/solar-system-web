@@ -97,11 +97,6 @@ export type BodyEphemerisSnapshot = {
   bodies: BodyEphemerisState[];
 };
 
-export type BodyStateProvider = {
-  getBodyMetadata: () => BodyMetadata[];
-  getSnapshot: (capturedAt?: string) => BodySnapshot;
-};
-
 export type BodyEphemerisProvider = {
   getBodyMetadata: () => BodyMetadata[];
   loadSnapshotAtUtc: (utc: Date | string) => Promise<BodyEphemerisSnapshot>;

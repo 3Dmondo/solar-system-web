@@ -11,7 +11,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ## Current Repo Snapshot
 
 - Browser-side Milestone 5 runtime foundations are already implemented in this repo: schema parsing, dataset loading, chunk selection, Hermite interpolation, async provider loading, physical scaling, simulation clock wiring, and HUD loading or error messaging.
-- The app now starts from the generated real-data runtime path by default, with explicit loading or error messaging instead of mocked startup or failure fallback.
+- The app now starts from the generated real-data runtime path by default, with explicit loading or error messaging instead of placeholder startup or failure fallback.
 - External preprocessing work is completed separately in `docs/tasks/milestone-5-spicenet.md`.
 - The repo now versions the accepted kernel-derived metadata snapshot at `public/ephemeris/body-metadata.json`, and it now defines the ignored local generated-asset root at `public/ephemeris/generated/` plus a helper script that can populate it from the pinned external `SpiceNet` workflow.
 - The GitHub Pages workflow now checks out `SpiceNet` at tag `v0.0.1` and generates non-versioned deployment ephemeris assets from the JPL SSD `de440s.bsp` URL before the site build, and the deployed app now consumes those generated assets through the default real-data runtime path.
@@ -24,8 +24,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ## Agreed Milestone Direction
 
 - Use the pinned external `SpiceNet` workflow as the generator for Milestone 5 web data.
-- Show real ephemeris-driven body positions from the beginning of the scene. Do not fall back to mocked positions.
-- If real data is not ready yet, show an explicit loading or error state rather than silently substituting a mocked catalog.
+- Show real ephemeris-driven body positions from the beginning of the scene. Do not fall back to placeholder positions.
+- If real data is not ready yet, show an explicit loading or error state rather than silently substituting a placeholder catalog.
 - Keep ephemeris manifest and chunk files non-versioned and generate them during CI or CD.
 - Keep kernel binaries and generated ephemeris artifacts out of git.
 - Keep `body-metadata.json` versioned in this repo as the accepted small kernel-derived metadata snapshot.
@@ -53,14 +53,14 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Preserve presentation metadata separately from physical metadata while scaling focus offsets proportionally.
 - [x] Compose the async provider and physical-scale mapping into the shared resolved catalog shape already used by the scene.
 - [x] Start the simulation clock from the current time and advance it in real time.
-- [x] Add pause and resume control plus HUD messaging for loading, fallback, and current simulation time.
+- [x] Add pause and resume control plus HUD messaging for loading, error, and current simulation time.
 - [x] Keep the default `pnpm build` and current GitHub Pages workflow free of hidden ephemeris generation.
 - [x] Add unit coverage for parsing, dataset loading, interpolation, provider caching, runtime wiring, simulation clock behavior, and HUD state messaging.
 
 ### Data Delivery And Activation Still To Do
 
-- [x] Remove the mocked startup and failure fallback from the runtime path.
-- [x] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
+- [x] Remove the placeholder startup and failure fallback from the runtime path.
+- [x] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of placeholder ones.
 - [x] Keep loading and failure UI explicit while the real dataset is being resolved.
 - [x] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
 - [x] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
@@ -75,7 +75,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### UX And Verification Still To Do
 
-- [ ] Replace circular mocked trails with sampled trail geometry derived from loaded chunk data.
+- [ ] Add sampled trail geometry derived from loaded chunk data.
 - [ ] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
 - [ ] Add the next playback controls in this order: rate changes, reverse playback.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
@@ -100,14 +100,14 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 3. Runtime Activation
 
-- Real positions now load from the first scene render, with explicit loading or error UX instead of mocked substitutes.
+- Real positions now load from the first scene render, with explicit loading or error UX instead of placeholder substitutes.
 - Keep tuning the first physical scale factor from the current default `0.001` scene units per kilometer before any later cinematic scaling work.
 - Keep evaluating whether the single physical scale should remain the long-term Milestone 5 default, but keep camera framing and clipping derived from scene extents while that tuning continues.
 - Keep the runtime contract explicit that raw SPICE positions stay in the accepted J2000 source frame until the scene-mapping layer rotates them into the app's ecliptic-aligned render frame.
 
 ### 4. Time And Trail UX
 
-- Replace mocked circular trails with chunk-derived trail geometry.
+- Add chunk-derived trail geometry.
 - Add the next playback controls in this order: rate changes, reverse playback.
 - Defer explicit date picking unless Milestone 5 usability proves it is necessary.
 
@@ -119,7 +119,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ## Acceptance Notes
 
-- The first visible scene should come from real ephemeris data or an explicit loading state, never from mocked positions.
+- The first visible scene should come from real ephemeris data or an explicit loading state, never from placeholder positions.
 - Opening the site should not require downloading the full supported ephemeris range.
 - The overview should stay responsive while the first real-data chunk loads.
 - Scrubbing within the current chunk should not trigger heavy recomputation.

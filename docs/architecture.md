@@ -36,7 +36,7 @@
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
 - Focused-body tracking now uses a split update path: live ephemeris refreshes keep recomputing the authored focused camera pose while the transition is still settling, then translate the current camera and target together once focus is active so manual orbit and zoom adjustments are preserved.
 - `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
-- The app still starts in the `overview` target, and smaller mock-scale scenes keep the legacy `[0, 14, 46]` overview framing.
+- The app still starts in the `overview` target, and smaller scenes keep the legacy `[0, 14, 46]` overview framing.
 
 ## Interaction Model
 
@@ -50,9 +50,8 @@
 
 ## Data And Domain Boundaries
 
-- `mockBodyStateProvider` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current synchronous source for mocked snapshot state.
-- Static body metadata and mocked snapshot positions are now separated in the mock data layer and merged only at scene-consumption boundaries.
-- `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by both mocked and async sources.
+- `bodyPresentation.ts` contains the shared display metadata that stays stable across data sources.
+- `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
 - `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, and supports pause or resume.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
@@ -67,13 +66,13 @@
 - Lighting uses a point light at the Sun plus a small ambient contribution.
 - `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
 - The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
-- `OrbitalTrails` renders non-interactive circular placeholder trails derived from mocked positions, using thicker opaque lines so their appearance stays consistent across body overlaps.
-- `PlanetBody` routes each body to either a custom material pipeline or the shared mock texture material.
+- Orbital trails are currently hidden until the real trail path is implemented.
+- `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.
 - Saturn uses a custom surface material and ring mesh.
 - Earth uses day, night, normal, specular, and cloud layers.
 - Venus uses a textured surface plus a cloud shell.
 - Moon uses texture and height data for extra relief.
-- The remaining bodies use shared texture-driven materials from `mockBodyTextures.ts`.
+- The remaining bodies use shared texture-driven materials from `bodyTextures.ts`.
 
 ## Testing And Validation
 

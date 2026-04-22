@@ -1,4 +1,4 @@
-import { getResolvedBodyCatalog, type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
+import { EMPTY_RESOLVED_BODY_CATALOG, type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore'
 import { type ViewTargetId } from '../../solar-system/domain/body';
 import {
   getFocusDistance,
@@ -43,7 +43,7 @@ export function getControlProfile(isCoarsePointer: boolean): ControlProfile {
 
 export function getControlDistanceRange(
   focusedBodyId: ViewTargetId,
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog(),
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG,
   isCoarsePointer = false
 ): ControlDistanceRange {
   const baseRange = isCoarsePointer

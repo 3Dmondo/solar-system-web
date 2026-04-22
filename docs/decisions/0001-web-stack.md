@@ -32,4 +32,4 @@ The project needs:
 - The repo requires a Node.js and `pnpm` toolchain.
 - Rendering helpers should remain decoupled from React components where practical.
 - Large texture assets and a growing single-page bundle must be watched as rendering fidelity increases.
-- The codebase should keep planned abstractions, such as a future body-state provider, separate from the current mocked data layer.
+- The codebase should keep long-lived presentation metadata and async-loaded ephemeris data separate so the rendering stack can evolve without rewriting scene consumers.

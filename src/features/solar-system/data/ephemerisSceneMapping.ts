@@ -4,7 +4,7 @@ import {
   type BodyPhysicalMetadata,
   type BodySnapshot
 } from '../domain/body'
-import { mockedBodyMetadata } from './mockBodyCatalog'
+import { presentationBodyMetadata } from './bodyPresentation'
 
 export type PhysicalSceneScale = {
   sceneUnitsPerKilometer: number
@@ -42,7 +42,7 @@ export function mapEphemerisSnapshotToSceneSnapshot(
 export function mapPhysicalMetadataToScaledBodyMetadata(
   physicalMetadata: BodyPhysicalMetadata[],
   scale: PhysicalSceneScale,
-  baseMetadata: BodyMetadata[] = mockedBodyMetadata
+  baseMetadata: BodyMetadata[] = presentationBodyMetadata
 ) {
   const physicalMetadataById = getDistinctBodyMap(physicalMetadata, 'physicalMetadata')
 

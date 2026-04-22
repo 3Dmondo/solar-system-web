@@ -4,15 +4,25 @@ import userEvent from '@testing-library/user-event';
 import { ExperienceHud } from './ExperienceHud';
 import {
   createEmptyResolvedBodyCatalog,
-  getResolvedBodyCatalog
+  resolveBodyCatalog
 } from '../../solar-system/data/bodyStateStore';
+import { presentationBodyMetadata } from '../../solar-system/data/bodyPresentation'
 
 describe('ExperienceHud', () => {
   afterEach(() => {
     cleanup();
   });
 
-  const catalog = getResolvedBodyCatalog();
+  const catalog = resolveBodyCatalog(
+    presentationBodyMetadata,
+    {
+      capturedAt: '2000-01-01T12:00:00.000Z',
+      bodies: presentationBodyMetadata.map((body, index) => ({
+        id: body.id,
+        position: [index * 10, 0, 0] as [number, number, number]
+      }))
+    }
+  )
 
   const renderHud = (focusedBodyId: 'overview' | 'saturn' = 'overview') =>
     render(
@@ -177,7 +187,7 @@ describe('ExperienceHud', () => {
     expect(screen.getByText(/network exploded/i)).toBeInTheDocument();
   });
 
-  it('shows a loading message without claiming a mocked snapshot is active', () => {
+  it('shows a loading message without claiming a fallback snapshot is active', () => {
     render(
       <ExperienceHud
         catalog={catalog}

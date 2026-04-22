@@ -2,7 +2,6 @@ import {
   type BodyEphemerisProvider,
   type BodyMetadata
 } from '../domain/body'
-import { mockedBodyMetadata } from './mockBodyCatalog'
 import {
   getChunkRangeForTdbTime,
   getNextChunkRange,
@@ -16,6 +15,7 @@ import {
   type WebEphemerisChunkRange
 } from './webEphemeris'
 import { type WebDataset, type WebDatasetLoader } from './webDatasetLoader'
+import { presentationBodyMetadata } from './bodyPresentation'
 
 export type WebEphemerisProviderOptions = {
   chunkBaseUrl: string
@@ -32,7 +32,7 @@ export function createWebEphemerisProvider({
   datasetLoader,
   fetchImpl = fetch,
   maxCachedChunks = defaultMaxCachedChunks,
-  presentationMetadata = mockedBodyMetadata
+  presentationMetadata = presentationBodyMetadata
 }: WebEphemerisProviderOptions): BodyEphemerisProvider {
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
   const chunkCache = new Map<string, Promise<WebEphemerisChunk>>()

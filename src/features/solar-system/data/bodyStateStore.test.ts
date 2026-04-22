@@ -1,38 +1,57 @@
 import { describe, expect, it } from 'vitest';
 import {
   createEmptyResolvedBodyCatalog,
-  getResolvedBodies,
-  getResolvedBodyById,
-  getResolvedBodyCatalog,
-  getResolvedBodyMetadataById
+  resolveBodyCatalog
 } from './bodyStateStore';
-import { mockedBodyMetadata } from './mockBodyCatalog';
+import { type BodyMetadata, type BodySnapshot } from '../domain/body'
 
 describe('bodyStateStore', () => {
-  it('resolves metadata and snapshot state together through one selector', () => {
-    const catalog = getResolvedBodyCatalog();
-
-    expect(catalog.metadata).toHaveLength(mockedBodyMetadata.length);
-    expect(catalog.snapshot.capturedAt).toBe('mock-overview');
-    expect(catalog.bodies).toHaveLength(mockedBodyMetadata.length);
-  });
-
-  it('returns merged body definitions by id', () => {
-    expect(getResolvedBodyById('earth')).toMatchObject({
+  const metadata: BodyMetadata[] = [
+    {
       id: 'earth',
       displayName: 'Earth',
-      position: [expect.any(Number), expect.any(Number), expect.any(Number)]
-    });
-  });
+      color: '#3a7bd5',
+      radius: 0.72,
+      focusOffset: [0, 0.25, 3.2]
+    },
+    {
+      id: 'moon',
+      displayName: 'Moon',
+      color: '#b0b4be',
+      radius: 0.22,
+      focusOffset: [0, 0.12, 1.7]
+    }
+  ]
+  const snapshot: BodySnapshot = {
+    capturedAt: '2000-01-01T12:00:00.000Z',
+    bodies: [
+      {
+        id: 'earth',
+        position: [1, 2, 3]
+      },
+      {
+        id: 'moon',
+        position: [4, 5, 6]
+      }
+    ]
+  }
 
-  it('returns static metadata by id for HUD labels and jump targets', () => {
-    expect(getResolvedBodyMetadataById('saturn')).toMatchObject({
-      id: 'saturn',
-      displayName: 'Saturn',
-      hasRings: true
-    });
-    expect(getResolvedBodies().find((body) => body.id === 'moon')?.displayName).toBe('Moon');
-  });
+  it('resolves metadata and snapshot state together through one selector', () => {
+    const catalog = resolveBodyCatalog(metadata, snapshot)
+
+    expect(catalog.metadata).toEqual(metadata)
+    expect(catalog.snapshot).toEqual(snapshot)
+    expect(catalog.bodies).toEqual([
+      {
+        ...metadata[0],
+        ...snapshot.bodies[0]
+      },
+      {
+        ...metadata[1],
+        ...snapshot.bodies[1]
+      }
+    ])
+  })
 
   it('can create an explicit empty catalog for real-data loading and error states', () => {
     const catalog = createEmptyResolvedBodyCatalog('2000-01-01T12:00:00.000Z');
@@ -44,4 +63,4 @@ describe('bodyStateStore', () => {
       bodies: []
     });
   });
-});
+})

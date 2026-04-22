@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
-import { OrbitalTrails } from '../../solar-system/components/OrbitalTrails';
 import { getControlDistanceRange, getControlProfile } from '../domain/controlProfile';
 import { translateFocusView } from '../domain/focusTracking';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
@@ -67,7 +66,6 @@ export function ExperienceScene({
         controlProfile={controlProfile}
         focusedBodyId={focusedBodyId}
       />
-      <OrbitalTrails bodies={bodies} />
 
       {bodies.map((body) => (
         <PlanetBody

@@ -24,7 +24,7 @@ describe('useResolvedBodyCatalog', () => {
     expect(result.current.catalog.bodies).toEqual([])
   })
 
-  it('loads an async catalog and exposes a loading state without seeding a mocked snapshot', async () => {
+  it('loads an async catalog and exposes a loading state without seeding a fallback snapshot', async () => {
     const loadedCatalog = createCatalog('loaded-catalog', [100, 0, 0])
     let resolveLoad: ((catalog: ResolvedBodyCatalog) => void) | undefined
     const source: BodyCatalogSource = {

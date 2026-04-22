@@ -4,9 +4,9 @@
 
 - Milestone 1 foundation and featured-body rendering work is complete.
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
-- Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
-- Milestone 4 data-abstraction work is complete, including the synchronous mocked `BodyStateProvider`, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
-- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, and a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of mocked startup positions.
+- Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, and manual closeout verification.
+- Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
+- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, and a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of placeholder startup positions.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -83,7 +83,7 @@ Goals:
 
 Current focus:
 
-- replace mocked circular trails with chunk-derived trail geometry
+- add chunk-derived trail geometry
 - add the next playback controls in this order: rate changes, reverse playback
 - add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery
 - finish chunk-size, startup-latency, and chunk-duration benchmarking for the deployed and local generated-data paths

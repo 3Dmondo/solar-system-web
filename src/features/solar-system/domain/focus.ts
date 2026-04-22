@@ -1,4 +1,4 @@
-import { getResolvedBodyCatalog, type ResolvedBodyCatalog } from '../data/bodyStateStore';
+import { EMPTY_RESOLVED_BODY_CATALOG, type ResolvedBodyCatalog } from '../data/bodyStateStore'
 import { type ViewTargetId } from './body';
 
 export type FocusTransitionProfile = {
@@ -28,7 +28,7 @@ const MIN_CAMERA_FAR = 100;
 
 export function getFocusDistance(
   bodyId: ViewTargetId,
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog(),
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG,
   aspect = 1
 ): number {
   if (bodyId === 'overview') {
@@ -46,7 +46,7 @@ export function getFocusDistance(
 
 export function getFocusTarget(
   bodyId: ViewTargetId,
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
 ): [number, number, number] {
   if (bodyId === 'overview') {
     return [0, 0, 0];
@@ -63,7 +63,7 @@ export function getFocusTarget(
 
 export function getFocusCameraPosition(
   bodyId: ViewTargetId,
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog(),
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG,
   aspect = 1
 ): [number, number, number] {
   if (bodyId === 'overview') {
@@ -95,7 +95,7 @@ export function getFocusCameraPosition(
 export function getFocusCameraPositionForViewDirection(
   bodyId: ViewTargetId,
   viewDirection: [number, number, number],
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog(),
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG,
   aspect = 1
 ): [number, number, number] {
   if (bodyId === 'overview') {
@@ -156,7 +156,7 @@ export function getFocusTransitionProfile(
 }
 
 export function getSceneOverviewRadius(
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
 ) {
   return catalog.bodies.reduce((maximumRadius, body) => {
     const bodyDistance = Math.hypot(...body.position);
@@ -168,7 +168,7 @@ export function getSceneOverviewRadius(
 
 export function getViewTargetVisibleRadius(
   bodyId: ViewTargetId,
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
 ) {
   if (bodyId === 'overview') {
     return getSceneOverviewRadius(catalog);
@@ -187,7 +187,7 @@ export function getCameraClipPlanes(
   bodyId: ViewTargetId,
   cameraPosition: [number, number, number],
   target: [number, number, number],
-  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog()
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
 ): CameraClipPlanes {
   const targetRadius = getViewTargetVisibleRadius(bodyId, catalog);
   const cameraDistanceToTarget = getDistance(cameraPosition, target);

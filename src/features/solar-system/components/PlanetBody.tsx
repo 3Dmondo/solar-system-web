@@ -5,10 +5,10 @@ import { Mesh } from 'three';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
-import { MockPlanetMaterial } from './MockPlanetMaterial';
 import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
+import { TexturedPlanetMaterial } from './TexturedPlanetMaterial'
 import { VenusCloudLayer } from './VenusCloudLayer';
 
 type PlanetBodyProps = ThreeElements['mesh'] & {
@@ -76,7 +76,7 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial />
         ) : (
-          <MockPlanetMaterial bodyId={body.id} />
+          <TexturedPlanetMaterial bodyId={body.id} />
         )}
       </mesh>
 
