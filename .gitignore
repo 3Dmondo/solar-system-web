@@ -3,8 +3,10 @@ dist/
 coverage/
 playwright-report/
 test-results/
-*.d.ts
-*.js
+playwright.config.d.ts
+playwright.config.js
+vite.config.d.ts
+vite.config.js
 *.tsbuildinfo
 _tmp_*
 .tmp/
