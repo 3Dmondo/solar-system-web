@@ -26,6 +26,15 @@ export function resolveBodyCatalog(
   };
 }
 
+export function createEmptyResolvedBodyCatalog(
+  capturedAt: string
+): ResolvedBodyCatalog {
+  return resolveBodyCatalog([], {
+    capturedAt,
+    bodies: []
+  });
+}
+
 export function getResolvedBodyCatalog(capturedAt?: string): ResolvedBodyCatalog {
   const metadata = mockBodyStateProvider.getBodyMetadata();
   const snapshot = mockBodyStateProvider.getSnapshot(capturedAt);

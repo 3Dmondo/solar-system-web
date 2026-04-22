@@ -48,9 +48,9 @@ pnpm test:e2e
 ## Manual Interaction Checklist
 
 - Overview loads with the HUD title `Solar System`.
-- The `Jump to` control is easy to notice in overview mode on desktop and mobile.
+- The `Jump to` control is easy to notice in overview and focused modes on desktop and mobile.
 - Opening `Jump to` feels lightweight on desktop and comfortable on mobile-sized layouts.
-- Choosing a body from `Jump to` focuses the intended target.
+- Choosing a body from `Jump to` focuses the intended target, including direct body-to-body switches while already focused.
 - Drag orbit feels stable on desktop and on touch devices.
 - Wheel zoom and pinch zoom work smoothly.
 - Double click or double tap focuses the intended body.

@@ -12,21 +12,19 @@ describe('useResolvedBodyCatalog', () => {
     vi.useRealTimers()
   })
 
-  it('returns the mocked catalog immediately when no async source is provided', () => {
+  it('surfaces an explicit error when no async source is provided', () => {
     const { result } = renderHook(() =>
       useResolvedBodyCatalog('2000-01-01T12:00:00Z')
     )
 
-    expect(result.current.status).toBe('ready')
-    expect(result.current.error).toBeNull()
-    expect(result.current.catalog.snapshot.capturedAt).toBe('mock-overview')
-    expect(result.current.catalog.bodies.find((body) => body.id === 'earth')).toMatchObject({
-      id: 'earth',
-      displayName: 'Earth'
-    })
+    expect(result.current.status).toBe('error')
+    expect(result.current.error?.message).toBe('Real ephemeris data source is not configured')
+    expect(result.current.catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(result.current.catalog.metadata).toEqual([])
+    expect(result.current.catalog.bodies).toEqual([])
   })
 
-  it('loads an async catalog and exposes a loading state while keeping the fallback snapshot', async () => {
+  it('loads an async catalog and exposes a loading state without seeding a mocked snapshot', async () => {
     const loadedCatalog = createCatalog('loaded-catalog', [100, 0, 0])
     let resolveLoad: ((catalog: ResolvedBodyCatalog) => void) | undefined
     const source: BodyCatalogSource = {
@@ -43,7 +41,9 @@ describe('useResolvedBodyCatalog', () => {
     )
 
     expect(result.current.status).toBe('loading')
-    expect(result.current.catalog.snapshot.capturedAt).toBe('mock-overview')
+    expect(result.current.catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(result.current.catalog.metadata).toEqual([])
+    expect(result.current.catalog.bodies).toEqual([])
     expect(source.prefetchAroundUtc).toHaveBeenCalledWith('2000-01-01T12:00:00.000Z')
 
     resolveLoad?.(loadedCatalog)
@@ -56,7 +56,7 @@ describe('useResolvedBodyCatalog', () => {
     expect(result.current.error).toBeNull()
   })
 
-  it('keeps the fallback snapshot and surfaces an error when the async source fails', async () => {
+  it('keeps the catalog empty and surfaces an error when the first async load fails', async () => {
     const source: BodyCatalogSource = {
       loadBodyCatalogAtUtc: vi.fn(async () => {
         throw new Error('Network exploded')
@@ -71,7 +71,9 @@ describe('useResolvedBodyCatalog', () => {
       expect(result.current.status).toBe('error')
     })
 
-    expect(result.current.catalog.snapshot.capturedAt).toBe('mock-overview')
+    expect(result.current.catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(result.current.catalog.metadata).toEqual([])
+    expect(result.current.catalog.bodies).toEqual([])
     expect(result.current.error?.message).toBe('Network exploded')
   })
 
@@ -100,7 +102,9 @@ describe('useResolvedBodyCatalog', () => {
     )
 
     expect(result.current.status).toBe('loading')
-    expect(result.current.catalog.snapshot.capturedAt).toBe('mock-overview')
+    expect(result.current.catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(result.current.catalog.metadata).toEqual([])
+    expect(result.current.catalog.bodies).toEqual([])
 
     await act(async () => {
       pendingLoads[0]?.(firstCatalog)
@@ -131,6 +135,40 @@ describe('useResolvedBodyCatalog', () => {
 
     expect(result.current.status).toBe('ready')
     expect(result.current.catalog).toBe(secondCatalog)
+  })
+
+  it('keeps the last loaded real catalog visible when a refresh fails', async () => {
+    const firstCatalog = createCatalog('loaded-catalog-1', [100, 0, 0])
+    const source: BodyCatalogSource = {
+      loadBodyCatalogAtUtc: vi
+        .fn<BodyCatalogSource['loadBodyCatalogAtUtc']>()
+        .mockResolvedValueOnce(firstCatalog)
+        .mockRejectedValueOnce(new Error('Chunk boundary exploded')),
+      prefetchAroundUtc: vi.fn(async () => undefined)
+    }
+    const { result, rerender } = renderHook(
+      ({ requestedUtc }) => useResolvedBodyCatalog(requestedUtc, source),
+      {
+        initialProps: {
+          requestedUtc: '2000-01-01T12:00:00Z'
+        }
+      }
+    )
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('ready')
+    })
+
+    rerender({
+      requestedUtc: '2000-01-01T12:00:01Z'
+    })
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('error')
+    })
+
+    expect(result.current.catalog).toBe(firstCatalog)
+    expect(result.current.error?.message).toBe('Chunk boundary exploded')
   })
 })
 

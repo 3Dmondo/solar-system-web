@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ExperienceHud } from './ExperienceHud';
-import { getResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
+import {
+  createEmptyResolvedBodyCatalog,
+  getResolvedBodyCatalog
+} from '../../solar-system/data/bodyStateStore';
 
 describe('ExperienceHud', () => {
   afterEach(() => {
@@ -81,6 +84,31 @@ describe('ExperienceHud', () => {
     expect(onFocusBody).toHaveBeenCalledWith('earth');
   });
 
+  it('keeps jump to available while focused so another body can be selected directly', async () => {
+    const user = userEvent.setup();
+    const onFocusBody = vi.fn();
+
+    render(
+      <ExperienceHud
+        catalog={catalog}
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="saturn"
+        isCoarsePointer={false}
+        isSimulationPaused={false}
+        requestedUtc="2000-01-01T12:00:00Z"
+        onFocusBody={onFocusBody}
+        onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open jump to bodies' }));
+    await user.click(screen.getByRole('button', { name: 'Jump to Earth' }));
+
+    expect(onFocusBody).toHaveBeenCalledWith('earth');
+  });
+
   it('closes jump to when escape is pressed', async () => {
     const user = userEvent.setup();
 
@@ -129,7 +157,7 @@ describe('ExperienceHud', () => {
     expect(screen.getByText(/running in real time/i)).toBeInTheDocument();
   });
 
-  it('shows a fallback status message when real ephemeris loading fails', () => {
+  it('shows an explicit error status message when real ephemeris loading fails', () => {
     render(
       <ExperienceHud
         catalog={catalog}
@@ -145,11 +173,11 @@ describe('ExperienceHud', () => {
       />
     );
 
-    expect(screen.getByText(/showing the fallback snapshot/i)).toBeInTheDocument();
+    expect(screen.getByText(/real ephemeris data is unavailable right now/i)).toBeInTheDocument();
     expect(screen.getByText(/network exploded/i)).toBeInTheDocument();
   });
 
-  it('shows a loading message without claiming the fallback snapshot is active', () => {
+  it('shows a loading message without claiming a mocked snapshot is active', () => {
     render(
       <ExperienceHud
         catalog={catalog}
@@ -167,6 +195,25 @@ describe('ExperienceHud', () => {
 
     expect(screen.getByText(/loading real positions for the requested time/i)).toBeInTheDocument();
     expect(screen.queryByText(/showing the fallback snapshot/i)).not.toBeInTheDocument();
+  });
+
+  it('hides jump to while the real catalog is still empty', () => {
+    render(
+      <ExperienceHud
+        catalog={createEmptyResolvedBodyCatalog('2000-01-01T12:00:00.000Z')}
+        catalogError={null}
+        catalogStatus="loading"
+        focusedBodyId="overview"
+        isCoarsePointer={false}
+        isSimulationPaused={false}
+        requestedUtc="2000-01-01T12:00:00Z"
+        onFocusBody={() => undefined}
+        onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Open jump to bodies' })).not.toBeInTheDocument();
   });
 
   it('toggles the pause or resume simulation control', async () => {

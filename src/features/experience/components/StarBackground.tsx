@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { BackSide, Mesh } from 'three';
 import { loadStarBackgroundTexture } from '../rendering/starBackground';
 
-const STAR_BACKGROUND_RADIUS = 420;
+const STAR_BACKGROUND_BASE_RADIUS = 1;
 const ignoreRaycast: Mesh['raycast'] = () => null;
 
 export function StarBackground() {
@@ -17,6 +17,7 @@ export function StarBackground() {
     }
 
     backgroundRef.current.position.copy(camera.position);
+    backgroundRef.current.scale.setScalar(Math.max(camera.far * 0.9, camera.near * 2));
   });
 
   return (
@@ -26,7 +27,7 @@ export function StarBackground() {
       rotation={[0.14, 0.5, 0]}
       renderOrder={-1}
     >
-      <sphereGeometry args={[STAR_BACKGROUND_RADIUS, 48, 48]} />
+      <sphereGeometry args={[STAR_BACKGROUND_BASE_RADIUS, 48, 48]} />
       <meshBasicMaterial
         color="#b8c3f5"
         depthWrite={false}

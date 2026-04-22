@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  getResolvedBodyCatalog,
+  createEmptyResolvedBodyCatalog,
   type BodyCatalogSource,
   type ResolvedBodyCatalog
 } from '../../solar-system/data/bodyStateStore'
@@ -17,22 +17,24 @@ export function useResolvedBodyCatalog(
     () => normalizeRequestedUtc(requestedUtc),
     [requestedUtc]
   )
-  const fallbackCatalog = useMemo(
-    () => getResolvedBodyCatalog(normalizedRequestedUtc),
+  const emptyCatalog = useMemo(
+    () => createEmptyResolvedBodyCatalog(normalizedRequestedUtc),
     [normalizedRequestedUtc]
   )
-  const [catalog, setCatalog] = useState<ResolvedBodyCatalog>(fallbackCatalog)
+  const [catalog, setCatalog] = useState<ResolvedBodyCatalog>(emptyCatalog)
   const [status, setStatus] = useState<ResolvedBodyCatalogStatus>(
-    source ? 'loading' : 'ready'
+    source ? 'loading' : 'error'
   )
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<Error | null>(
+    source ? null : createMissingSourceError()
+  )
   const hasLoadedSourceCatalog = useRef(false)
 
   useEffect(() => {
     if (!source) {
-      setCatalog(fallbackCatalog)
-      setStatus('ready')
-      setError(null)
+      setCatalog(emptyCatalog)
+      setStatus('error')
+      setError(createMissingSourceError())
       hasLoadedSourceCatalog.current = false
       return
     }
@@ -51,7 +53,7 @@ export function useResolvedBodyCatalog(
         }
       }, refreshLoadingDelayMs)
     } else {
-      setCatalog(fallbackCatalog)
+      setCatalog(emptyCatalog)
       setStatus('loading')
     }
 
@@ -81,10 +83,13 @@ export function useResolvedBodyCatalog(
           window.clearTimeout(loadingTimeoutId)
         }
 
-        hasLoadedSourceCatalog.current = false
-        setCatalog(fallbackCatalog)
         setStatus('error')
         setError(toError(reason))
+
+        if (!isRefreshingLoadedCatalog) {
+          hasLoadedSourceCatalog.current = false
+          setCatalog(emptyCatalog)
+        }
       })
 
     return () => {
@@ -94,7 +99,7 @@ export function useResolvedBodyCatalog(
         window.clearTimeout(loadingTimeoutId)
       }
     }
-  }, [fallbackCatalog, normalizedRequestedUtc, source])
+  }, [emptyCatalog, normalizedRequestedUtc, source])
 
   return {
     catalog,
@@ -119,4 +124,8 @@ function toError(reason: unknown) {
   }
 
   return new Error('Failed to load body catalog')
+}
+
+function createMissingSourceError() {
+  return new Error('Real ephemeris data source is not configured')
 }

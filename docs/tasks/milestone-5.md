@@ -11,10 +11,15 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ## Current Repo Snapshot
 
 - Browser-side Milestone 5 runtime foundations are already implemented in this repo: schema parsing, dataset loading, chunk selection, Hermite interpolation, async provider loading, physical scaling, simulation clock wiring, and HUD loading or error messaging.
-- Current code still keeps the mocked catalog as a startup and failure fallback. That no longer matches the agreed Milestone 5 direction and needs to be removed.
+- The app now starts from the generated real-data runtime path by default, with explicit loading or error messaging instead of mocked startup or failure fallback.
 - External preprocessing work is completed separately in `docs/tasks/milestone-5-spicenet.md`.
 - The repo now versions the accepted kernel-derived metadata snapshot at `public/ephemeris/body-metadata.json`, and it now defines the ignored local generated-asset root at `public/ephemeris/generated/` plus a helper script that can populate it from the pinned external `SpiceNet` workflow.
-- The GitHub Pages workflow now checks out `SpiceNet` at tag `v0.0.1` and generates non-versioned deployment ephemeris assets from the JPL SSD `de440s.bsp` URL before the site build, while runtime activation still remains a separate Milestone 5 step.
+- The GitHub Pages workflow now checks out `SpiceNet` at tag `v0.0.1` and generates non-versioned deployment ephemeris assets from the JPL SSD `de440s.bsp` URL before the site build, and the deployed app now consumes those generated assets through the default real-data runtime path.
+- The first real-data activation pass now defaults to `0.001` scene units per kilometer unless a runtime override is supplied.
+- The first real-data camera pass now keeps one shared km-to-scene scale for positions and radii while deriving overview framing, zoom bounds, and clip planes from the loaded scene extents.
+- The runtime now maps raw J2000 ephemeris vectors into one shared ecliptic-aligned render frame before focus, controls, and planet rendering consume body positions.
+- The current focus pass now snaps targeting directly onto the selected body center and uses an initial focused camera distance of about `10 x` the body radius from the authored focus direction.
+- Focused tracking now re-evaluates the authored pose only while a focus transition is settling; once focused, live body updates translate the current camera and target together so manual orbit and zoom adjustments remain intact.
 
 ## Agreed Milestone Direction
 
@@ -30,6 +35,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Keep the default `pnpm build` path focused on the web app build; ephemeris generation should remain an explicit local or CI or CD step.
 - Pin CI or CD generation to `3Dmondo/SpiceNet` tag `v0.0.1`.
 - Fetch `de440s.bsp` for CI or CD generation from the JPL SSD catalog URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`.
+- Use `0.001` scene units per kilometer as the first default physical scale, with `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` reserved as an override while Milestone 5 tuning continues.
 - Preserve the accepted solar-system-barycenter frame, approximate J2000 UTC anchor, and cubic Hermite interpolation contract for Milestone 5.
 - Keep physical metadata separate from cinematic presentation metadata, with one explicit km-to-scene scale factor for the real-data path.
 
@@ -53,9 +59,9 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### Data Delivery And Activation Still To Do
 
-- [ ] Remove the mocked startup and failure fallback from the runtime path.
-- [ ] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
-- [ ] Keep loading and failure UI explicit while the real dataset is being resolved.
+- [x] Remove the mocked startup and failure fallback from the runtime path.
+- [x] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
+- [x] Keep loading and failure UI explicit while the real dataset is being resolved.
 - [x] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
 - [x] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
 - [x] Generate ephemeris manifest and chunk files during CI or CD with the pinned `SpiceNet` workflow before deployment.
@@ -63,6 +69,9 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Define a git-ignored local output directory for generated ephemeris assets during development.
 - [x] Add a local helper script that generates ephemeris assets when the local output directory is missing.
 - [x] Wire the runtime to consume versioned body metadata together with generated ephemeris manifest and chunk assets.
+- [x] Retune overview framing, zoom limits, and clip planes so the current physically scaled real-data scene remains navigable.
+- [x] Keep focus offsets and real body positions in the same render-space frame instead of mixing raw J2000 coordinates with authored scene-space camera offsets.
+- [x] Keep focused-body targeting centered on the selected planet during the transition and tighten the default focused framing distance for local inspection.
 
 ### UX And Verification Still To Do
 
@@ -91,9 +100,10 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 3. Runtime Activation
 
-- Remove the mocked fallback path.
-- Load real positions from the first scene render, with explicit loading or error UX instead of mocked substitutes.
-- Keep the first physical scale factor inspectable in the live scene before any later cinematic scaling work.
+- Real positions now load from the first scene render, with explicit loading or error UX instead of mocked substitutes.
+- Keep tuning the first physical scale factor from the current default `0.001` scene units per kilometer before any later cinematic scaling work.
+- Keep evaluating whether the single physical scale should remain the long-term Milestone 5 default, but keep camera framing and clipping derived from scene extents while that tuning continues.
+- Keep the runtime contract explicit that raw SPICE positions stay in the accepted J2000 source frame until the scene-mapping layer rotates them into the app's ecliptic-aligned render frame.
 
 ### 4. Time And Trail UX
 
@@ -124,4 +134,3 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 - Should the local helper script only generate data when missing, or also support an explicit refresh mode?
 - What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?
-- What global km-to-scene scale factor keeps the first physical pass readable without reintroducing hidden cinematic distortion?

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  createEmptyResolvedBodyCatalog,
   getResolvedBodies,
   getResolvedBodyById,
   getResolvedBodyCatalog,
@@ -31,5 +32,16 @@ describe('bodyStateStore', () => {
       hasRings: true
     });
     expect(getResolvedBodies().find((body) => body.id === 'moon')?.displayName).toBe('Moon');
+  });
+
+  it('can create an explicit empty catalog for real-data loading and error states', () => {
+    const catalog = createEmptyResolvedBodyCatalog('2000-01-01T12:00:00.000Z');
+
+    expect(catalog.metadata).toEqual([]);
+    expect(catalog.bodies).toEqual([]);
+    expect(catalog.snapshot).toEqual({
+      capturedAt: '2000-01-01T12:00:00.000Z',
+      bodies: []
+    });
   });
 });

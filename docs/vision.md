@@ -6,11 +6,12 @@ Build a static web-based solar system explorer that feels polished, readable, an
 
 ## Current Experience
 
-The repository currently ships a mocked overview-first solar-system scene with:
+The repository currently ships an overview-first solar-system scene with real-data startup and:
 
+- generated ephemeris-driven positions loaded at startup, with explicit loading or error messaging when local or deployed data is unavailable
 - Sun, all 8 planets, and the Moon
-- overview-to-body focus transitions driven by a `Jump to` HUD menu plus double click or double tap
-- directional camera easing that preserves the current viewing angle when moving into focus and pulls back more decisively to overview
+- overview-to-body focus transitions driven by a `Jump to` HUD menu plus double click or double tap, with `Jump to` still available while focused for direct body-to-body switches
+- directional camera easing that snaps the target onto the selected body center, approaches from the authored focus direction at about `10 x` body radius, and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
 - a minimal HUD with a help overlay and focused-mode overview return
 - a Milky Way star background
@@ -20,8 +21,8 @@ The repository currently ships a mocked overview-first solar-system scene with:
 
 ## Current Constraints
 
-- Body positions and trails are hard-coded mocked values.
-- The app now uses a synchronous mocked body-state provider, but still serves only hard-coded snapshot data.
+- Orbital trails are still hard-coded mocked circles rather than sampled ephemeris history.
+- The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
 - There is no dedicated rendering-configuration UI yet.
@@ -29,16 +30,13 @@ The repository currently ships a mocked overview-first solar-system scene with:
 
 ## Next Experience
 
-The next implementation milestone is real positions and time controls on top of the new provider-backed data boundary.
+The next implementation slice focuses on finishing the real-data milestone after startup activation.
 
 Focus areas:
 
-- integrate static offline-generated chunked ephemeris assets behind the existing provider shape
-- keep browser work focused on loading and interpolating prepared chunks instead of raw-kernel parsing unless later benchmarks prove that unnecessary
-- use kernel-derived body facts where they help the app, while keeping cinematic scale and focus tuning separate from physical metadata
-- start the simulation from the current datetime with real-time advancement, pause, reverse, and rate controls without rewriting the current scene consumers again
 - replace circular mocked trails with sampled position history derived from the same chunk data
-- keep the current overview readability and focus behavior intact while the data source changes
+- add rate and reverse controls on top of the current real-time and pause behavior
+- expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
 - defer frame-switching and final trail UX until the later reference-frame milestone
 
 ## Long-Term Direction

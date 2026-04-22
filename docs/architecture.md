@@ -24,20 +24,27 @@
 
 ## Current Runtime Shape
 
-- `App` renders `SolarSystemExperience` and can opt into the external web-data catalog source through `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER`.
+- `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
+- The first real-data activation pass uses a default physical scale of `0.001` scene units per kilometer unless `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` overrides it.
+- Real positions and kernel-derived mean radii still share that one explicit km-to-scene factor; the runtime does not apply a second hidden scale to body positions.
+- The scene now presents real positions through one explicit frame transform: raw J2000 ephemeris vectors are rotated into a J2000-ecliptic-aligned render frame and then mapped into the app's `x/z` orbital plane with `y` up before focus, controls, and rendering consume them.
 - `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list from the current resolved catalog.
-- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or fallback messages.
-- The app starts in the `overview` target, with the camera at `[0, 14, 46]`.
+- The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
+- Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
+- Focused-body tracking now uses a split update path: live ephemeris refreshes keep recomputing the authored focused camera pose while the transition is still settling, then translate the current camera and target together once focus is active so manual orbit and zoom adjustments are preserved.
+- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
+- The app still starts in the `overview` target, and smaller mock-scale scenes keep the legacy `[0, 14, 46]` overview framing.
 
 ## Interaction Model
 
 - Desktop: drag to orbit, wheel to zoom, double click a body to focus it.
 - Mobile: drag to orbit, pinch to zoom, double tap a body to focus it.
-- The overview HUD exposes a `Jump to` button that opens a grouped chooser for direct focus and easier body discovery.
-- Focus transitions are eased, can be interrupted by user input, preserve the current viewing angle when entering a body, and use directional profiles so body-to-overview moves pull back faster.
+- The HUD exposes a `Jump to` button whenever real bodies are loaded, so you can switch directly between bodies without returning to overview first.
+- Focus transitions are eased, can be interrupted by user input, and use directional profiles so body-to-overview moves pull back faster.
+- Focus transitions now keep the selected body centered from the start of the move by snapping the controls target to the selected body before the camera eases into its authored focused distance.
 - The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 
@@ -46,16 +53,14 @@
 - `mockBodyStateProvider` in `src/features/solar-system/data/mockBodyCatalog.ts` is the current synchronous source for mocked snapshot state.
 - Static body metadata and mocked snapshot positions are now separated in the mock data layer and merged only at scene-consumption boundaries.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by both mocked and async sources.
-- `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that can keep a mocked fallback catalog visible while an async source loads or fails.
+- `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
 - `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, and supports pause or resume.
-- `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, and uniform physical scaling into the shared resolved-catalog shape, including focus offsets that scale with the physically derived radii.
-- `webBodyCatalogRuntime.ts` turns the external web-data source on only when the runtime env provides both the data base URL and the physical scale factor, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
-- Without those two env values, the app keeps using the mocked catalog for positions and radii even though the real-data runtime path is implemented.
+- `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
+- `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
-- The default runtime still falls back to the existing mocked overview layout until the external web-data source is explicitly configured.
 
 ## Rendering Model
 
@@ -91,7 +96,6 @@ Additional notes:
 - The workflow now checks out `3Dmondo/SpiceNet` at tag `v0.0.1`, generates `public/ephemeris/generated/` from the JPL SSD `de440s.bsp` URL before the web build, and publishes those generated assets through the normal `dist/` artifact without committing them to git.
 - `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
 - Static texture imports are bundled through Vite so they work from the project-site base path.
-- The deployment build still does not enable the real-data runtime by default; runtime activation remains a separate Milestone 5 step.
 
 ## Known Gaps And Planned Refactors
 

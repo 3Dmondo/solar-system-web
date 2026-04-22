@@ -167,16 +167,16 @@ describe('webBodyCatalogSource', () => {
     expect(datasetLoader.load).toHaveBeenCalledTimes(1)
     expect(ephemerisProvider.loadSnapshotAtUtc).toHaveBeenCalledWith('2000-01-01T12:00:00Z')
     expect(catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
-    expect(earth).toMatchObject({
-      id: 'earth',
-      radius: 6.3710084,
-      position: [100, 0, 0]
-    })
-    expect(moon).toMatchObject({
-      id: 'moon',
-      radius: 1.7374,
-      position: [100.4, 0.3, 0]
-    })
+    expect(earth?.id).toBe('earth')
+    expect(earth?.radius).toBeCloseTo(6.3710084, 9)
+    expect(earth?.position[0]).toBeCloseTo(100, 9)
+    expect(earth?.position[1]).toBeCloseTo(0, 9)
+    expect(earth?.position[2]).toBeCloseTo(0, 9)
+    expect(moon?.id).toBe('moon')
+    expect(moon?.radius).toBeCloseTo(1.7374, 9)
+    expect(moon?.position[0]).toBeCloseTo(100.4, 9)
+    expect(moon?.position[1]).toBeCloseTo(-0.1193331463, 9)
+    expect(moon?.position[2]).toBeCloseTo(-0.2752446186, 9)
     expect(
       Math.hypot(...(earth?.focusOffset ?? [0, 0, 0])) / (earth?.radius ?? 1)
     ).toBeCloseTo(

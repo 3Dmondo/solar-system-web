@@ -138,10 +138,18 @@ const chunkFixture = {
 }
 
 describe('webBodyCatalogRuntime', () => {
-  it('returns undefined when the required runtime config is missing or invalid', () => {
-    expect(getConfiguredWebEphemerisDataBaseUrl({})).toBeUndefined()
+  it('uses default generated-data paths and the first physical scene scale when runtime config is omitted', () => {
+    expect(getConfiguredWebEphemerisDataBaseUrl({})).toBe('./ephemeris/generated')
     expect(getConfiguredWebBodyMetadataUrl({})).toBe('./ephemeris/body-metadata.json')
-    expect(getConfiguredSceneUnitsPerKilometer({})).toBeUndefined()
+    expect(getConfiguredSceneUnitsPerKilometer({})).toBe(0.001)
+    expect(
+      createConfiguredWebBodyCatalogSource({
+        BASE_URL: '/solar-system-web/'
+      })
+    ).toBeDefined()
+  })
+
+  it('returns undefined when the configured scene scale is invalid', () => {
     expect(
       getConfiguredSceneUnitsPerKilometer({
         VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER: 'nope'
@@ -149,7 +157,7 @@ describe('webBodyCatalogRuntime', () => {
     ).toBeUndefined()
     expect(
       createConfiguredWebBodyCatalogSource({
-        VITE_WEB_EPHEMERIS_DATA_BASE_URL: 'ephemeris/de440s'
+        VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER: 'nope'
       })
     ).toBeUndefined()
   })
@@ -168,12 +176,12 @@ describe('webBodyCatalogRuntime', () => {
     ).toBe('./reference/body-metadata.json')
   })
 
-  it('creates a working real catalog source when the runtime config is present', async () => {
+  it('creates a working real catalog source when using the default generated-data path', async () => {
     const earthBase = baseMetadata.find((body) => body.id === 'earth')
     const fetchMock = vi.fn<typeof fetch>(async (url: string | URL | Request) => {
       const value = url.toString()
 
-      if (value === 'ephemeris/de440s/manifest.json') {
+      if (value === '/solar-system-web/ephemeris/generated/manifest.json') {
         return new Response(JSON.stringify(manifestFixture), { status: 200 })
       }
 
@@ -181,7 +189,7 @@ describe('webBodyCatalogRuntime', () => {
         return new Response(JSON.stringify(bodyMetadataFixture), { status: 200 })
       }
 
-      if (value === 'ephemeris/de440s/chunk-0.json') {
+      if (value === '/solar-system-web/ephemeris/generated/chunk-0.json') {
         return new Response(JSON.stringify(chunkFixture), { status: 200 })
       }
 
@@ -189,9 +197,7 @@ describe('webBodyCatalogRuntime', () => {
     })
     const source = createConfiguredWebBodyCatalogSource(
       {
-        BASE_URL: '/solar-system-web/',
-        VITE_WEB_EPHEMERIS_DATA_BASE_URL: 'ephemeris/de440s',
-        VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER: '0.001'
+        BASE_URL: '/solar-system-web/'
       },
       {
         fetchImpl: fetchMock,
@@ -223,9 +229,9 @@ describe('webBodyCatalogRuntime', () => {
     expect(earth?.position[2]).toBeCloseTo(0, 9)
     expect(fetchMock).toHaveBeenCalledTimes(3)
     expect(fetchMock.mock.calls.map(([url]) => url.toString())).toEqual([
-      'ephemeris/de440s/manifest.json',
+      '/solar-system-web/ephemeris/generated/manifest.json',
       '/solar-system-web/ephemeris/body-metadata.json',
-      'ephemeris/de440s/chunk-0.json'
+      '/solar-system-web/ephemeris/generated/chunk-0.json'
     ])
   })
 })

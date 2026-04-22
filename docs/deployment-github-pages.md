@@ -12,7 +12,7 @@
 - The build job checks out `3Dmondo/SpiceNet` at tag `v0.0.1`, installs dependencies with `pnpm install --frozen-lockfile`, generates `public/ephemeris/generated/` before the web build, and then runs `pnpm build`.
 - `actions/configure-pages@v5` is used with `enablement: true`.
 - The deploy job publishes the `dist/` artifact.
-- The workflow-generated ephemeris assets are copied into `dist/ephemeris/generated/` through Vite's normal `public/` handling, but the build does not yet turn on the real-data runtime by default.
+- The workflow-generated ephemeris assets are copied into `dist/ephemeris/generated/` through Vite's normal `public/` handling, and the deployed app now consumes them through the default real-data runtime path.
 
 ## Expected URL
 

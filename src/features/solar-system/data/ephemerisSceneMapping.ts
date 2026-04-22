@@ -10,6 +10,10 @@ export type PhysicalSceneScale = {
   sceneUnitsPerKilometer: number
 }
 
+const J2000_ECLIPTIC_OBLIQUITY_RADIANS = (23.439291111 * Math.PI) / 180
+const J2000_ECLIPTIC_OBLIQUITY_COSINE = Math.cos(J2000_ECLIPTIC_OBLIQUITY_RADIANS)
+const J2000_ECLIPTIC_OBLIQUITY_SINE = Math.sin(J2000_ECLIPTIC_OBLIQUITY_RADIANS)
+
 export function createPhysicalSceneScale(
   sceneUnitsPerKilometer: number
 ): PhysicalSceneScale {
@@ -30,7 +34,7 @@ export function mapEphemerisSnapshotToSceneSnapshot(
     capturedAt: snapshot.capturedAt,
     bodies: snapshot.bodies.map((body) => ({
       id: body.id,
-      position: scaleVector(body.positionKm, scale.sceneUnitsPerKilometer)
+      position: mapJ2000PositionKmToScenePosition(body.positionKm, scale)
     }))
   }
 }
@@ -82,5 +86,28 @@ function scaleVector(
     vector[0] * sceneUnitsPerKilometer,
     vector[1] * sceneUnitsPerKilometer,
     vector[2] * sceneUnitsPerKilometer
+  ]
+}
+
+function mapJ2000PositionKmToScenePosition(
+  positionKm: [number, number, number],
+  scale: PhysicalSceneScale
+): [number, number, number] {
+  const eclipticAligned = rotateJ2000EquatorialVectorToEcliptic(positionKm)
+
+  return [
+    eclipticAligned[0] * scale.sceneUnitsPerKilometer,
+    eclipticAligned[2] * scale.sceneUnitsPerKilometer,
+    -eclipticAligned[1] * scale.sceneUnitsPerKilometer
+  ]
+}
+
+function rotateJ2000EquatorialVectorToEcliptic(
+  vector: [number, number, number]
+): [number, number, number] {
+  return [
+    vector[0],
+    vector[1] * J2000_ECLIPTIC_OBLIQUITY_COSINE + vector[2] * J2000_ECLIPTIC_OBLIQUITY_SINE,
+    -vector[1] * J2000_ECLIPTIC_OBLIQUITY_SINE + vector[2] * J2000_ECLIPTIC_OBLIQUITY_COSINE
   ]
 }

@@ -5,6 +5,9 @@ import { createWebBodyCatalogSource } from './webBodyCatalogSource'
 import { createWebDatasetLoader } from './webDatasetLoader'
 import { createWebEphemerisProvider } from './webEphemerisProvider'
 
+const DEFAULT_WEB_EPHEMERIS_DATA_BASE_PATH = 'ephemeris/generated'
+const DEFAULT_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER = 0.001
+
 export type WebBodyCatalogRuntimeEnv = {
   readonly BASE_URL?: string
   readonly VITE_WEB_EPHEMERIS_BODY_METADATA_URL?: string
@@ -56,7 +59,7 @@ export function getConfiguredWebEphemerisDataBaseUrl(
   const value = env.VITE_WEB_EPHEMERIS_DATA_BASE_URL?.trim()
 
   if (!value) {
-    return undefined
+    return `${getConfiguredBaseUrl(env)}${DEFAULT_WEB_EPHEMERIS_DATA_BASE_PATH}`
   }
 
   return value.replace(/[\\/]+$/, '')
@@ -80,7 +83,7 @@ export function getConfiguredSceneUnitsPerKilometer(
   const value = env.VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER?.trim()
 
   if (!value) {
-    return undefined
+    return DEFAULT_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER
   }
 
   const parsed = Number(value)

@@ -1,12 +1,25 @@
+import { getResolvedBodyCatalog, type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
+import { type ViewTargetId } from '../../solar-system/domain/body';
+import {
+  getFocusDistance,
+  getSceneOverviewRadius,
+  getViewTargetVisibleRadius
+} from '../../solar-system/domain/focus';
+
 export type ControlProfile = {
   dampingFactor: number;
   rotateSpeed: number;
   zoomSpeed: number;
-  minDistance: number;
-  maxDistance: number;
   minPolarAngle: number;
   maxPolarAngle: number;
 };
+
+export type ControlDistanceRange = {
+  minDistance: number;
+  maxDistance: number;
+};
+
+const staticOverviewSceneRadiusThreshold = 36;
 
 export function getControlProfile(isCoarsePointer: boolean): ControlProfile {
   if (isCoarsePointer) {
@@ -14,20 +27,48 @@ export function getControlProfile(isCoarsePointer: boolean): ControlProfile {
       dampingFactor: 0.12,
       rotateSpeed: 0.85,
       zoomSpeed: 0.9,
-      minDistance: 1.6,
-      maxDistance: 52,
       minPolarAngle: 0.2,
       maxPolarAngle: Math.PI - 0.2
     };
   }
 
+  return {
+    dampingFactor: 0.09,
+    rotateSpeed: 0.65,
+    zoomSpeed: 0.8,
+    minPolarAngle: 0.12,
+    maxPolarAngle: Math.PI - 0.12
+  };
+}
+
+export function getControlDistanceRange(
+  focusedBodyId: ViewTargetId,
+  catalog: ResolvedBodyCatalog = getResolvedBodyCatalog(),
+  isCoarsePointer = false
+): ControlDistanceRange {
+  const baseRange = isCoarsePointer
+    ? { minDistance: 1.6, maxDistance: 52 }
+    : { minDistance: 1.4, maxDistance: 56 };
+  const sceneRadius = getSceneOverviewRadius(catalog);
+
+  if (sceneRadius <= staticOverviewSceneRadiusThreshold) {
+    return baseRange;
+  }
+
+  const overviewDistance = getFocusDistance('overview', catalog);
+
+  if (focusedBodyId === 'overview') {
     return {
-      dampingFactor: 0.09,
-      rotateSpeed: 0.65,
-      zoomSpeed: 0.8,
-      minDistance: 1.4,
-      maxDistance: 56,
-      minPolarAngle: 0.12,
-      maxPolarAngle: Math.PI - 0.12
+      minDistance: Math.max(baseRange.minDistance, sceneRadius * 1.02),
+      maxDistance: Math.max(baseRange.maxDistance, overviewDistance * 6)
     };
+  }
+
+  const visibleRadius = getViewTargetVisibleRadius(focusedBodyId, catalog);
+  const focusDistance = getFocusDistance(focusedBodyId, catalog);
+
+  return {
+    minDistance: Math.max(baseRange.minDistance, visibleRadius * 1.15, focusDistance * 0.25),
+    maxDistance: Math.max(baseRange.maxDistance, overviewDistance * 1.25, focusDistance * 64)
+  };
 }

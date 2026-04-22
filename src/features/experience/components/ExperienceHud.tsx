@@ -55,20 +55,13 @@ export function ExperienceHud({
   const jumpButtonRef = useRef<HTMLButtonElement | null>(null);
   const jumpPanelRef = useRef<HTMLDivElement | null>(null);
   const showingOverview = focusedBodyId === 'overview';
+  const hasJumpTargets = catalog.metadata.length > 0;
   const statusMessage =
     catalogStatus === 'loading'
       ? 'Loading real positions for the requested time.'
       : catalogStatus === 'error'
-        ? `Real ephemeris data is unavailable right now. Showing the fallback snapshot. ${catalogError?.message ?? ''}`.trim()
+        ? `Real ephemeris data is unavailable right now. ${catalogError?.message ?? ''}`.trim()
         : null;
-
-  useEffect(() => {
-    if (showingOverview) {
-      return;
-    }
-
-    setJumpMenuVisible(false);
-  }, [showingOverview]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -166,7 +159,7 @@ export function ExperienceHud({
         >
           {isSimulationPaused ? 'Resume' : 'Pause'}
         </button>
-        {showingOverview ? (
+        {hasJumpTargets ? (
           <button
             ref={jumpButtonRef}
             aria-expanded={jumpMenuVisible}
@@ -183,7 +176,7 @@ export function ExperienceHud({
           </button>
         ) : null}
       </div>
-      {showingOverview && jumpMenuVisible ? (
+      {hasJumpTargets && jumpMenuVisible ? (
         <div
           ref={jumpPanelRef}
           className={[

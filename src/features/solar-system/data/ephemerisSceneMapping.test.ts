@@ -118,7 +118,7 @@ const physicalMetadata: BodyPhysicalMetadata[] = [
 ]
 
 describe('ephemerisSceneMapping', () => {
-  it('scales barycentric positions with one global factor without re-centering them', () => {
+  it('scales barycentric positions into the shared scene frame without re-centering them', () => {
     const scale = createPhysicalSceneScale(0.01)
     const mappedSnapshot = mapEphemerisSnapshotToSceneSnapshot(referenceEphemerisSnapshot, scale)
     const sun = mappedSnapshot.bodies.find((body) => body.id === 'sun')
@@ -128,11 +128,15 @@ describe('ephemerisSceneMapping', () => {
     const earthMoonDistance = getDistance(moon?.position ?? [0, 0, 0], earth?.position ?? [0, 0, 0])
 
     expect(mappedSnapshot.capturedAt).toBe(referenceEphemerisSnapshot.capturedAt)
-    expect(sun?.position).toEqual([-1, 0.2, 0.05])
-    expect(earth?.position).toEqual([10, 0.2, 0.05])
+    expect(sun?.position[0]).toBeCloseTo(-1, 9)
+    expect(sun?.position[1]).toBeCloseTo(-0.0336813277, 9)
+    expect(sun?.position[2]).toBeCloseTo(-0.2033852701, 9)
+    expect(earth?.position[0]).toBeCloseTo(10, 9)
+    expect(earth?.position[1]).toBeCloseTo(-0.0336813277, 9)
+    expect(earth?.position[2]).toBeCloseTo(-0.2033852701, 9)
     expect(moon?.position[0]).toBeCloseTo(10.04, 9)
-    expect(moon?.position[1]).toBeCloseTo(0.23, 9)
-    expect(moon?.position[2]).toBeCloseTo(0.05, 9)
+    expect(moon?.position[1]).toBeCloseTo(-0.0456146424, 9)
+    expect(moon?.position[2]).toBeCloseTo(-0.230909732, 9)
     expect(earthMoonDistance / earthSunDistance).toBeCloseTo(0.0045454545, 9)
   })
 

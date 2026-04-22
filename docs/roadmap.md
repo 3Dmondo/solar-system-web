@@ -4,9 +4,9 @@
 
 - Milestone 1 foundation and featured-body rendering work is complete.
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
-- Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, preserved-angle focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
+- Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, thicker opaque orbital trails, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including the synchronous mocked `BodyStateProvider`, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
-- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, and a GitHub Pages workflow that now checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, while the app itself still defaults to the mocked source.
+- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, and a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of mocked startup positions.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -83,18 +83,11 @@ Goals:
 
 Current focus:
 
-- validate and normalize the accepted `SpiceNet` web-data schema in the browser data layer before swapping the live provider
-- keep the committed body metadata snapshot separate from generated manifest and chunk assets while the runtime consumes it alongside cached manifest data and the app's cinematic metadata
-- match the accepted SpiceNet approximate UTC anchor, shared chunk-boundary rules, and Hermite interpolation math in browser-side runtime helpers before the async provider swap
-- keep raw kilometer ephemeris snapshots in a dedicated async provider layer so the later scene-scale mapping can stay explicit
-- map raw barycentric ephemeris snapshots and kernel-derived mean radii into a physically scaled scene model through one global km-to-scene factor, with focus framing scaled proportionally instead of left at mocked distances
-- compose the async provider and the physical-scale adapter into the same resolved catalog shape the scene already consumes before rewriting scene and HUD wiring
-- route scene, HUD, and focus helpers through a runtime catalog hook that can surface loading and fallback states before the web-data source is turned on by default
-- keep the real web-data source behind explicit runtime configuration until hosted assets and the first physical scale factor are ready for inspection
-- start the simulation clock from the current UTC time and surface that requested time in the HUD before adding pause, reverse, or rate controls
-- add the first playback control slice with pause and resume before rate changes or reverse playback
-- defer any optional cinematic non-linear size scaling and moon or satellite spacing offsets to a later dedicated milestone
-- keep the current mocked overview experience stable until async loading, physical scaling, and camera or focus UX are ready together
+- replace mocked circular trails with chunk-derived trail geometry
+- add the next playback controls in this order: rate changes, reverse playback
+- add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery
+- finish chunk-size, startup-latency, and chunk-duration benchmarking for the deployed and local generated-data paths
+- manually verify the real-data startup flow on desktop and mobile before milestone closeout
 
 ## Milestone 6: Reference Frames And Trail UX
 
