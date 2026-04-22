@@ -26,6 +26,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout SpiceNet
+        uses: actions/checkout@v4
+        with:
+          repository: 3Dmondo/SpiceNet
+          ref: v0.0.1
+          path: .tmp/SpiceNet
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -35,6 +42,11 @@ jobs:
           node-version: lts/*
           cache: pnpm
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
@@ -42,6 +54,16 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate ephemeris assets
+        shell: pwsh
+        run: |
+          ./scripts/Ensure-LocalWebEphemerisData.ps1 `
+            -SpiceNetRepoRoot ./\.tmp/SpiceNet `
+            -OutputRoot ./public/ephemeris/generated `
+            -SpkUrl "https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp" `
+            -ForceRegenerate `
+            -ForceDownload
 
       - name: Build site
         run: pnpm build

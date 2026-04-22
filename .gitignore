@@ -8,3 +8,5 @@ test-results/
 *.tsbuildinfo
 _tmp_*
 .tmp/
+public/ephemeris/generated/*
+!public/ephemeris/generated/.gitkeep

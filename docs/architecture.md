@@ -14,6 +14,8 @@
 
 - App entry: `src/main.tsx`, `src/App.tsx`
 - Versioned kernel-derived metadata snapshot: `public/ephemeris/body-metadata.json`
+- Local generated ephemeris asset root: `public/ephemeris/generated/`
+- Local ephemeris helper: `scripts/Ensure-LocalWebEphemerisData.ps1`
 - Experience shell and HUD: `src/features/experience`
 - Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
 - Static textures: `assets/textures`
@@ -24,6 +26,7 @@
 
 - `App` renders `SolarSystemExperience` and can opt into the external web-data catalog source through `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER`.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
+- The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
 - `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list from the current resolved catalog.
 - `ExperienceHud` shows the current target label, a grouped `Jump to` chooser in overview, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or fallback messages.
@@ -85,8 +88,10 @@ Additional notes:
 
 - GitHub Pages deployment is defined in `.github/workflows/deploy-pages.yml`.
 - The workflow builds on pushes to `master` and on manual dispatch.
+- The workflow now checks out `3Dmondo/SpiceNet` at tag `v0.0.1`, generates `public/ephemeris/generated/` from the JPL SSD `de440s.bsp` URL before the web build, and publishes those generated assets through the normal `dist/` artifact without committing them to git.
 - `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
 - Static texture imports are bundled through Vite so they work from the project-site base path.
+- The deployment build still does not enable the real-data runtime by default; runtime activation remains a separate Milestone 5 step.
 
 ## Known Gaps And Planned Refactors
 

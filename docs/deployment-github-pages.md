@@ -9,9 +9,10 @@
 
 - GitHub Pages deploys on pushes to `master`.
 - Manual runs are also allowed through `workflow_dispatch`.
-- The build job installs dependencies with `pnpm install --frozen-lockfile` and runs `pnpm build`.
+- The build job checks out `3Dmondo/SpiceNet` at tag `v0.0.1`, installs dependencies with `pnpm install --frozen-lockfile`, generates `public/ephemeris/generated/` before the web build, and then runs `pnpm build`.
 - `actions/configure-pages@v5` is used with `enablement: true`.
 - The deploy job publishes the `dist/` artifact.
+- The workflow-generated ephemeris assets are copied into `dist/ephemeris/generated/` through Vite's normal `public/` handling, but the build does not yet turn on the real-data runtime by default.
 
 ## Expected URL
 
@@ -47,9 +48,11 @@ pnpm preview -- --host
 - Do not switch the repo to Jekyll or static HTML deployment. The repository already owns the workflow.
 - If the default branch changes from `master`, update the workflow trigger.
 - Large assets are bundled into the static build, so deployment size is driven mostly by textures and the main JavaScript bundle.
+- Local generated Milestone 5 ephemeris assets belong under the ignored `public/ephemeris/generated/` folder so Vite can serve and bundle them without versioning them in git.
+- The deployment workflow pins `SpiceNet` to tag `v0.0.1` and currently downloads `de440s.bsp` from the JPL SSD catalog URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`, which matches the `de440s.bsp` entry in `SpiceNet/docs/SsdCatalog/ssd_catalog.json`.
 
-## Planned Milestone 5 Changes
+## Milestone 5 Data Delivery
 
-- Milestone 5 is planned to download non-versioned ephemeris and supporting kernel files during CI or CD rather than storing them in git.
-- The default `pnpm build` flow should stay focused on the web app build and should not become the normal ephemeris-generation entry point.
-- Local ephemeris generation is planned to use a separate testing script plus a git-ignored kernel cache folder.
+- CI now downloads non-versioned ephemeris and supporting kernel files during deployment rather than storing them in git.
+- The default `pnpm build` flow remains focused on the web app build; ephemeris generation is still an explicit pre-build step in CI and a separate helper script locally.
+- Local ephemeris generation uses `scripts/Ensure-LocalWebEphemerisData.ps1`, which delegates to the external `SpiceNet` workflow and writes generated manifest or chunk assets into the ignored `public/ephemeris/generated/` folder.

@@ -17,6 +17,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 
 - Body positions and trails are mocked.
 - A synchronous mocked `BodyStateProvider` now feeds the scene through `bodyStateStore.ts`.
+- Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
 - `pnpm test:e2e` requires Playwright browsers and a local preview server.
@@ -38,7 +39,10 @@ pnpm dev
 pnpm lint
 pnpm test
 pnpm build
+.\scripts\Ensure-LocalWebEphemerisData.ps1
 ```
+
+The local ephemeris helper reuses the pinned external `SpiceNet` workflow and defaults to a sibling checkout at `../SpiceNet`. It now defaults `de440s.bsp` to the JPL SSD URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`; pass `-SpiceNetRepoRoot`, `-SpkUrl`, or `-SpkFileName` if your local setup differs.
 
 For Playwright:
 

@@ -13,7 +13,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Browser-side Milestone 5 runtime foundations are already implemented in this repo: schema parsing, dataset loading, chunk selection, Hermite interpolation, async provider loading, physical scaling, simulation clock wiring, and HUD loading or error messaging.
 - Current code still keeps the mocked catalog as a startup and failure fallback. That no longer matches the agreed Milestone 5 direction and needs to be removed.
 - External preprocessing work is completed separately in `docs/tasks/milestone-5-spicenet.md`.
-- The repo now versions the accepted kernel-derived metadata snapshot at `public/ephemeris/body-metadata.json`, but it does not yet generate non-versioned ephemeris assets during CI or CD or local development.
+- The repo now versions the accepted kernel-derived metadata snapshot at `public/ephemeris/body-metadata.json`, and it now defines the ignored local generated-asset root at `public/ephemeris/generated/` plus a helper script that can populate it from the pinned external `SpiceNet` workflow.
+- The GitHub Pages workflow now checks out `SpiceNet` at tag `v0.0.1` and generates non-versioned deployment ephemeris assets from the JPL SSD `de440s.bsp` URL before the site build, while runtime activation still remains a separate Milestone 5 step.
 
 ## Agreed Milestone Direction
 
@@ -25,7 +26,10 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Keep `body-metadata.json` versioned in this repo as the accepted small kernel-derived metadata snapshot.
 - Provide a git-ignored local directory for generated ephemeris assets during development.
 - Add a local helper script that generates ephemeris assets when that local directory is missing, reusing the accepted `SpiceNet` flow.
+- Use `public/ephemeris/generated/` as the local generated asset root, served from `./ephemeris/generated` when the runtime is configured to consume local generated data.
 - Keep the default `pnpm build` path focused on the web app build; ephemeris generation should remain an explicit local or CI or CD step.
+- Pin CI or CD generation to `3Dmondo/SpiceNet` tag `v0.0.1`.
+- Fetch `de440s.bsp` for CI or CD generation from the JPL SSD catalog URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`.
 - Preserve the accepted solar-system-barycenter frame, approximate J2000 UTC anchor, and cubic Hermite interpolation contract for Milestone 5.
 - Keep physical metadata separate from cinematic presentation metadata, with one explicit km-to-scene scale factor for the real-data path.
 
@@ -53,11 +57,11 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [ ] Make the app load real ephemeris data at startup so the first visible scene uses real positions instead of mocked ones.
 - [ ] Keep loading and failure UI explicit while the real dataset is being resolved.
 - [x] Version `body-metadata.json` in this repo as the accepted kernel-derived metadata snapshot.
-- [ ] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
-- [ ] Generate ephemeris manifest and chunk files during CI or CD with the pinned `SpiceNet` workflow before deployment.
-- [ ] Publish generated ephemeris assets with the deployed site without committing them to git.
-- [ ] Define a git-ignored local output directory for generated ephemeris assets during development.
-- [ ] Add a local helper script that generates ephemeris assets when the local output directory is missing.
+- [x] Keep ephemeris manifest and chunk files non-versioned and generated outside git.
+- [x] Generate ephemeris manifest and chunk files during CI or CD with the pinned `SpiceNet` workflow before deployment.
+- [x] Publish generated ephemeris assets with the deployed site without committing them to git.
+- [x] Define a git-ignored local output directory for generated ephemeris assets during development.
+- [x] Add a local helper script that generates ephemeris assets when the local output directory is missing.
 - [x] Wire the runtime to consume versioned body metadata together with generated ephemeris manifest and chunk assets.
 
 ### UX And Verification Still To Do
@@ -80,9 +84,10 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 2. CI Or CD And Local Generation
 
-- Add CI or CD steps that fetch kernels through the accepted external `SpiceNet` workflow and generate ephemeris data before deployment.
-- Define a git-ignored local output directory for generated ephemeris assets.
-- Add a local helper script that checks for missing ephemeris assets and generates them when needed.
+- Keep CI or CD generation pinned to `3Dmondo/SpiceNet` tag `v0.0.1`.
+- Fetch `de440s.bsp` for CI or CD generation from the JPL SSD catalog entry at `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`.
+- Keep the local generated output rooted at `public/ephemeris/generated/`, served from `./ephemeris/generated` when configured.
+- Use `scripts/Ensure-LocalWebEphemerisData.ps1` to populate missing local ephemeris assets through the pinned external `SpiceNet` workflow.
 
 ### 3. Runtime Activation
 
@@ -117,7 +122,6 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ## Open Questions
 
-- What local ignored directory and env or base-URL convention should the app use for generated ephemeris assets during development?
 - Should the local helper script only generate data when missing, or also support an explicit refresh mode?
 - What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?
 - What global km-to-scene scale factor keeps the first physical pass readable without reintroducing hidden cinematic distortion?
