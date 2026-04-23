@@ -35,7 +35,7 @@
 - The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
 - Focused-body tracking now uses a split update path: live ephemeris refreshes keep recomputing the authored focused camera pose while the transition is still settling, then translate the current camera and target together once focus is active so manual orbit and zoom adjustments are preserved.
-- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, a pause or resume control, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
+- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, pause or resume plus playback-rate controls, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
 - The app still starts in the `overview` target, and smaller scenes keep the legacy `[0, 14, 46]` overview framing.
 
 ## Interaction Model
@@ -53,7 +53,7 @@
 - `bodyPresentation.ts` contains the shared display metadata that stays stable across data sources.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
-- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, and supports pause or resume.
+- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, supports pause or resume, and exposes one minimal playback-rate cycle across the current forward-speed presets.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
 - `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.

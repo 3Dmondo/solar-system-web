@@ -28,8 +28,10 @@ type ExperienceHudProps = {
   focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
   isSimulationPaused: boolean;
+  playbackRateLabel: string;
   requestedUtc: string;
   onFocusBody: (bodyId: BodyId) => void;
+  onCyclePlaybackRate: () => void;
   onReturnToOverview: () => void;
   onToggleSimulationPaused: () => void;
 };
@@ -41,8 +43,10 @@ export function ExperienceHud({
   focusedBodyId,
   isCoarsePointer,
   isSimulationPaused,
+  playbackRateLabel,
   requestedUtc,
   onFocusBody,
+  onCyclePlaybackRate,
   onReturnToOverview,
   onToggleSimulationPaused
 }: ExperienceHudProps) {
@@ -142,7 +146,9 @@ export function ExperienceHud({
         <span className="experience-hud__clock-label">Simulation time</span>
         <time dateTime={requestedUtc}>{formatUtcTimestamp(requestedUtc)}</time>
         <span className="experience-hud__clock-state">
-          {isSimulationPaused ? 'Paused' : 'Running in real time'}
+          {isSimulationPaused
+            ? `Paused at ${playbackRateLabel}`
+            : `Running at ${playbackRateLabel}`}
         </span>
       </div>
       {statusMessage ? (
@@ -158,6 +164,14 @@ export function ExperienceHud({
           onClick={onToggleSimulationPaused}
         >
           {isSimulationPaused ? 'Resume' : 'Pause'}
+        </button>
+        <button
+          aria-label="Change simulation playback rate"
+          className="experience-hud__control-button"
+          type="button"
+          onClick={onCyclePlaybackRate}
+        >
+          Rate {playbackRateLabel}
         </button>
         {hasJumpTargets ? (
           <button
@@ -236,6 +250,7 @@ export function ExperienceHud({
         <div className="experience-hud__instructions" role="dialog" aria-label="Interaction help">
           <div>Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus.</div>
           <div>Mobile: drag to orbit, pinch to zoom, double tap a body, or use Jump to focus.</div>
+          <div>Use Rate to step through the current playback speeds.</div>
           <div>Use Overview while focused, or zoom farther out to recover a broader view.</div>
         </div>
       ) : null}

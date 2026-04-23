@@ -34,8 +34,10 @@ describe('ExperienceHud', () => {
         focusedBodyId={focusedBodyId}
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={vi.fn()}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={vi.fn()}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -54,8 +56,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="saturn"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={onFocusBody}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={onReturnToOverview}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -82,8 +86,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={onFocusBody}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -107,8 +113,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="saturn"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={onFocusBody}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -145,8 +153,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:34:56Z"
         onFocusBody={() => undefined}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -163,9 +173,10 @@ describe('ExperienceHud', () => {
 
     expect(screen.getByText(/Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus/i)).toBeInTheDocument();
     expect(screen.getByText(/Mobile: drag to orbit, pinch to zoom, double tap a body, or use Jump to focus/i)).toBeInTheDocument();
+    expect(screen.getByText(/Use Rate to step through the current playback speeds/i)).toBeInTheDocument();
     expect(screen.getByText(/Use Overview while focused/i)).toBeInTheDocument();
     expect(screen.getByText('2000-01-01 12:34:56 UTC')).toBeInTheDocument();
-    expect(screen.getByText(/running in real time/i)).toBeInTheDocument();
+    expect(screen.getByText(/running at 1x/i)).toBeInTheDocument();
   });
 
   it('shows an explicit error status message when real ephemeris loading fails', () => {
@@ -177,8 +188,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -197,8 +210,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -217,8 +232,10 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused={false}
+        playbackRateLabel="1x"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={vi.fn()}
       />
@@ -239,17 +256,46 @@ describe('ExperienceHud', () => {
         focusedBodyId="overview"
         isCoarsePointer={false}
         isSimulationPaused
+        playbackRateLabel="1h/s"
         requestedUtc="2000-01-01T12:00:00Z"
         onFocusBody={() => undefined}
+        onCyclePlaybackRate={vi.fn()}
         onReturnToOverview={() => undefined}
         onToggleSimulationPaused={onToggleSimulationPaused}
       />
     );
 
-    expect(screen.getByText(/paused/i)).toBeInTheDocument();
+    expect(screen.getByText(/paused at 1h\/s/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Resume simulation' }));
 
     expect(onToggleSimulationPaused).toHaveBeenCalledTimes(1);
+  });
+
+  it('cycles the simulation playback rate from the HUD', async () => {
+    const user = userEvent.setup();
+    const onCyclePlaybackRate = vi.fn();
+
+    render(
+      <ExperienceHud
+        catalog={catalog}
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="overview"
+        isCoarsePointer={false}
+        isSimulationPaused={false}
+        playbackRateLabel="1x"
+        requestedUtc="2000-01-01T12:00:00Z"
+        onFocusBody={() => undefined}
+        onCyclePlaybackRate={onCyclePlaybackRate}
+        onReturnToOverview={() => undefined}
+        onToggleSimulationPaused={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Change simulation playback rate' }));
+
+    expect(onCyclePlaybackRate).toHaveBeenCalledTimes(1);
+    expect(screen.getByText(/rate 1x/i)).toBeInTheDocument();
   });
 });

@@ -19,6 +19,7 @@ describe('useSimulationClock', () => {
     );
 
     expect(result.current.requestedUtc).toBe('2000-01-01T12:00:00.000Z');
+    expect(result.current.playbackRateLabel).toBe('1x');
 
     act(() => {
       vi.advanceTimersByTime(3000);
@@ -66,6 +67,49 @@ describe('useSimulationClock', () => {
 
     expect(result.current.isPaused).toBe(false);
     expect(result.current.requestedUtc).toBe('2000-01-01T12:00:05.000Z');
+  });
+
+  it('supports changing the playback rate without resetting the current time', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2000-01-01T12:00:00Z'));
+
+    const { result } = renderHook(() =>
+      useSimulationClock({
+        startAt: '2000-01-01T12:00:00Z',
+        tickIntervalMs: 1000
+      })
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:00:02.000Z');
+
+    act(() => {
+      result.current.cyclePlaybackRate();
+    });
+
+    expect(result.current.playbackRateLabel).toBe('1m/s');
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:02:02.000Z');
+  });
+
+  it('wraps the playback-rate cycle back to real time after the last preset', () => {
+    const { result } = renderHook(() => useSimulationClock());
+
+    act(() => {
+      result.current.cyclePlaybackRate();
+      result.current.cyclePlaybackRate();
+      result.current.cyclePlaybackRate();
+      result.current.cyclePlaybackRate();
+    });
+
+    expect(result.current.playbackRateLabel).toBe('1x');
   });
 
   it('rejects invalid start times', () => {

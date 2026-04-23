@@ -22,6 +22,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Focused tracking now re-evaluates the authored pose only while a focus transition is settling; once focused, live body updates translate the current camera and target together so manual orbit and zoom adjustments remain intact.
 - The first trail pass now derives sampled position history from the active loaded chunk, clips it with body-specific default trail windows, and renders it without adding visible trail controls yet.
 - Richer trail styling and longer historical lookback for bodies such as the outer planets are explicitly deferred to the later trail UX milestone.
+- The HUD now exposes one minimal playback-rate control that cycles through the current Milestone 5 speed presets while reverse playback remains pending.
 
 ## Agreed Milestone Direction
 
@@ -79,7 +80,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 - [x] Add sampled trail geometry derived from loaded chunk data.
 - [x] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
-- [ ] Add the next playback controls in this order: rate changes, reverse playback.
+- [x] Add rate changes to the current playback controls.
+- [ ] Add reverse playback after the landed rate controls.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
 - [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
 - [ ] Finish chunk-size, startup-latency, and production chunk-duration benchmarking for the browser runtime.
@@ -109,7 +111,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 4. Time Controls And Verification
 
-- Add the next playback controls in this order: rate changes, reverse playback.
+- Keep the landed playback-rate control minimal while tuning the accepted preset speeds.
+- Add reverse playback after the current forward-rate pass.
 - Defer explicit date picking unless Milestone 5 usability proves it is necessary.
 - Verify the first chunk-derived trail pass stays readable enough before any richer trail controls are introduced.
 - Keep the Milestone 5 trail pass intentionally simple; defer brighter or thicker styling, non-transparent treatment, tail fading, and deeper historical windows to the later trail UX milestone.

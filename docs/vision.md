@@ -13,7 +13,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - overview-to-body focus transitions driven by a `Jump to` HUD menu plus double click or double tap, with `Jump to` still available while focused for direct body-to-body switches
 - directional camera easing that snaps the target onto the selected body center, approaches from the authored focus direction at about `10 x` body radius, and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
-- a minimal HUD with a help overlay and focused-mode overview return
+- a minimal HUD with a help overlay, focused-mode overview return, pause or resume, and cycling playback-rate controls
 - chunk-derived orbital trails clipped by per-body default trail windows
 - a Milky Way star background
 - continuous body self-rotation
@@ -34,7 +34,7 @@ The next implementation slice focuses on finishing the real-data milestone after
 
 Focus areas:
 
-- add rate and reverse controls on top of the current real-time and pause behavior
+- add reverse playback on top of the landed pause and rate controls
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
 - defer frame-switching, deeper trail history, and final trail UX until the later reference-frame and trail milestone
 
