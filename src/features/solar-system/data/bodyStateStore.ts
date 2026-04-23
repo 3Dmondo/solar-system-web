@@ -38,8 +38,10 @@ function mergeBodySnapshotWithMetadata(
   metadata: BodyMetadata[],
   snapshot: BodySnapshot
 ): BodyDefinition[] {
+  const snapshotBodiesById = new Map(snapshot.bodies.map((body) => [body.id, body]))
+
   return metadata.flatMap((bodyMetadata) => {
-    const state = snapshot.bodies.find((body) => body.id === bodyMetadata.id)
+    const state = snapshotBodiesById.get(bodyMetadata.id)
 
     if (!state) {
       return []

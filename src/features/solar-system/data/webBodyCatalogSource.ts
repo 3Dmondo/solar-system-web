@@ -18,23 +18,43 @@ export function createWebBodyCatalogSource({
   datasetLoader,
   scale
 }: WebBodyCatalogSourceOptions): BodyCatalogSource {
+  let scaledMetadataPromise: Promise<ReturnType<typeof mapPhysicalMetadataToScaledBodyMetadata>>
+    | undefined
+
   return {
     loadBodyCatalogAtUtc: async (utc) => {
-      const [dataset, ephemerisSnapshot] = await Promise.all([
-        datasetLoader.load(),
+      const [metadata, ephemerisSnapshot] = await Promise.all([
+        loadScaledMetadata(),
         ephemerisProvider.loadSnapshotAtUtc(utc)
       ])
-      const metadata = mapPhysicalMetadataToScaledBodyMetadata(
-        dataset.bodyMetadata.bodies,
-        scale,
-        ephemerisProvider.getBodyMetadata()
-      )
       const snapshot = mapEphemerisSnapshotToSceneSnapshot(ephemerisSnapshot, scale)
 
       return resolveBodyCatalog(metadata, snapshot)
     },
     prefetchAroundUtc: async (utc) => {
-      await Promise.all([datasetLoader.load(), ephemerisProvider.prefetchAroundUtc(utc)])
+      await Promise.all([loadScaledMetadata(), ephemerisProvider.prefetchAroundUtc(utc)])
     }
+  }
+
+  function loadScaledMetadata() {
+    if (scaledMetadataPromise) {
+      return scaledMetadataPromise
+    }
+
+    scaledMetadataPromise = datasetLoader
+      .load()
+      .then((dataset) =>
+        mapPhysicalMetadataToScaledBodyMetadata(
+          dataset.bodyMetadata.bodies,
+          scale,
+          ephemerisProvider.getBodyMetadata()
+        )
+      )
+      .catch((error) => {
+        scaledMetadataPromise = undefined
+        throw error
+      })
+
+    return scaledMetadataPromise
   }
 }

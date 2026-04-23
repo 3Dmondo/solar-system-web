@@ -222,6 +222,25 @@ describe('webBodyCatalogSource', () => {
     expect(datasetLoader.load).toHaveBeenCalledTimes(1)
     expect(ephemerisProvider.prefetchAroundUtc).toHaveBeenCalledWith('2000-01-01T12:00:00Z')
   })
+
+  it('reuses the scaled metadata across later catalog loads', async () => {
+    const datasetLoader = createDatasetLoaderStub(dataset)
+    const ephemerisProvider = createEphemerisProviderStub()
+    const source = createWebBodyCatalogSource({
+      ephemerisProvider,
+      datasetLoader,
+      scale: createPhysicalSceneScale(0.001)
+    })
+
+    const firstCatalog = await source.loadBodyCatalogAtUtc('2000-01-01T12:00:00Z')
+    const secondCatalog = await source.loadBodyCatalogAtUtc('2000-01-01T12:00:01Z')
+
+    expect(datasetLoader.load).toHaveBeenCalledTimes(1)
+    expect(ephemerisProvider.loadSnapshotAtUtc).toHaveBeenCalledTimes(2)
+    expect(firstCatalog.metadata).toBe(secondCatalog.metadata)
+    expect(firstCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
+    expect(secondCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:01.000Z')
+  })
 })
 
 function createDatasetLoaderStub(datasetValue: WebDataset): WebDatasetLoader & {
