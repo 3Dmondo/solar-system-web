@@ -8,6 +8,12 @@ Planned
 
 Recover most of the performance lost after switching the runtime clock to per-frame advancement, while keeping real ephemeris motion visually smooth and preserving the current Milestone 5 startup behavior.
 
+## Scope Of This Plan
+
+- This plan covers Milestone `5.1` runtime-performance follow-up only.
+- It assumes the current real-data startup path, loading or error UX, body interpolation contract, and active-chunk trail presentation stay in place unless a later measurement proves one of them must change.
+- It does not treat trail styling, reverse playback, or broader physical-alignment work as part of the first optimization slice.
+
 ## Current Symptom
 
 - The overview dropped from about `60 FPS` to about `17 FPS` after the runtime started resolving the real-data catalog on every animation frame.
@@ -17,14 +23,30 @@ Recover most of the performance lost after switching the runtime clock to per-fr
 
 - The current clock path in `src/features/experience/state/useSimulationClock.ts` emits a fresh `requestedUtc` string on every `requestAnimationFrame`.
 - `src/features/experience/state/useResolvedBodyCatalog.ts` treats every new timestamp as a new async catalog request, so the app starts `prefetchAroundUtc(...)` plus `loadBodyCatalogAtUtc(...)` on every frame.
-- `src/features/solar-system/data/webBodyCatalogSource.ts` rebuilds a full resolved catalog on every request, including scene-space body positions and trail arrays.
+- `src/features/solar-system/data/webBodyCatalogSource.ts` now keeps scaled body metadata cached across requests, but it still rebuilds a fresh resolved catalog object graph for every requested time.
 - `src/features/solar-system/data/webEphemerisProvider.ts` currently does both of these on every request:
   - interpolates all 10 body positions for the requested time
   - resamples all 10 body trails for the requested time
 - The raw body-position interpolation work is comparatively small. The larger cost comes from regenerating trails, rebuilding object graphs, and pushing a brand-new catalog through React and Three every frame.
+- `prefetchAroundUtc(...)` still runs on every timestamp change, but the current provider cache means repeated calls inside the same chunk are more likely to be avoidable bookkeeping overhead than repeated network fetches.
 - With the current local generated dataset in `public/ephemeris/generated/manifest.json`, the active `2025-2050` chunk implies roughly:
   - `10,886` chunk samples scanned per frame across all bodies
   - `1,224` visible trail points rebuilt and remapped to scene space per frame
+
+## Current Hot Path
+
+1. `useSimulationClock(...)` advances `simulationTimeMs` on every animation frame and returns a new ISO timestamp.
+2. `useResolvedBodyCatalog(...)` normalizes that timestamp, triggers `prefetchAroundUtc(...)`, and awaits `loadBodyCatalogAtUtc(...)`.
+3. `createWebBodyCatalogSource(...)` loads cached scaled metadata plus a fresh runtime snapshot, then merges both into a new resolved catalog.
+4. `createWebEphemerisProvider(...)` resolves the active chunk, interpolates all bodies, and resamples all visible trails for the same timestamp.
+5. The scene receives fresh body-position arrays and fresh trail arrays, so React and `@react-three/fiber` propagate new props through the overview every frame.
+
+## Non-Goals For The First Pass
+
+- Do not replace Hermite interpolation with a lower-fidelity body-position approximation.
+- Do not redesign trail visuals or widen trail history just to hide runtime cost.
+- Do not add new user-facing controls as part of the performance pass.
+- Do not move immediately to analytical orbit approximations unless the measured CPU and GPU costs still block Milestone 5 after caching and data-path narrowing.
 
 ## Working Hypothesis
 
@@ -52,6 +74,19 @@ The likely high-cost path is:
 - Record desktop `/debug` FPS plus timing samples for the current baseline before changing behavior.
 - Confirm whether `prefetchAroundUtc(...)` is doing any meaningful work on every frame or only adding overhead.
 
+Suggested capture points:
+
+- `useResolvedBodyCatalog(...)`:
+  - request count per second
+  - average and worst-case source load duration
+- `createWebEphemerisProvider(...).loadSnapshotAtUtc(...)`:
+  - body interpolation duration
+  - trail sampling duration
+  - total provider duration
+- scene commit path:
+  - number of trail arrays replaced
+  - number of body-position arrays replaced
+
 ### 2. Split Fast Body Updates From Slow Trail Updates
 
 - Introduce a fast path for per-frame body-position updates that only:
@@ -70,6 +105,13 @@ Expected result:
 - the app keeps smooth planet motion
 - trails remain visually stable
 - the largest per-frame allocation source disappears
+
+First implementation slice:
+
+- Keep body interpolation per-frame.
+- Freeze trail recomputation within the active chunk except when the chunk file changes.
+- Accept slightly stale in-chunk trail endpoints for the first measurement pass if that buys a large FPS recovery.
+- Re-measure before doing any broader data-shape refactor.
 
 ### 3. Stop Rebuilding The Entire Catalog Every Frame
 
@@ -100,6 +142,11 @@ Expected result:
 Expected result:
 
 - per-frame simulation updates stop forcing app-wide React rerenders
+
+Decision gate:
+
+- Only take this step in the first optimization pass if body-only per-frame updates still leave the overview materially below the target desktop FPS.
+- If body-only updates recover performance enough, defer the deeper state-ownership rewrite until after Milestone 5 closeout or until reverse playback demands it.
 
 ### 5. Revisit Trail Rendering Strategy
 
@@ -159,6 +206,31 @@ Expected result:
 5. Re-measure again on desktop and mobile.
 6. If trails are still the limiting factor, test a GPU-resident trail-buffer strategy before considering analytical trail approximation.
 7. Only then decide whether deeper refactors, such as a scene-local motion store, are still necessary.
+
+## Immediate Deliverable For The Next Code Step
+
+- Add minimal instrumentation that can stay local or debug-only.
+- Land the smallest safe change that stops per-frame trail regeneration inside the active chunk.
+- Keep startup, chunk-boundary loading, and focus tracking behavior unchanged.
+- Update `docs/tasks/milestone-5.md` in the same code step if the accepted plan or milestone wording changes materially.
+
+## Exit Criteria Per Sub-Step
+
+### Instrumentation Baseline
+
+- A local run can show where time is spent without opening browser devtools on every check.
+- We have at least one before snapshot for default playback and one faster playback preset.
+
+### Trail Decoupling Pass
+
+- Body motion remains smooth at default playback.
+- Trail arrays are no longer rebuilt on every animation frame inside the same chunk.
+- Desktop `/debug` FPS shows a meaningful recovery from the current `~17 FPS` baseline.
+
+### Data-Shape Narrowing Pass
+
+- The per-frame path no longer replaces the entire resolved catalog object graph.
+- Scene consumers update only the data that actually changed.
 
 ## Verification
 
