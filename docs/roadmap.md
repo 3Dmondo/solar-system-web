@@ -85,7 +85,8 @@ Current focus:
 
 - optimize the now-default per-frame runtime path and use `/debug` as the lightweight FPS measurement route while profiling improvements
 - review Earth layered lighting, Saturn ring-shadowing on the globe, and Venus cloud lighting so the apparent sun direction better tracks live body positions
-- add reverse playback after the current performance and lighting follow-up
+- align body axial orientation, spin rates, Earth-Sun orientation, and any high-value physical metadata extensions with the rendered scene before closing the milestone
+- add reverse playback after the current performance, lighting, and physical-alignment follow-up
 - add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery
 - finish chunk-size, startup-latency, and chunk-duration benchmarking for the deployed and local generated-data paths
 - manually verify the real-data startup flow on desktop and mobile before milestone closeout

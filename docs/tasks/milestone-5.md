@@ -25,6 +25,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - The HUD now exposes one minimal playback-rate control that cycles through the current Milestone 5 speed presets while reverse playback remains pending.
 - The default runtime now advances the simulation clock on every animation frame for visibly smoother motion through the interpolated ephemeris curve.
 - Visiting `/debug` on the current host now enables a lightweight FPS overlay without changing the default clock cadence.
+- The current rendering path still treats axial orientation, spin-rate fidelity, and Earth-Sun seasonal orientation as planned follow-up work rather than finished physical alignment.
 
 ## Agreed Milestone Direction
 
@@ -43,6 +44,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Use `0.001` scene units per kilometer as the first default physical scale, with `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` reserved as an override while Milestone 5 tuning continues.
 - Preserve the accepted solar-system-barycenter frame, approximate J2000 UTC anchor, and cubic Hermite interpolation contract for Milestone 5.
 - Keep physical metadata separate from cinematic presentation metadata, with one explicit km-to-scene scale factor for the real-data path.
+- Extend the physical-alignment review beyond mean radii where useful, starting with axial orientation, body rotation rates, and Earth's orientation relative to the Sun.
 
 ## Progress Checklist
 
@@ -86,7 +88,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Add rate changes to the current playback controls.
 - [ ] 5.1 Optimize the new per-frame runtime path, with attention to catalog recomputation, interpolation cost, avoidable React churn, and scene update overhead.
 - [ ] 5.2 Review dynamic lighting coherence for Earth layers, Saturn ring shadows on the globe, and Venus cloud lighting so the apparent sun direction tracks live body positions.
-- [ ] Add reverse playback after the current performance and lighting follow-up.
+- [ ] 5.3 Align scene rendering with solar-system metadata, including axial orientation, rotation speed, Earth-Sun orientation, and other physical characteristics worth bringing into the runtime contract.
+- [ ] Add reverse playback after the current performance, lighting, and physical-alignment follow-up.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
 - [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
 - [ ] Finish chunk-size, startup-latency, and production chunk-duration benchmarking for the browser runtime.
@@ -105,6 +108,13 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Re-check Earth layered lighting so the day or night split, cloud response, and specular highlights follow the live sun direction.
 - Re-check Saturn ring shadow projection on the globe under moving-body lighting.
 - Re-check Venus cloud lighting so the apparent terminator follows the changing body-to-sun vector.
+
+### 5.3 Physical Alignment Review
+
+- Align each body's rendered spin axis with the best accepted physical metadata we have available, rather than relying on presentation-friendly defaults where they diverge.
+- Review body rotation speeds so self-rotation timing is coherent with real periods and remains stable under the current simulation clock.
+- Make Earth's orientation toward the Sun seasonally coherent instead of leaving the apparent solar exposure to texture or shader assumptions alone.
+- Identify which additional physical characteristics are worth bringing into the Milestone 5 runtime contract next, such as pole orientation, obliquity, prime meridian or epoch anchoring, and sidereal rotation metadata.
 
 ## Remaining Plan
 
@@ -127,12 +137,13 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Keep tuning the first physical scale factor from the current default `0.001` scene units per kilometer before any later cinematic scaling work.
 - Keep evaluating whether the single physical scale should remain the long-term Milestone 5 default, but keep camera framing and clipping derived from scene extents while that tuning continues.
 - Keep the runtime contract explicit that raw SPICE positions stay in the accepted J2000 source frame until the scene-mapping layer rotates them into the app's ecliptic-aligned render frame.
+- Expand the physical-alignment contract beyond radius-only metadata where it materially improves correctness, starting with axial orientation, spin-rate metadata, and Earth's seasonal orientation toward the Sun.
 
 ### 4. Time Controls And Verification
 
 - Keep the landed playback-rate control minimal while tuning the accepted preset speeds.
 - The default runtime now advances on every animation frame for smoother motion; keep `/debug` as the manual FPS overlay while optimizing that path.
-- Add reverse playback after the current performance and lighting follow-up.
+- Add reverse playback after the current performance, lighting, and physical-alignment follow-up.
 - Defer explicit date picking unless Milestone 5 usability proves it is necessary.
 - Verify the first chunk-derived trail pass stays readable enough before any richer trail controls are introduced.
 - Keep the Milestone 5 trail pass intentionally simple; defer brighter or thicker styling, non-transparent treatment, tail fading, and deeper historical windows to the later trail UX milestone.
@@ -155,9 +166,11 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - `body-metadata.json` should remain versioned and small enough to diff, review, and consume directly from the web app.
 - Local development should work against a git-ignored generated ephemeris directory plus a helper script when data is missing.
 - The first real-data release should start from the user's current datetime and advance in real time unless paused or rate-adjusted.
+- Body self-rotation and axial presentation should converge toward accepted physical metadata rather than staying presentation-authored where they visibly diverge.
 - Real-data integration should not force Milestone 6 frame-selection work into this milestone.
 
 ## Open Questions
 
 - Should the local helper script only generate data when missing, or also support an explicit refresh mode?
 - What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?
+- Which physical metadata fields beyond mean radius give the best visual payoff for Milestone 5.3 without overcomplicating the web-data contract?

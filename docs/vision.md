@@ -25,6 +25,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - Orbital trails currently use fixed per-body default windows, and the richer styling pass plus longer historical lookback for outer planets are deferred to the later trail UX milestone.
 - The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The smoother per-frame clock path is now the default, but its current runtime cost still needs a dedicated optimization pass.
+- Body axial orientation, self-rotation periods, and Earth-Sun seasonal orientation are not yet aligned as tightly as the real-data path should allow.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
 - There is no dedicated rendering-configuration UI yet.
@@ -38,7 +39,8 @@ Focus areas:
 
 - optimize the now-default per-frame runtime path before milestone closeout
 - review Earth layered lighting, Saturn ring-shadowing on the globe, and Venus cloud lighting so the apparent sun direction tracks the live positions more convincingly
-- add reverse playback on top of the landed pause and rate controls after the current performance and lighting follow-up
+- align body axial orientation, spin rates, Earth-Sun seasonal orientation, and other high-value physical characteristics with the rendered scene
+- add reverse playback on top of the landed pause and rate controls after the current performance, lighting, and physical-alignment follow-up
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
 - defer frame-switching, deeper trail history, and final trail UX until the later reference-frame and trail milestone
 

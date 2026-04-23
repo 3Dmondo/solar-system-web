@@ -58,6 +58,7 @@
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
 - `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
+- The current metadata path materially improves positional accuracy and mean-radius scaling, but axial orientation, spin-period fidelity, and Earth-Sun seasonal orientation still need a dedicated Milestone 5 alignment pass.
 - `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
@@ -105,4 +106,5 @@ Additional notes:
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
 - Review the live sun-direction response of layered Earth shading, Saturn's ring shadow on the globe, and Venus cloud lighting under moving-body updates.
+- Align rendered axial tilt, rotation speeds, Earth-Sun orientation, and other high-value physical characteristics with the available solar-system metadata.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
