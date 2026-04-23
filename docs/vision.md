@@ -14,6 +14,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - directional camera easing that snaps the target onto the selected body center, approaches from the authored focus direction at about `10 x` body radius, and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
 - a minimal HUD with a help overlay, focused-mode overview return, pause or resume, and cycling playback-rate controls
+- per-frame simulation-time advancement for smoother orbital motion
 - chunk-derived orbital trails clipped by per-body default trail windows
 - a Milky Way star background
 - continuous body self-rotation
@@ -23,6 +24,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 
 - Orbital trails currently use fixed per-body default windows, and the richer styling pass plus longer historical lookback for outer planets are deferred to the later trail UX milestone.
 - The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
+- The smoother per-frame clock path is now the default, but its current runtime cost still needs a dedicated optimization pass.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
 - There is no dedicated rendering-configuration UI yet.
@@ -34,7 +36,9 @@ The next implementation slice focuses on finishing the real-data milestone after
 
 Focus areas:
 
-- add reverse playback on top of the landed pause and rate controls
+- optimize the now-default per-frame runtime path before milestone closeout
+- review Earth layered lighting, Saturn ring-shadowing on the globe, and Venus cloud lighting so the apparent sun direction tracks the live positions more convincingly
+- add reverse playback on top of the landed pause and rate controls after the current performance and lighting follow-up
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
 - defer frame-switching, deeper trail history, and final trail UX until the later reference-frame and trail milestone
 

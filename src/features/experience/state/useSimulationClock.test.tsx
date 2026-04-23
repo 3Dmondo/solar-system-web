@@ -14,7 +14,8 @@ describe('useSimulationClock', () => {
     const { result } = renderHook(() =>
       useSimulationClock({
         startAt: '2000-01-01T12:00:00Z',
-        tickIntervalMs: 1000
+        tickIntervalMs: 1000,
+        updateMode: 'interval'
       })
     );
 
@@ -35,7 +36,8 @@ describe('useSimulationClock', () => {
     const { result } = renderHook(() =>
       useSimulationClock({
         startAt: '2000-01-01T12:00:00Z',
-        tickIntervalMs: 1000
+        tickIntervalMs: 1000,
+        updateMode: 'interval'
       })
     );
 
@@ -76,7 +78,8 @@ describe('useSimulationClock', () => {
     const { result } = renderHook(() =>
       useSimulationClock({
         startAt: '2000-01-01T12:00:00Z',
-        tickIntervalMs: 1000
+        tickIntervalMs: 1000,
+        updateMode: 'interval'
       })
     );
 
@@ -99,8 +102,37 @@ describe('useSimulationClock', () => {
     expect(result.current.requestedUtc).toBe('2000-01-01T12:02:02.000Z');
   });
 
+  it('advances the simulation clock on every animation frame by default', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2000-01-01T12:00:00Z'));
+
+    const { result } = renderHook(() =>
+      useSimulationClock({
+        startAt: '2000-01-01T12:00:00Z'
+      })
+    );
+
+    expect(result.current.requestedUtc).toBe('2000-01-01T12:00:00.000Z');
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(Date.parse(result.current.requestedUtc)).toBeGreaterThan(
+      Date.parse('2000-01-01T12:00:00.000Z')
+    );
+    expect(Date.parse(result.current.requestedUtc)).toBeLessThanOrEqual(
+      Date.parse('2000-01-01T12:00:00.120Z')
+    );
+  });
+
   it('wraps the playback-rate cycle back to real time after the last preset', () => {
-    const { result } = renderHook(() => useSimulationClock());
+    const { result } = renderHook(() =>
+      useSimulationClock({
+        tickIntervalMs: 1000,
+        updateMode: 'interval'
+      })
+    );
 
     act(() => {
       result.current.cyclePlaybackRate();

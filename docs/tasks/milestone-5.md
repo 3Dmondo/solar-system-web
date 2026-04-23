@@ -23,6 +23,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - The first trail pass now derives sampled position history from the active loaded chunk, clips it with body-specific default trail windows, and renders it without adding visible trail controls yet.
 - Richer trail styling and longer historical lookback for bodies such as the outer planets are explicitly deferred to the later trail UX milestone.
 - The HUD now exposes one minimal playback-rate control that cycles through the current Milestone 5 speed presets while reverse playback remains pending.
+- The default runtime now advances the simulation clock on every animation frame for visibly smoother motion through the interpolated ephemeris curve.
+- Visiting `/debug` on the current host now enables a lightweight FPS overlay without changing the default clock cadence.
 
 ## Agreed Milestone Direction
 
@@ -56,6 +58,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Preserve presentation metadata separately from physical metadata while scaling focus offsets proportionally.
 - [x] Compose the async provider and physical-scale mapping into the shared resolved catalog shape already used by the scene.
 - [x] Start the simulation clock from the current time and advance it in real time.
+- [x] Make per-frame clock advancement the default runtime cadence while keeping `/debug` as lightweight FPS instrumentation.
 - [x] Add pause and resume control plus HUD messaging for loading, error, and current simulation time.
 - [x] Keep the default `pnpm build` and current GitHub Pages workflow free of hidden ephemeris generation.
 - [x] Add unit coverage for parsing, dataset loading, interpolation, provider caching, runtime wiring, simulation clock behavior, and HUD state messaging.
@@ -81,11 +84,27 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Add sampled trail geometry derived from loaded chunk data.
 - [x] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
 - [x] Add rate changes to the current playback controls.
-- [ ] Add reverse playback after the landed rate controls.
+- [ ] 5.1 Optimize the new per-frame runtime path, with attention to catalog recomputation, interpolation cost, avoidable React churn, and scene update overhead.
+- [ ] 5.2 Review dynamic lighting coherence for Earth layers, Saturn ring shadows on the globe, and Venus cloud lighting so the apparent sun direction tracks live body positions.
+- [ ] Add reverse playback after the current performance and lighting follow-up.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
 - [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
 - [ ] Finish chunk-size, startup-latency, and production chunk-duration benchmarking for the browser runtime.
 - [ ] Run milestone closeout manual verification for the real-data path on desktop and mobile.
+
+## Follow-up Tasks Within Milestone 5
+
+### 5.1 Optimization
+
+- Profile the now-default per-frame runtime with `/debug` and isolate the heaviest cost centers across catalog refreshes, interpolation, React updates, and scene work.
+- Reduce avoidable per-frame recomputation before Milestone 5 closeout, especially where derived data can be cached or scene updates can be narrowed.
+- Re-measure desktop and mobile FPS after each optimization pass so the smoother cadence does not regress usability.
+
+### 5.2 Lighting Coherence Review
+
+- Re-check Earth layered lighting so the day or night split, cloud response, and specular highlights follow the live sun direction.
+- Re-check Saturn ring shadow projection on the globe under moving-body lighting.
+- Re-check Venus cloud lighting so the apparent terminator follows the changing body-to-sun vector.
 
 ## Remaining Plan
 
@@ -112,7 +131,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ### 4. Time Controls And Verification
 
 - Keep the landed playback-rate control minimal while tuning the accepted preset speeds.
-- Add reverse playback after the current forward-rate pass.
+- The default runtime now advances on every animation frame for smoother motion; keep `/debug` as the manual FPS overlay while optimizing that path.
+- Add reverse playback after the current performance and lighting follow-up.
 - Defer explicit date picking unless Milestone 5 usability proves it is necessary.
 - Verify the first chunk-derived trail pass stays readable enough before any richer trail controls are introduced.
 - Keep the Milestone 5 trail pass intentionally simple; defer brighter or thicker styling, non-transparent treatment, tail fading, and deeper historical windows to the later trail UX milestone.
@@ -120,6 +140,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ### 5. Verification And Closeout
 
 - Add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery.
+- Use `/debug` for manual FPS measurements while profiling the now-default per-frame clock path.
 - Manually verify desktop and mobile behavior with throttled network and CPU.
 - Update roadmap, architecture, vision, and deployment docs again once the real-data-first path lands.
 

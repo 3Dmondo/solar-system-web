@@ -25,6 +25,7 @@
 ## Current Runtime Shape
 
 - `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides.
+- Visiting `/debug` on the current host enables a lightweight FPS overlay for local performance sampling without changing the normal runtime behavior.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
 - The first real-data activation pass uses a default physical scale of `0.001` scene units per kilometer unless `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` overrides it.
@@ -53,7 +54,7 @@
 - `bodyPresentation.ts` contains the shared display metadata that stays stable across data sources.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
-- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time in real time, supports pause or resume, and exposes one minimal playback-rate cycle across the current forward-speed presets.
+- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, and exposes one minimal playback-rate cycle across the current forward-speed presets.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame.
 - `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
@@ -103,4 +104,5 @@ Additional notes:
 - Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
+- Review the live sun-direction response of layered Earth shading, Saturn's ring shadow on the globe, and Venus cloud lighting under moving-body updates.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.

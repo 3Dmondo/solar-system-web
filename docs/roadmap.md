@@ -6,7 +6,7 @@
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
-- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock with rate changes, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of placeholder startup positions, and a first trail pass that renders active-chunk sampled history with body-specific default windows.
+- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock with rate changes and now per-frame default advancement, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of placeholder startup positions, a `/debug` FPS overlay for local profiling, and a first trail pass that renders active-chunk sampled history with body-specific default windows.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -83,7 +83,9 @@ Goals:
 
 Current focus:
 
-- add reverse playback on top of the landed rate controls
+- optimize the now-default per-frame runtime path and use `/debug` as the lightweight FPS measurement route while profiling improvements
+- review Earth layered lighting, Saturn ring-shadowing on the globe, and Venus cloud lighting so the apparent sun direction better tracks live body positions
+- add reverse playback after the current performance and lighting follow-up
 - add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery
 - finish chunk-size, startup-latency, and chunk-duration benchmarking for the deployed and local generated-data paths
 - manually verify the real-data startup flow on desktop and mobile before milestone closeout

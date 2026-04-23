@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 export type UseSimulationClockOptions = {
   startAt?: Date | string;
   tickIntervalMs?: number;
+  updateMode?: 'interval' | 'animation-frame';
 };
 
 const defaultTickIntervalMs = 1000;
 const defaultPlaybackRateMultiplier = 1;
+const defaultUpdateMode = 'animation-frame';
 
 export const simulationPlaybackRateOptions = [
   { label: '1x', multiplier: 1 },
@@ -18,14 +20,18 @@ export const simulationPlaybackRateOptions = [
 export function useSimulationClock(options: UseSimulationClockOptions = {}) {
   const {
     startAt = new Date(),
-    tickIntervalMs = defaultTickIntervalMs
+    tickIntervalMs = defaultTickIntervalMs,
+    updateMode = defaultUpdateMode
   } = options;
   const [simulationTimeMs, setSimulationTimeMs] = useState(() => normalizeStartAt(startAt).getTime());
   const [isPaused, setIsPaused] = useState(false);
   const [playbackRateMultiplier, setPlaybackRateMultiplier] = useState(defaultPlaybackRateMultiplier);
 
   useEffect(() => {
-    if (!Number.isFinite(tickIntervalMs) || tickIntervalMs <= 0) {
+    if (
+      updateMode === 'interval'
+      && (!Number.isFinite(tickIntervalMs) || tickIntervalMs <= 0)
+    ) {
       throw new Error('tickIntervalMs must be a finite number greater than zero');
     }
 
@@ -33,19 +39,43 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
       return;
     }
 
-    let previousRealTimeMs = Date.now();
-    const intervalId = window.setInterval(() => {
-      const currentRealTimeMs = Date.now();
+    const getCurrentRealTimeMs =
+      updateMode === 'animation-frame'
+        ? () => performance.now()
+        : () => Date.now();
+    let previousRealTimeMs = getCurrentRealTimeMs();
+
+    const advanceSimulationClock = () => {
+      const currentRealTimeMs = getCurrentRealTimeMs();
       const elapsedRealTimeMs = currentRealTimeMs - previousRealTimeMs;
 
       previousRealTimeMs = currentRealTimeMs;
       setSimulationTimeMs((value) => value + elapsedRealTimeMs * playbackRateMultiplier);
+    };
+
+    if (updateMode === 'animation-frame') {
+      let animationFrameId = 0;
+
+      const handleAnimationFrame = () => {
+        advanceSimulationClock();
+        animationFrameId = window.requestAnimationFrame(handleAnimationFrame);
+      };
+
+      animationFrameId = window.requestAnimationFrame(handleAnimationFrame);
+
+      return () => {
+        window.cancelAnimationFrame(animationFrameId);
+      };
+    }
+
+    const intervalId = window.setInterval(() => {
+      advanceSimulationClock();
     }, tickIntervalMs);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [isPaused, playbackRateMultiplier, tickIntervalMs]);
+  }, [isPaused, playbackRateMultiplier, tickIntervalMs, updateMode]);
 
   return {
     isPaused,

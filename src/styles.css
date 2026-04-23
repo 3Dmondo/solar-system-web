@@ -37,3 +37,40 @@ body {
 button {
   font: inherit;
 }
+
+.debug-fps-overlay {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 20;
+  min-width: 7rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.9rem;
+  background: rgba(7, 11, 24, 0.82);
+  backdrop-filter: blur(10px);
+  color: var(--text);
+  pointer-events: none;
+  text-align: right;
+}
+
+.debug-fps-overlay__label {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.debug-fps-overlay__value {
+  margin-top: 0.2rem;
+  font-size: 1.9rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.debug-fps-overlay__hint {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}

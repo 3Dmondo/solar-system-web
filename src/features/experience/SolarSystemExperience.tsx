@@ -1,5 +1,6 @@
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
+import { DebugFpsOverlay } from './components/DebugFpsOverlay';
 import { useCoarsePointer } from './hooks/useCoarsePointer';
 import { useFocusedBody } from './state/useFocusedBody';
 import {
@@ -10,9 +11,13 @@ import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
 
 type SolarSystemExperienceProps = {
   catalogSource?: BodyCatalogSource;
+  showDebugOverlay?: boolean;
 };
 
-export function SolarSystemExperience({ catalogSource }: SolarSystemExperienceProps) {
+export function SolarSystemExperience({
+  catalogSource,
+  showDebugOverlay = false
+}: SolarSystemExperienceProps) {
   const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
   const {
@@ -46,6 +51,7 @@ export function SolarSystemExperience({ catalogSource }: SolarSystemExperiencePr
         onCyclePlaybackRate={cyclePlaybackRate}
         onToggleSimulationPaused={togglePaused}
       />
+      {showDebugOverlay ? <DebugFpsOverlay /> : null}
     </main>
   );
 }
