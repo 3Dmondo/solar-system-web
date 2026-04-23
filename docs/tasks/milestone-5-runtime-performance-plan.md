@@ -2,11 +2,24 @@
 
 ## Status
 
-Planned
+Replanned
 
 ## Goal
 
 Recover most of the performance lost after switching the runtime clock to per-frame advancement, while keeping real ephemeris motion visually smooth and preserving the current Milestone 5 startup behavior.
+
+## Restart Decision
+
+- Restart this task from the last committed state before the current uncommitted runtime-performance experiments.
+- Treat the current uncommitted branch work as rejected exploration, not as the base for the next pass.
+- Do not continue layering fixes on the current effect-driven hot path.
+
+Why this restart is justified:
+
+- The current branch still shows visible oscillation at `1h/s` and `1d/s`.
+- The visible oscillation now affects both body motion and trail motion, which means the current dataflow is still not stable enough even after multiple local fixes.
+- The current implementation path kept per-frame motion coupled to `useResolvedBodyCatalog(...)`, which remains a React hook built around request orchestration and catalog replacement rather than a dedicated motion runtime.
+- The repeated “body advances, trail lags, trail rejoins, body snaps” pattern is strong evidence that the architecture is still fighting the hot loop instead of owning it cleanly.
 
 ## Scope Of This Plan
 
@@ -14,10 +27,12 @@ Recover most of the performance lost after switching the runtime clock to per-fr
 - It assumes the current real-data startup path, loading or error UX, body interpolation contract, and active-chunk trail presentation stay in place unless a later measurement proves one of them must change.
 - It does not treat trail styling, reverse playback, or broader physical-alignment work as part of the first optimization slice.
 
-## Current Symptom
+## Current Symptom In The Rejected Branch
 
 - The overview dropped from about `60 FPS` to about `17 FPS` after the runtime started resolving the real-data catalog on every animation frame.
 - The first catalog-refresh optimization pass helped a little, but it did not address the main cost center.
+- The later uncommitted optimization attempts recovered some FPS, but they did not preserve stable motion.
+- At faster playback rates such as `1h/s` and `1d/s`, bodies and trails still oscillate visibly instead of advancing smoothly.
 
 ## Verified Findings
 
@@ -32,6 +47,12 @@ Recover most of the performance lost after switching the runtime clock to per-fr
 - With the current local generated dataset in `public/ephemeris/generated/manifest.json`, the active `2025-2050` chunk implies roughly:
   - `10,886` chunk samples scanned per frame across all bodies
   - `1,224` visible trail points rebuilt and remapped to scene space per frame
+
+## Additional Findings From The Rejected Branch
+
+- Caching and partial synchronous fallbacks improved FPS, but they did not remove the fundamental mismatch between the per-frame motion path and the effect-driven catalog hook.
+- Trying to keep hot motion inside the `ResolvedBodyCatalog` replacement path makes it too easy for body motion, trail cadence, request timing, and React commit timing to drift out of lockstep.
+- The branch demonstrated that better caching alone is not enough if the scene still consumes per-frame motion through a catalog object that is regenerated and committed through React.
 
 ## Current Hot Path
 
@@ -48,119 +69,108 @@ Recover most of the performance lost after switching the runtime clock to per-fr
 - Do not add new user-facing controls as part of the performance pass.
 - Do not move immediately to analytical orbit approximations unless the measured CPU and GPU costs still block Milestone 5 after caching and data-path narrowing.
 
-## Working Hypothesis
+## Updated Hypothesis
 
 The performance collapse is mainly caused by architectural churn around the per-frame time update, not by the 10 Hermite body interpolations alone.
 
-The likely high-cost path is:
+The likely unstable path is:
 
 1. per-frame React state update for simulation time
 2. per-frame async catalog refresh effect
-3. per-frame trail sampling and trail scene-space remapping
-4. per-frame replacement of the entire resolved catalog object graph
-5. per-frame React rerender of the scene and HUD
-6. per-frame `Line` point-array updates and material prop churn in the Three scene
+3. per-frame full-catalog or partial-catalog replacement
+4. trail updates that do not share one explicit ownership model with body motion
+5. per-frame React rerender of scene consumers that were not designed as a motion store
 
-## Plan
+The browser runtime needs one authoritative hot-motion owner instead of trying to make the catalog-loading hook behave like one.
 
-### 1. Measure Before Refactoring
+## Replanned Implementation Strategy
 
-- Add lightweight instrumentation around:
-  - `loadBodyCatalogAtUtc(...)`
-  - body interpolation
-  - trail sampling
-  - scene-space mapping
-  - React catalog commit
-- Record desktop `/debug` FPS plus timing samples for the current baseline before changing behavior.
-- Confirm whether `prefetchAroundUtc(...)` is doing any meaningful work on every frame or only adding overhead.
+### 1. Return To The Last Good Commit Before This Experiment
 
-Suggested capture points:
+- Discard the current uncommitted Milestone 5.1 performance experiment.
+- Re-enter from the last committed state where startup, focus, and trail behavior were at least functionally coherent, even if slow.
+- Keep the newly learned measurements and failure notes, but do not keep the current code path.
 
-- `useResolvedBodyCatalog(...)`:
-  - request count per second
-  - average and worst-case source load duration
-- `createWebEphemerisProvider(...).loadSnapshotAtUtc(...)`:
-  - body interpolation duration
-  - trail sampling duration
-  - total provider duration
-- scene commit path:
-  - number of trail arrays replaced
-  - number of body-position arrays replaced
+### 2. Split Startup Loading From Runtime Motion Ownership
 
-### 2. Split Fast Body Updates From Slow Trail Updates
-
-- Introduce a fast path for per-frame body-position updates that only:
-  - selects the current chunk
-  - interpolates body positions
-  - maps those 10 positions into scene space
-- Move trail generation off the per-frame path.
-- Recompute trails only when one of these changes:
-  - active chunk file
-  - focused body, if trail styling or scope depends on it later
-  - configured trail window policy
-  - a coarse time threshold large enough to matter visually
+- Keep `useResolvedBodyCatalog(...)` for what it is good at:
+  - initial loading
+  - chunk-boundary loading
+  - loading and error messaging
+  - static metadata delivery
+- Stop using `useResolvedBodyCatalog(...)` as the owner of per-frame motion after startup.
+- Introduce a dedicated Milestone 5 runtime motion layer that owns:
+  - current simulation time
+  - active chunk selection
+  - body interpolation inside the active chunk
+  - trail refresh policy inside the active chunk
 
 Expected result:
 
-- the app keeps smooth planet motion
-- trails remain visually stable
-- the largest per-frame allocation source disappears
+- startup and async loading remain explicit
+- per-frame motion no longer depends on React effect timing
 
-First implementation slice:
+### 3. Build A Scene Runtime Store For Hot Motion Data
 
-- Keep body interpolation per-frame.
-- Freeze trail recomputation within the active chunk except when the chunk file changes.
-- Accept slightly stale in-chunk trail endpoints for the first measurement pass if that buys a large FPS recovery.
-- Re-measure before doing any broader data-shape refactor.
-
-### 3. Stop Rebuilding The Entire Catalog Every Frame
-
-- Keep stable metadata and stable body-definition shells where possible.
-- Replace full-catalog replacement with a narrower runtime state shape, for example:
-  - static metadata
-  - dynamic body positions
-  - dynamic trails with slower refresh cadence
-- Avoid driving the per-frame path through `useResolvedBodyCatalog` if that hook remains effect-driven and async-oriented.
-- Prefer a dedicated runtime store or scene-local subscription for hot motion data.
+- Add a dedicated runtime store or ref-backed runtime object for the active chunk.
+- Warm or swap that runtime object only when:
+  - the first chunk finishes loading
+  - playback crosses a chunk boundary
+  - a recoverable data error forces a reset
+- Keep the hot motion data shape narrow:
+  - current body positions
+  - current body velocities if still useful
+  - current trail geometry state
+- Do not rebuild the full resolved catalog object graph per frame.
 
 Expected result:
 
-- less React reconciliation
-- fewer prop identity changes
-- less Three object churn
+- one stable owner for motion state
+- no per-frame catalog regeneration
 
-### 4. Keep React Out Of The Hottest Loop
+### 4. Move Body Motion Fully Off The Effect-Driven React Loop
 
-- Evaluate moving the hottest clock-driven position updates into a render-loop-owned store or ref-backed state that the Three scene can consume directly.
-- Keep React state for slower UI concerns:
-  - formatted UTC label
-  - loading and error state
+- Interpolate bodies directly from the warmed active chunk inside the motion runtime.
+- Let the scene consume those positions from the runtime store or scene-local subscription.
+- Keep React rendering for slower UI concerns only:
+  - HUD text
   - playback controls
-  - chunk-boundary transitions
-- If needed, decouple the HUD clock label from the raw render cadence so the HUD does not rerender at display-frame frequency.
+  - loading and error state
+  - focus selection state
 
 Expected result:
 
-- per-frame simulation updates stop forcing app-wide React rerenders
+- body motion becomes smooth because it no longer waits for async hook churn or React commit timing
 
-Decision gate:
+### 5. Rebuild The Trail Strategy Around The Same Motion Owner
 
-- Only take this step in the first optimization pass if body-only per-frame updates still leave the overview materially below the target desktop FPS.
-- If body-only updates recover performance enough, defer the deeper state-ownership rewrite until after Milestone 5 closeout or until reverse playback demands it.
-
-### 5. Revisit Trail Rendering Strategy
-
-- Keep current trail windows, but cache chunk-derived trail samples by:
-  - chunk file
-  - body id
-  - trail window days
-- Only append or trim endpoints when the target time moves inside the same cached trail segment, rather than rebuilding the full trail array each frame.
-- If needed, move trail generation to a lower update cadence than body positions.
-- If trail rendering still appears to be the limiting factor after the earlier runtime refactors, treat GPU upload reduction as a final optimization phase rather than an initial rewrite.
+- Do not let trails be governed by a separate timing model from body positions.
+- Keep a stable cached trail body per chunk.
+- Update only the moving frontier from the same runtime motion owner that updates the bodies.
+- Prefer one of these implementations:
+  - append or trim the visible endpoint from a cached sampled trail body
+  - maintain a stable per-body buffer and adjust only the active frontier
+- Avoid policies that refresh trails on an arbitrary cadence unrelated to the same motion owner.
 
 Expected result:
 
-- orbit lines stop dominating CPU and allocation cost
+- trails and planets advance coherently
+- no repeated lag and snap cycle
+
+### 6. Re-Measure Only After The Ownership Split Lands
+
+- Do not spend another pass tuning cache windows or cadence thresholds until the motion owner is separated from the catalog hook.
+- Measure again only after:
+  - body motion comes from the runtime store
+  - trail frontier updates come from the same runtime store
+  - React is out of the per-frame catalog loop
+
+## Rejected Tactics From This Branch
+
+- Do not continue with per-frame requests routed through `useResolvedBodyCatalog(...)`, even if some of them can be answered synchronously.
+- Do not keep adding local cache layers on top of full catalog replacement in React as the main strategy.
+- Do not govern trails with a cadence policy that is separate from the same owner that advances body motion.
+- Do not treat “FPS improved” as success if visible motion still oscillates.
 
 ### 5.1 Final Trail-Rendering Fallbacks
 
@@ -199,20 +209,20 @@ Expected result:
 
 ## Proposed Implementation Order
 
-1. Add timing instrumentation and capture a baseline.
-2. Disable per-frame trail recomputation while keeping body interpolation per-frame.
-3. Re-measure FPS and commit if the gain is material.
-4. Narrow the per-frame data shape so body motion no longer rebuilds the full resolved catalog.
-5. Re-measure again on desktop and mobile.
-6. If trails are still the limiting factor, test a GPU-resident trail-buffer strategy before considering analytical trail approximation.
-7. Only then decide whether deeper refactors, such as a scene-local motion store, are still necessary.
+1. Reset to the last committed state before the current uncommitted experiment.
+2. Keep `/debug` instrumentation available, but treat it as support tooling only.
+3. Introduce a dedicated runtime motion store for the active chunk.
+4. Route per-frame body interpolation through that runtime store instead of the catalog hook.
+5. Move trail frontier updates under the same runtime store.
+6. Re-measure motion stability first, then FPS.
+7. Only after motion is stable, revisit GPU upload reduction if trails still cost too much.
 
 ## Immediate Deliverable For The Next Code Step
 
-- Add minimal instrumentation that can stay local or debug-only.
-- Land the smallest safe change that stops per-frame trail regeneration inside the active chunk.
-- Keep startup, chunk-boundary loading, and focus tracking behavior unchanged.
-- Update `docs/tasks/milestone-5.md` in the same code step if the accepted plan or milestone wording changes materially.
+- Reset to the last committed state before this uncommitted experiment.
+- Preserve or re-add lightweight `/debug` instrumentation only if it can live outside the hot motion ownership path.
+- Build the first dedicated active-chunk motion store without changing the startup loading contract.
+- Keep startup, chunk-boundary loading, and focus tracking behavior unchanged while the motion owner is replaced.
 
 ## Exit Criteria Per Sub-Step
 
@@ -223,14 +233,14 @@ Expected result:
 
 ### Trail Decoupling Pass
 
-- Body motion remains smooth at default playback.
-- Trail arrays are no longer rebuilt on every animation frame inside the same chunk.
+- Body motion remains smooth at default playback and at least one faster preset.
+- Trails advance coherently with body motion instead of lagging and snapping in a visible cycle.
 - Desktop `/debug` FPS shows a meaningful recovery from the current `~17 FPS` baseline.
 
 ### Data-Shape Narrowing Pass
 
 - The per-frame path no longer replaces the entire resolved catalog object graph.
-- Scene consumers update only the data that actually changed.
+- Scene consumers no longer depend on the catalog hook for hot motion updates.
 
 ## Verification
 
@@ -239,6 +249,7 @@ Expected result:
 - Confirm that:
   - bodies still move smoothly
   - trails remain readable and stable
+  - bodies and trails advance together without a repeated lag and snap cycle
   - focus tracking still behaves correctly
   - loading and chunk-boundary behavior still works
 - Keep `pnpm test` green for any touched provider, store, and runtime-hook code.
