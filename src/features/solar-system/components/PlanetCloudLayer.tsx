@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { FrontSide, Mesh, type Texture } from 'three';
+import { FrontSide, Mesh, type Texture, Vector3 } from 'three';
 import { getSunLightDirection } from '../rendering/sunLighting';
 
 type CloudAlphaHeuristic = {
@@ -24,6 +24,7 @@ type PlanetCloudLayerProps = {
   rotationSpeed: number;
   shellScaleDefault: number;
   shellScaleFocused: number;
+  sunPosition: [number, number, number];
   transparencyHeuristic?: CloudAlphaHeuristic;
 };
 
@@ -41,10 +42,16 @@ export function PlanetCloudLayer({
   rotationSpeed,
   shellScaleDefault,
   shellScaleFocused,
+  sunPosition,
   transparencyHeuristic
 }: PlanetCloudLayerProps) {
-  const lightDirection = getSunLightDirection(bodyPosition);
+  const lightDirection = getSunLightDirection(bodyPosition, sunPosition);
   const cloudMeshRef = useRef<Mesh>(null);
+  const shaderRef = useRef<{
+    uniforms: {
+      cloudLightDirection?: { value: Vector3 };
+    };
+  } | null>(null);
   const shellScale = focused ? shellScaleFocused : shellScaleDefault;
 
   useFrame((_, delta) => {
@@ -53,6 +60,12 @@ export function PlanetCloudLayer({
     }
 
     cloudMeshRef.current.rotation.y += delta * rotationSpeed;
+
+    const cloudLightDirection = shaderRef.current?.uniforms.cloudLightDirection;
+
+    if (cloudLightDirection) {
+      cloudLightDirection.value.copy(lightDirection);
+    }
   });
 
   return (
@@ -87,6 +100,7 @@ export function PlanetCloudLayer({
           shader.uniforms.cloudAlphaPower = {
             value: transparencyHeuristic?.power ?? 1
           };
+          shaderRef.current = shader as typeof shaderRef.current;
 
           shader.vertexShader = shader.vertexShader.replace(
             '#include <common>',

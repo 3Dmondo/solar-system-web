@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { TangentSpaceNormalMap, Vector2 } from 'three';
+import { TangentSpaceNormalMap, Vector2, Vector3 } from 'three';
 import { EARTH_CLOUD_UV_SPEED, EARTH_CLOUD_SHADOW_SHELL_RADIUS } from '../rendering/earthMotion';
 import {
   loadEarthCloudTexture,
@@ -13,31 +13,44 @@ import { getSunLightDirection } from '../rendering/sunLighting';
 
 type EarthSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
+  sunPosition: [number, number, number];
 };
 
-export function EarthSurfaceMaterial({ bodyPosition }: EarthSurfaceMaterialProps) {
+export function EarthSurfaceMaterial({
+  bodyPosition,
+  sunPosition
+}: EarthSurfaceMaterialProps) {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
   const nightTexture = useMemo(() => loadEarthNightTexture(), []);
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
   const normalTexture = useMemo(() => loadEarthNormalTexture(), []);
   const specularTexture = useMemo(() => loadEarthSpecularTexture(), []);
-  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
+  const lightDirection = useMemo(
+    () => getSunLightDirection(bodyPosition, sunPosition),
+    [bodyPosition, sunPosition]
+  );
   const shaderRef = useRef<{
     uniforms: {
       earthCloudTexture?: { value: unknown };
       earthCloudOffset?: { value: number };
+      earthLightDirection?: { value: Vector3 };
       earthSpecularTexture?: { value: unknown };
     };
   } | null>(null);
 
   useFrame((_, delta) => {
     const earthCloudOffset = shaderRef.current?.uniforms.earthCloudOffset;
+    const earthLightDirection = shaderRef.current?.uniforms.earthLightDirection;
 
     if (!earthCloudOffset) {
       return;
     }
 
     earthCloudOffset.value = (earthCloudOffset.value + delta * EARTH_CLOUD_UV_SPEED) % 1;
+
+    if (earthLightDirection) {
+      earthLightDirection.value.copy(lightDirection);
+    }
   });
 
   return (

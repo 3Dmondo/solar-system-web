@@ -38,7 +38,6 @@ The next implementation slice focuses on finishing the real-data milestone after
 Focus areas:
 
 - optimize the now-default per-frame runtime path before milestone closeout
-- review Earth layered lighting, Saturn ring-shadowing on the globe, and Venus cloud lighting so the apparent sun direction tracks the live positions more convincingly
 - align body axial orientation, spin rates, Earth-Sun seasonal orientation, and other high-value physical characteristics with the rendered scene
 - add reverse playback on top of the landed pause and rate controls after the current performance, lighting, and physical-alignment follow-up
 - expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact

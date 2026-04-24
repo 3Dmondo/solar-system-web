@@ -15,9 +15,16 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
   body: BodyDefinition;
   focused: boolean;
   onSelect: (bodyId: BodyId) => void;
+  sunPosition: [number, number, number];
 };
 
-export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBodyProps) {
+export function PlanetBody({
+  body,
+  focused,
+  onSelect,
+  sunPosition,
+  ...meshProps
+}: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
   const meshRef = useRef<Mesh>(null);
   const sphereSegments = body.material === 'sun' ? 96 : body.material === 'moon' ? 128 : 64;
@@ -70,9 +77,10 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
           <SaturnSurfaceMaterial
             bodyPosition={body.position}
             radius={body.radius}
+            sunPosition={sunPosition}
           />
         ) : body.material === 'earth' ? (
-          <EarthSurfaceMaterial bodyPosition={body.position} />
+          <EarthSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial />
         ) : (
@@ -86,15 +94,22 @@ export function PlanetBody({ body, focused, onSelect, ...meshProps }: PlanetBody
           bodyPosition={body.position}
           onSelect={onSelect}
           radius={body.radius}
+          sunPosition={sunPosition}
         />
       ) : body.material === 'earth' ? (
-        <EarthCloudLayer bodyPosition={body.position} focused={focused} radius={body.radius} />
+        <EarthCloudLayer
+          bodyPosition={body.position}
+          focused={focused}
+          radius={body.radius}
+          sunPosition={sunPosition}
+        />
       ) : body.material === 'venus' ? (
         <VenusCloudLayer
           bodyPosition={body.position}
           focused={focused}
           radius={body.radius}
           rotationSpeed={body.surfaceRotationSpeed ?? 0}
+          sunPosition={sunPosition}
         />
       ) : null}
     </group>

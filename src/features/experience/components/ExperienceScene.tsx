@@ -83,6 +83,7 @@ export function ExperienceScene({
           body={body}
           focused={body.id === focusedBodyId}
           onSelect={onFocusBody}
+          sunPosition={sunPosition}
         />
       ))}
     </Canvas>

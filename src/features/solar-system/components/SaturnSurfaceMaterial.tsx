@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import {
   createSaturnRingNormal,
@@ -15,19 +16,41 @@ import { getSunLightDirection } from '../rendering/sunLighting';
 type SaturnSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
   radius: number;
+  sunPosition: [number, number, number];
 };
 
 export function SaturnSurfaceMaterial({
   bodyPosition,
-  radius
+  radius,
+  sunPosition
 }: SaturnSurfaceMaterialProps) {
   const ringTexture = useMemo(() => createSaturnRingTexture(), []);
   const surfaceTexture = useMemo(() => loadSaturnSurfaceTexture(), []);
   const ringNormal = useMemo(() => new Vector3(...createSaturnRingNormal()).normalize(), []);
   const bodyCenter = useMemo(() => new Vector3(...bodyPosition), [bodyPosition]);
-  const lightDirection = useMemo(() => getSunLightDirection(bodyPosition), [bodyPosition]);
+  const lightDirection = useMemo(
+    () => getSunLightDirection(bodyPosition, sunPosition),
+    [bodyPosition, sunPosition]
+  );
+  const shaderRef = useRef<{
+    uniforms: {
+      bodyCenter?: { value: Vector3 };
+      saturnLightDirection?: { value: Vector3 };
+    };
+  } | null>(null);
   const ringInnerRadius = radius * SATURN_RING_INNER_MULTIPLIER;
   const ringOuterRadius = radius * SATURN_RING_OUTER_MULTIPLIER;
+
+  useFrame(() => {
+    const shader = shaderRef.current;
+
+    if (!shader) {
+      return;
+    }
+
+    shader.uniforms.bodyCenter?.value.copy(bodyCenter);
+    shader.uniforms.saturnLightDirection?.value.copy(lightDirection);
+  });
 
   return (
     <meshStandardMaterial
@@ -44,6 +67,7 @@ export function SaturnSurfaceMaterial({
         shader.uniforms.ringTextureMinU = { value: SATURN_RING_SHADOW_TEXTURE_MIN_U };
         shader.uniforms.ringShadowStrength = { value: 0.72 };
         shader.uniforms.saturnLightDirection = { value: lightDirection };
+        shaderRef.current = shader as typeof shaderRef.current;
 
         shader.vertexShader = shader.vertexShader.replace(
           '#include <common>',

@@ -7,9 +7,15 @@ type EarthCloudLayerProps = {
   bodyPosition: [number, number, number];
   focused: boolean;
   radius: number;
+  sunPosition: [number, number, number];
 };
 
-export function EarthCloudLayer({ bodyPosition, focused, radius }: EarthCloudLayerProps) {
+export function EarthCloudLayer({
+  bodyPosition,
+  focused,
+  radius,
+  sunPosition
+}: EarthCloudLayerProps) {
   const cloudTexture = useMemo(() => loadEarthCloudTexture(), []);
 
   return (
@@ -22,6 +28,7 @@ export function EarthCloudLayer({ bodyPosition, focused, radius }: EarthCloudLay
       rotationSpeed={EARTH_CLOUD_WORLD_ROTATION_SPEED}
       shellScaleDefault={1.01}
       shellScaleFocused={1.05}
+      sunPosition={sunPosition}
     />
   );
 }

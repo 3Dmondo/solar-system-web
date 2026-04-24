@@ -106,6 +106,5 @@ Additional notes:
 - Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
-- Review the live sun-direction response of layered Earth shading, Saturn's ring shadow on the globe, and Venus cloud lighting under moving-body updates.
 - Align rendered axial tilt, rotation speeds, Earth-Sun orientation, and other high-value physical characteristics with the available solar-system metadata.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
