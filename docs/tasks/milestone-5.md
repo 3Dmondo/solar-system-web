@@ -103,6 +103,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 - The first optimization pass now keeps the physically scaled metadata stable across clock-driven catalog refreshes and avoids repeated linear body lookups while merging snapshot state into the resolved catalog.
 - The current measurement pass now gives `/debug` one repeatable benchmark timestamp by default plus debug-only timing samples across the main runtime phases called out in the Milestone 5.1 plan.
+- The next CPU pass now precomputes per-chunk trail sampler state and reuses stable interior trail segments across nearby frames so trail history no longer walks the chunk samples from scratch on every snapshot.
 - Profile the now-default per-frame runtime with `/debug` and isolate the heaviest cost centers across catalog refreshes, interpolation, React updates, and scene work.
 - Reduce avoidable per-frame recomputation before Milestone 5 closeout, especially where derived data can be cached or scene updates can be narrowed.
 - Re-measure desktop and mobile FPS after each optimization pass so the smoother cadence does not regress usability.

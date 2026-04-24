@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { sampleChunkBodyTrailAtTdbTime } from './webEphemerisTrails'
+import {
+  createChunkBodyTrailSampler,
+  sampleChunkBodyTrailAtTdbTime
+} from './webEphemerisTrails'
 import { type WebEphemerisChunk, type WebEphemerisManifest } from './webEphemeris'
 
 const manifest: WebEphemerisManifest = {
@@ -81,5 +84,15 @@ describe('webEphemerisTrails', () => {
         [129600, 0, 0]
       ]
     })
+  })
+
+  it('reuses the stable interior trail segment while the moving endpoints continue to update', () => {
+    const sampler = createChunkBodyTrailSampler(manifest, chunk, 'earth')
+    const firstTrail = sampler.sampleAtTdbTime(129600, 1)
+    const secondTrail = sampler.sampleAtTdbTime(129601, 1)
+
+    expect(firstTrail.positionsKm[1]).toBe(secondTrail.positionsKm[1])
+    expect(firstTrail.positionsKm[0]).not.toBe(secondTrail.positionsKm[0])
+    expect(firstTrail.positionsKm.at(-1)).not.toBe(secondTrail.positionsKm.at(-1))
   })
 })

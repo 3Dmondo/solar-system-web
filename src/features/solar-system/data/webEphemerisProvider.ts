@@ -1,8 +1,12 @@
 import {
   type BodyEphemerisProvider,
+  type BodyId,
   type BodyMetadata
 } from '../domain/body'
-import { measureRuntimeDebugMetric, measureRuntimeDebugMetricAsync } from '../../experience/debug/runtimeDebugMetrics'
+import {
+  measureRuntimeDebugMetric,
+  measureRuntimeDebugMetricAsync
+} from '../../experience/debug/runtimeDebugMetrics'
 import {
   getChunkRangeForTdbTime,
   getNextChunkRange,
@@ -17,7 +21,7 @@ import {
 } from './webEphemeris'
 import { type WebDataset, type WebDatasetLoader } from './webDatasetLoader'
 import { presentationBodyMetadata } from './bodyPresentation'
-import { sampleChunkBodyTrailAtTdbTime } from './webEphemerisTrails'
+import { createChunkBodyTrailSampler } from './webEphemerisTrails'
 
 export type WebEphemerisProviderOptions = {
   chunkBaseUrl: string
@@ -38,6 +42,7 @@ export function createWebEphemerisProvider({
 }: WebEphemerisProviderOptions): BodyEphemerisProvider {
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
   const chunkCache = new Map<string, Promise<WebEphemerisChunk>>()
+  const trailSamplerCache = new Map<string, ReturnType<typeof createChunkBodyTrailSampler>>()
   const presentationMetadataByBodyId = new Map(
     presentationMetadata.map((body) => [body.id, body])
   )
@@ -46,51 +51,48 @@ export function createWebEphemerisProvider({
     getBodyMetadata: () => presentationMetadata,
     loadSnapshotAtUtc: async (utc) =>
       measureRuntimeDebugMetricAsync('ephemerisSnapshotGeneration', async () => {
-      const utcDate = normalizeUtcInput(utc)
-      const dataset = await datasetLoader.load()
-      const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
-      const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
-      const chunk = await loadChunk(dataset, chunkRange)
-      const trails = measureRuntimeDebugMetric('trailGeneration', () =>
-        dataset.manifest.bodies
-          .map((body) => {
-            const trailWindowDays =
-              presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+        const utcDate = normalizeUtcInput(utc)
+        const dataset = await datasetLoader.load()
+        const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
+        const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
+        const chunk = await loadChunk(dataset, chunkRange)
+        const trails = measureRuntimeDebugMetric('trailGeneration', () =>
+          dataset.manifest.bodies
+            .map((body) => {
+              const trailWindowDays =
+                presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
 
-            return sampleChunkBodyTrailAtTdbTime(
+              return getTrailSampler(dataset, chunk, body.bodyId).sampleAtTdbTime(
+                approximateTdbSecondsFromJ2000,
+                trailWindowDays
+              )
+            })
+            .filter((trail) => trail.positionsKm.length >= 2)
+        )
+
+        return {
+          capturedAt: utcDate.toISOString(),
+          approximateTdbSecondsFromJ2000,
+          chunkFileName: chunkRange.fileName,
+          chunkStartTdbSecondsFromJ2000: chunkRange.startTdbSecondsFromJ2000,
+          chunkEndTdbSecondsFromJ2000: chunkRange.endTdbSecondsFromJ2000,
+          bodies: dataset.manifest.bodies.map((body) => {
+            const state = interpolateChunkBodyAtTdbTime(
               dataset.manifest,
               chunk,
               body.bodyId,
-              approximateTdbSecondsFromJ2000,
-              trailWindowDays
+              approximateTdbSecondsFromJ2000
             )
-          })
-          .filter((trail) => trail.positionsKm.length >= 2)
-      )
 
-      return {
-        capturedAt: utcDate.toISOString(),
-        approximateTdbSecondsFromJ2000,
-        chunkFileName: chunkRange.fileName,
-        chunkStartTdbSecondsFromJ2000: chunkRange.startTdbSecondsFromJ2000,
-        chunkEndTdbSecondsFromJ2000: chunkRange.endTdbSecondsFromJ2000,
-        bodies: dataset.manifest.bodies.map((body) => {
-          const state = interpolateChunkBodyAtTdbTime(
-            dataset.manifest,
-            chunk,
-            body.bodyId,
-            approximateTdbSecondsFromJ2000
-          )
-
-          return {
-            id: body.bodyId,
-            positionKm: state.positionKm,
-            velocityKmPerSecond: state.velocityKmPerSecond
-          }
-        }),
-        trails
-      }
-    }),
+            return {
+              id: body.bodyId,
+              positionKm: state.positionKm,
+              velocityKmPerSecond: state.velocityKmPerSecond
+            }
+          }),
+          trails
+        }
+      }),
     prefetchAroundUtc: async (utc) => {
       const utcDate = normalizeUtcInput(utc)
       const dataset = await datasetLoader.load()
@@ -107,7 +109,27 @@ export function createWebEphemerisProvider({
     clearCache: () => {
       datasetLoader.clearCache()
       chunkCache.clear()
+      trailSamplerCache.clear()
     }
+  }
+
+  function getTrailSampler(
+    dataset: WebDataset,
+    chunk: WebEphemerisChunk,
+    bodyId: BodyId
+  ) {
+    const cacheKey = `${chunk.range.fileName}:${bodyId}`
+    const cachedSampler = trailSamplerCache.get(cacheKey)
+
+    if (cachedSampler) {
+      return cachedSampler
+    }
+
+    const nextSampler = createChunkBodyTrailSampler(dataset.manifest, chunk, bodyId)
+
+    trailSamplerCache.set(cacheKey, nextSampler)
+
+    return nextSampler
   }
 
   function loadChunk(dataset: WebDataset, range: WebEphemerisChunkRange) {

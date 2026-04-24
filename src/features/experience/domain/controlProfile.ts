@@ -59,7 +59,7 @@ export function getControlDistanceRange(
 
   if (focusedBodyId === 'overview') {
     return {
-      minDistance: Math.max(baseRange.minDistance, sceneRadius * 1.02),
+      minDistance: Math.max(baseRange.minDistance, getOverviewMinDistance(catalog)),
       maxDistance: Math.max(baseRange.maxDistance, overviewDistance * 6)
     };
   }
@@ -71,4 +71,27 @@ export function getControlDistanceRange(
     minDistance: Math.max(baseRange.minDistance, visibleRadius * 1.15, focusDistance * 0.25),
     maxDistance: Math.max(baseRange.maxDistance, overviewDistance * 1.25, focusDistance * 64)
   };
+}
+
+function getOverviewMinDistance(
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
+) {
+  const nonCentralBodyDistances = catalog.bodies
+    .map((body) => Math.hypot(...body.position))
+    .filter((distance) => distance > 0);
+  const nearestBodyDistance = nonCentralBodyDistances.length > 0
+    ? Math.min(...nonCentralBodyDistances)
+    : 0;
+  const centralBodyVisibleRadius = catalog.bodies.reduce((maxRadius, body) => {
+    if (Math.hypot(...body.position) > 0) {
+      return maxRadius;
+    }
+
+    return Math.max(maxRadius, body.hasRings ? body.radius * 2.25 : body.radius);
+  }, 0);
+
+  return Math.max(
+    centralBodyVisibleRadius * 2,
+    nearestBodyDistance > 0 ? nearestBodyDistance * 0.2 : 0
+  );
 }

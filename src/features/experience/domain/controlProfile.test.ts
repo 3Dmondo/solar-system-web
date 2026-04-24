@@ -57,7 +57,8 @@ describe('getControlProfile', () => {
   it('expands overview zoom limits for the physically scaled runtime', () => {
     const range = getControlDistanceRange('overview', physicallyScaledCatalog, false);
 
-    expect(range.minDistance).toBeGreaterThan(4_500_000);
+    expect(range.minDistance).toBeLessThan(150_000);
+    expect(range.minDistance).toBeGreaterThan(1_000);
     expect(range.maxDistance).toBeGreaterThan(range.minDistance);
   });
 

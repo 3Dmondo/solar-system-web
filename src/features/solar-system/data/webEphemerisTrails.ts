@@ -12,6 +12,13 @@ import { interpolateChunkBodyAtTdbTime } from './webEphemerisTimeline'
 
 const secondsPerDay = 86_400
 
+export type ChunkBodyTrailSampler = {
+  sampleAtTdbTime: (
+    targetTdbSecondsFromJ2000: number,
+    trailWindowDays: number
+  ) => BodyEphemerisTrail
+}
+
 export function sampleChunkBodyTrailAtTdbTime(
   manifest: WebEphemerisManifest,
   chunk: WebEphemerisChunk,
@@ -19,10 +26,17 @@ export function sampleChunkBodyTrailAtTdbTime(
   targetTdbSecondsFromJ2000: number,
   trailWindowDays: number
 ): BodyEphemerisTrail {
-  if (!Number.isFinite(trailWindowDays) || trailWindowDays < 0) {
-    throw new Error('trailWindowDays must be a finite number greater than or equal to zero')
-  }
+  return createChunkBodyTrailSampler(manifest, chunk, bodyId).sampleAtTdbTime(
+    targetTdbSecondsFromJ2000,
+    trailWindowDays
+  )
+}
 
+export function createChunkBodyTrailSampler(
+  manifest: WebEphemerisManifest,
+  chunk: WebEphemerisChunk,
+  bodyId: BodyId
+): ChunkBodyTrailSampler {
   const manifestBody = getManifestBodyById(manifest, bodyId)
 
   if (!manifestBody) {
@@ -39,65 +53,141 @@ export function sampleChunkBodyTrailAtTdbTime(
 
   if (sampleCount === 0) {
     return {
-      id: bodyId,
-      positionsKm: []
+      sampleAtTdbTime: () => ({
+        id: bodyId,
+        positionsKm: []
+      })
     }
   }
 
-  const trailStartTdbSecondsFromJ2000 = Math.max(
-    chunk.range.startTdbSecondsFromJ2000,
-    targetTdbSecondsFromJ2000 - trailWindowDays * secondsPerDay
+  const sampleTimes = Array.from(
+    { length: sampleCount },
+    (_, sampleIndex) => getChunkBodySampleTime(chunk, manifestBody, sampleIndex)
   )
-  const trail = {
-    id: bodyId,
-    positionsKm: [] as Array<[number, number, number]>
-  }
-  let lastEmittedTime: number | undefined
+  const samplePositionsKm = Array.from(
+    { length: sampleCount },
+    (_, sampleIndex) => getChunkBodySampleAt(chunkBody, sampleIndex).positionKm
+  )
+  const interiorPositionsByRangeKey = new Map<string, Array<[number, number, number]>>()
+  const firstSampleTime = sampleTimes[0] ?? chunk.range.startTdbSecondsFromJ2000
+  const firstSamplePositionKm =
+    samplePositionsKm[0] ?? ([0, 0, 0] as [number, number, number])
 
-  const appendPoint = (time: number, positionKm: [number, number, number]) => {
-    if (lastEmittedTime === time) {
-      return
-    }
+  return {
+    sampleAtTdbTime: (targetTdbSecondsFromJ2000, trailWindowDays) => {
+      if (!Number.isFinite(trailWindowDays) || trailWindowDays < 0) {
+        throw new Error(
+          'trailWindowDays must be a finite number greater than or equal to zero'
+        )
+      }
 
-    trail.positionsKm.push(positionKm)
-    lastEmittedTime = time
-  }
-
-  if (trailStartTdbSecondsFromJ2000 < targetTdbSecondsFromJ2000) {
-    const firstSampleTime = getChunkBodySampleTime(chunk, manifestBody, 0)
-
-    if (trailStartTdbSecondsFromJ2000 === firstSampleTime) {
-      appendPoint(firstSampleTime, getChunkBodySampleAt(chunkBody, 0).positionKm)
-    } else {
-      appendPoint(
-        trailStartTdbSecondsFromJ2000,
-        interpolateChunkBodyAtTdbTime(
-          manifest,
-          chunk,
-          bodyId,
-          trailStartTdbSecondsFromJ2000
-        ).positionKm
+      const trailStartTdbSecondsFromJ2000 = Math.max(
+        chunk.range.startTdbSecondsFromJ2000,
+        targetTdbSecondsFromJ2000 - trailWindowDays * secondsPerDay
       )
+      const positionsKm: Array<[number, number, number]> = []
+
+      if (trailStartTdbSecondsFromJ2000 < targetTdbSecondsFromJ2000) {
+        if (trailStartTdbSecondsFromJ2000 === firstSampleTime) {
+          positionsKm.push(firstSamplePositionKm)
+        } else {
+          positionsKm.push(
+            interpolateChunkBodyAtTdbTime(
+              manifest,
+              chunk,
+              bodyId,
+              trailStartTdbSecondsFromJ2000
+            ).positionKm
+          )
+        }
+      }
+
+      const interiorStartIndex = getFirstSampleIndexAfterTime(
+        sampleTimes,
+        trailStartTdbSecondsFromJ2000
+      )
+      const interiorEndIndex = getFirstSampleIndexAtOrAfterTime(
+        sampleTimes,
+        targetTdbSecondsFromJ2000
+      )
+      const interiorPositionsKm = getCachedInteriorPositions(
+        interiorPositionsByRangeKey,
+        samplePositionsKm,
+        interiorStartIndex,
+        interiorEndIndex
+      )
+
+      if (interiorPositionsKm.length > 0) {
+        positionsKm.push(...interiorPositionsKm)
+      }
+
+      positionsKm.push(
+        interpolateChunkBodyAtTdbTime(manifest, chunk, bodyId, targetTdbSecondsFromJ2000)
+          .positionKm
+      )
+
+      return {
+        id: bodyId,
+        positionsKm
+      }
+    }
+  }
+}
+
+function getCachedInteriorPositions(
+  interiorPositionsByRangeKey: Map<string, Array<[number, number, number]>>,
+  samplePositionsKm: Array<[number, number, number]>,
+  startIndex: number,
+  endIndex: number
+) {
+  if (startIndex >= endIndex) {
+    return []
+  }
+
+  const rangeKey = `${startIndex}:${endIndex}`
+  const cachedPositions = interiorPositionsByRangeKey.get(rangeKey)
+
+  if (cachedPositions) {
+    return cachedPositions
+  }
+
+  const nextPositions = samplePositionsKm.slice(startIndex, endIndex)
+
+  interiorPositionsByRangeKey.set(rangeKey, nextPositions)
+
+  return nextPositions
+}
+
+function getFirstSampleIndexAfterTime(sampleTimes: number[], time: number) {
+  let low = 0
+  let high = sampleTimes.length
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2)
+
+    if ((sampleTimes[middle] ?? Number.POSITIVE_INFINITY) <= time) {
+      low = middle + 1
+    } else {
+      high = middle
     }
   }
 
-  for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex += 1) {
-    const sampleTime = getChunkBodySampleTime(chunk, manifestBody, sampleIndex)
+  return low
+}
 
-    if (
-      sampleTime <= trailStartTdbSecondsFromJ2000
-      || sampleTime >= targetTdbSecondsFromJ2000
-    ) {
-      continue
+function getFirstSampleIndexAtOrAfterTime(sampleTimes: number[], time: number) {
+  let low = 0
+  let high = sampleTimes.length
+
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2)
+
+    if ((sampleTimes[middle] ?? Number.POSITIVE_INFINITY) < time) {
+      low = middle + 1
+    } else {
+      high = middle
     }
-
-    appendPoint(sampleTime, getChunkBodySampleAt(chunkBody, sampleIndex).positionKm)
   }
 
-  appendPoint(
-    targetTdbSecondsFromJ2000,
-    interpolateChunkBodyAtTdbTime(manifest, chunk, bodyId, targetTdbSecondsFromJ2000).positionKm
-  )
-
-  return trail
+  return low
 }
