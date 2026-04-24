@@ -1,7 +1,10 @@
-import { useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { FrontSide, Mesh, type Texture, Vector3 } from 'three';
+import { FrontSide, Mesh, Quaternion, type Texture, Vector3 } from 'three';
 import { getSunLightDirection } from '../rendering/sunLighting';
+import { useSimulationClockContext } from '../../experience/state/SimulationClockContext';
+
+const Y_UP = new Vector3(0, 1, 0)
 
 type CloudAlphaHeuristic = {
   maxAlpha: number;
@@ -12,6 +15,7 @@ type CloudAlphaHeuristic = {
 
 type PlanetCloudLayerProps = {
   alphaTexture: Texture;
+  angularVelocityRadPerSec: number;
   bodyPosition: [number, number, number];
   color?: string;
   colorTexture?: Texture;
@@ -20,8 +24,8 @@ type PlanetCloudLayerProps = {
   maxVisibility?: number;
   minVisibility?: number;
   opacity: number;
+  poleDirectionRender?: [number, number, number];
   radius: number;
-  rotationSpeed: number;
   shellScaleDefault: number;
   shellScaleFocused: number;
   sunPosition: [number, number, number];
@@ -30,6 +34,7 @@ type PlanetCloudLayerProps = {
 
 export function PlanetCloudLayer({
   alphaTexture,
+  angularVelocityRadPerSec,
   bodyPosition,
   color = '#ffffff',
   colorTexture,
@@ -38,8 +43,8 @@ export function PlanetCloudLayer({
   maxVisibility = 1,
   minVisibility = 0.08,
   opacity,
+  poleDirectionRender,
   radius,
-  rotationSpeed,
   shellScaleDefault,
   shellScaleFocused,
   sunPosition,
@@ -53,13 +58,36 @@ export function PlanetCloudLayer({
     };
   } | null>(null);
   const shellScale = focused ? shellScaleFocused : shellScaleDefault;
+  const { playbackRateMultiplier, isPaused } = useSimulationClockContext();
+
+  // Quaternion aligning the cloud shell Y axis to the body's north pole.
+  const poleAlignQuat = useMemo(() => {
+    if (!poleDirectionRender) {
+      return new Quaternion()
+    }
+    const poleVec = new Vector3(...poleDirectionRender).normalize()
+    return new Quaternion().setFromUnitVectors(Y_UP, poleVec)
+  }, [poleDirectionRender])
+
+  const spinQuat = useMemo(() => new Quaternion(), [])
+  const cloudAngleRef = useRef(0)
+
+  // Apply initial pole alignment when the pole changes.
+  useEffect(() => {
+    if (cloudMeshRef.current) {
+      cloudMeshRef.current.quaternion.copy(poleAlignQuat)
+    }
+  }, [poleAlignQuat])
 
   useFrame((_, delta) => {
     if (!cloudMeshRef.current) {
       return;
     }
 
-    cloudMeshRef.current.rotation.y += delta * rotationSpeed;
+    const simDelta = isPaused ? 0 : delta * playbackRateMultiplier
+    cloudAngleRef.current += angularVelocityRadPerSec * simDelta
+    spinQuat.setFromAxisAngle(Y_UP, cloudAngleRef.current)
+    cloudMeshRef.current.quaternion.copy(poleAlignQuat).multiply(spinQuat)
 
     const cloudLightDirection = shaderRef.current?.uniforms.cloudLightDirection;
 

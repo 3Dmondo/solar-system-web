@@ -1,8 +1,9 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame, type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
-import { Mesh } from 'three';
+import { Mesh, Quaternion, Vector3 } from 'three';
 import { type BodyDefinition, type BodyId } from '../domain/body';
+import { useSimulationClockContext } from '../../experience/state/SimulationClockContext';
 import { EarthCloudLayer } from './EarthCloudLayer';
 import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
 import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
@@ -11,11 +12,16 @@ import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
 import { TexturedPlanetMaterial } from './TexturedPlanetMaterial'
 import { VenusCloudLayer } from './VenusCloudLayer';
 
+// Module-level reusable objects to avoid allocating per frame.
+const Y_UP = new Vector3(0, 1, 0)
+
 type PlanetBodyProps = ThreeElements['mesh'] & {
   body: BodyDefinition;
   focused: boolean;
   onSelect: (bodyId: BodyId) => void;
   sunPosition: [number, number, number];
+  /** Earth's current scene position, provided only for the Moon to enable tidal locking. */
+  tidalLockTargetPosition?: [number, number, number] | null;
 };
 
 export function PlanetBody({
@@ -23,18 +29,76 @@ export function PlanetBody({
   focused,
   onSelect,
   sunPosition,
+  tidalLockTargetPosition,
   ...meshProps
 }: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
   const meshRef = useRef<Mesh>(null);
   const sphereSegments = body.material === 'sun' ? 96 : body.material === 'moon' ? 128 : 64;
+  const { playbackRateMultiplier, isPaused, simulationInitialUtcMs } = useSimulationClockContext();
+
+  // Quaternion aligning the body Y axis to its physical north pole direction.
+  const poleAlignQuat = useMemo(() => {
+    if (!body.poleDirectionRender) {
+      return new Quaternion()
+    }
+    const poleVec = new Vector3(...body.poleDirectionRender).normalize()
+    return new Quaternion().setFromUnitVectors(Y_UP, poleVec)
+  }, [body.poleDirectionRender])
+
+  // Reused per-frame objects: one quaternion for the spin component plus a
+  // helper vector for the Moon tidal-lock computation.
+  const spinQuat = useMemo(() => new Quaternion(), [])
+  const scratchVec = useMemo(() => new Vector3(), [])
+  const spinAngleRef = useRef(0)
+  const isSpinInitializedRef = useRef(false)
 
   useFrame((_, delta) => {
-    if (!meshRef.current || !body.surfaceRotationSpeed) {
+    if (!meshRef.current || !body.poleDirectionRender || body.angularVelocityRadPerSec == null) {
       return;
     }
 
-    meshRef.current.rotation.y += delta * body.surfaceRotationSpeed;
+    // One-time initialization: set Earth's initial spin angle so the prime
+    // meridian faces the correct direction relative to the Sun at simulation start.
+    if (!isSpinInitializedRef.current && body.id === 'earth') {
+      isSpinInitializedRef.current = true
+      spinAngleRef.current = computeEarthInitialSpinAngle(
+        body.position, sunPosition, poleAlignQuat, simulationInitialUtcMs
+      )
+    } else if (!isSpinInitializedRef.current) {
+      isSpinInitializedRef.current = true
+    }
+
+    const simDelta = isPaused ? 0 : delta * playbackRateMultiplier
+
+    if (body.id === 'moon' && tidalLockTargetPosition) {
+      // --- Tidal lock: Moon always faces Earth ---
+      // Compute the direction from Moon to Earth projected onto Moon's equatorial plane.
+      const poleVec = scratchVec.set(...body.poleDirectionRender).normalize()
+      const moonToEarth = new Vector3(
+        tidalLockTargetPosition[0] - body.position[0],
+        tidalLockTargetPosition[1] - body.position[1],
+        tidalLockTargetPosition[2] - body.position[2]
+      ).normalize()
+      const poleComponent = moonToEarth.dot(poleVec)
+      const equatorialDir = moonToEarth.clone()
+        .sub(poleVec.clone().multiplyScalar(poleComponent))
+      if (equatorialDir.lengthSq() < 1e-8) {
+        return
+      }
+      equatorialDir.normalize()
+      // Transform equatorial direction into the pre-pole-aligned frame.
+      const localFaceDir = equatorialDir.clone()
+        .applyQuaternion(poleAlignQuat.clone().invert())
+      const angle = Math.atan2(localFaceDir.x, localFaceDir.z)
+      spinQuat.setFromAxisAngle(Y_UP, angle)
+    } else {
+      // --- Standard prograde/retrograde spin ---
+      spinAngleRef.current += body.angularVelocityRadPerSec * simDelta
+      spinQuat.setFromAxisAngle(Y_UP, spinAngleRef.current)
+    }
+
+    meshRef.current.quaternion.copy(poleAlignQuat).multiply(spinQuat)
   });
 
   const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -69,18 +133,18 @@ export function PlanetBody({
         onDoubleClick={handleDoubleClick}
         onPointerDown={handlePointerDown}
         receiveShadow
-        rotation={body.surfaceRotation}
         scale={focused ? 1.04 : 1}
       >
         <sphereGeometry args={[body.radius, sphereSegments, sphereSegments]} />
         {body.material === 'saturn' ? (
           <SaturnSurfaceMaterial
             bodyPosition={body.position}
+            poleDirectionRender={body.poleDirectionRender}
             radius={body.radius}
             sunPosition={sunPosition}
           />
         ) : body.material === 'earth' ? (
-          <EarthSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
+          <EarthSurfaceMaterial bodyPosition={body.position} poleDirectionRender={body.poleDirectionRender} sunPosition={sunPosition} />
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial />
         ) : (
@@ -93,6 +157,7 @@ export function PlanetBody({
           bodyId={body.id}
           bodyPosition={body.position}
           onSelect={onSelect}
+          poleDirectionRender={body.poleDirectionRender}
           radius={body.radius}
           sunPosition={sunPosition}
         />
@@ -100,18 +165,63 @@ export function PlanetBody({
         <EarthCloudLayer
           bodyPosition={body.position}
           focused={focused}
+          poleDirectionRender={body.poleDirectionRender}
           radius={body.radius}
           sunPosition={sunPosition}
         />
       ) : body.material === 'venus' ? (
         <VenusCloudLayer
+          angularVelocityRadPerSec={body.angularVelocityRadPerSec ?? 0}
           bodyPosition={body.position}
           focused={focused}
+          poleDirectionRender={body.poleDirectionRender}
           radius={body.radius}
-          rotationSpeed={body.surfaceRotationSpeed ?? 0}
           sunPosition={sunPosition}
         />
       ) : null}
     </group>
   );
+}
+
+/**
+ * Computes Earth's initial spin angle so the prime meridian faces the Sun at
+ * solar noon (12:00 UTC) and is correctly offset at any other UTC start time.
+ *
+ * Three.js SphereGeometry maps texture u=0.5 (prime meridian for standard Earth
+ * textures) to local +X.  After poleAlignQuat, local +X stays at world +X.
+ * Ry(θ) * [1,0,0] = [cos(θ), 0, −sin(θ)], so the angle that aims +X at the
+ * Sun's equatorial direction is  atan2(−localSun.z, localSun.x).
+ *
+ * The UTC correction adds (secondsFromNoon × 2π/86400) so the prime meridian
+ * has already rotated the right amount past solar noon at the start time.
+ */
+function computeEarthInitialSpinAngle(
+  earthPos: [number, number, number],
+  sunPos: [number, number, number],
+  poleAlignQuat: Quaternion,
+  utcMs: number
+): number {
+  const toSun = new Vector3(
+    sunPos[0] - earthPos[0],
+    sunPos[1] - earthPos[1],
+    sunPos[2] - earthPos[2]
+  ).normalize()
+
+  // Bring the Sun direction into the mesh's pre-spin local frame.
+  const invPoleAlign = poleAlignQuat.clone().invert()
+  const localSun = toSun.applyQuaternion(invPoleAlign)
+
+  // Equatorial magnitude (guard against degenerate case).
+  const equatLen = Math.sqrt(localSun.x * localSun.x + localSun.z * localSun.z)
+  if (equatLen < 1e-6) return 0
+
+  // Angle to face the prime meridian (+X after Ry) toward the Sun in the equatorial plane.
+  const sunAngle = Math.atan2(-localSun.z / equatLen, localSun.x / equatLen)
+
+  // UTC correction: prime meridian faces the Sun at 12:00 UTC (solar noon at Greenwich).
+  const utcSecondsOfDay = (utcMs / 1000) % 86400
+  const secondsFromNoon = utcSecondsOfDay - 43200
+  const utcCorrection = secondsFromNoon * ((2 * Math.PI) / 86400)
+
+  return sunAngle + utcCorrection
 }

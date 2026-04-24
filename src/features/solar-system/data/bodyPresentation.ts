@@ -1,6 +1,4 @@
 import { type BodyId, type BodyMetadata } from '../domain/body'
-import { EARTH_SURFACE_ROTATION_SPEED } from '../rendering/earthMotion'
-import { SATURN_SPHERE_TILT } from '../rendering/saturnRings'
 
 export const presentationBodyMetadata: BodyMetadata[] = [
   {
@@ -10,8 +8,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'sun',
     radius: 2.6,
     defaultTrailWindowDays: 0,
-    focusOffset: [0, 0.7, 8.8],
-    surfaceRotationSpeed: 0.01
+    focusOffset: [0, 0.7, 8.8]
   },
   {
     id: 'mercury',
@@ -19,8 +16,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#9f9183',
     radius: 0.25,
     defaultTrailWindowDays: 120,
-    focusOffset: [0, 0.12, 1.8],
-    surfaceRotationSpeed: 0.014
+    focusOffset: [0, 0.12, 1.8]
   },
   {
     id: 'venus',
@@ -29,8 +25,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'venus',
     radius: 0.52,
     defaultTrailWindowDays: 240,
-    focusOffset: [0, 0.18, 2.6],
-    surfaceRotationSpeed: 0.011
+    focusOffset: [0, 0.18, 2.6]
   },
   {
     id: 'earth',
@@ -39,8 +34,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'earth',
     radius: 0.72,
     defaultTrailWindowDays: 365,
-    focusOffset: [0, 0.25, 3.2],
-    surfaceRotationSpeed: EARTH_SURFACE_ROTATION_SPEED
+    focusOffset: [0, 0.25, 3.2]
   },
   {
     id: 'moon',
@@ -49,8 +43,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'moon',
     radius: 0.22,
     defaultTrailWindowDays: 35,
-    focusOffset: [0, 0.12, 1.7],
-    surfaceRotationSpeed: 0.018
+    focusOffset: [0, 0.12, 1.7]
   },
   {
     id: 'mars',
@@ -58,8 +51,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#bf6c4e',
     radius: 0.38,
     defaultTrailWindowDays: 720,
-    focusOffset: [0, 0.14, 2.2],
-    surfaceRotationSpeed: 0.07
+    focusOffset: [0, 0.14, 2.2]
   },
   {
     id: 'jupiter',
@@ -67,8 +59,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#c9a678',
     radius: 1.55,
     defaultTrailWindowDays: 4_332,
-    focusOffset: [0, 0.52, 6.4],
-    surfaceRotationSpeed: 0.045
+    focusOffset: [0, 0.52, 6.4]
   },
   {
     id: 'saturn',
@@ -78,8 +69,6 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     radius: 1.35,
     defaultTrailWindowDays: 8_000,
     focusOffset: [0, 0.45, 5.8],
-    surfaceRotation: [SATURN_SPHERE_TILT, 0, 0],
-    surfaceRotationSpeed: 0.02,
     hasRings: true
   },
   {
@@ -88,8 +77,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#92c9d6',
     radius: 0.92,
     defaultTrailWindowDays: 9_125,
-    focusOffset: [0, 0.3, 4],
-    surfaceRotationSpeed: 0.026
+    focusOffset: [0, 0.3, 4]
   },
   {
     id: 'neptune',
@@ -97,8 +85,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#557fda',
     radius: 0.88,
     defaultTrailWindowDays: 9_125,
-    focusOffset: [0, 0.28, 3.8],
-    surfaceRotationSpeed: 0.024
+    focusOffset: [0, 0.28, 3.8]
   }
 ]
 

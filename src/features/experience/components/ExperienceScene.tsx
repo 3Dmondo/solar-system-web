@@ -49,6 +49,7 @@ export function ExperienceScene({
   );
   const bodies = catalog.bodies;
   const sunPosition = bodies.find((body) => body.id === 'sun')?.position ?? [0, 0, 0];
+  const earthPosition = bodies.find((body) => body.id === 'earth')?.position ?? null;
   const initialAspect = getInitialCameraAspect();
 
   return (
@@ -84,6 +85,7 @@ export function ExperienceScene({
           focused={body.id === focusedBodyId}
           onSelect={onFocusBody}
           sunPosition={sunPosition}
+          tidalLockTargetPosition={body.id === 'moon' ? earthPosition : null}
         />
       ))}
     </Canvas>

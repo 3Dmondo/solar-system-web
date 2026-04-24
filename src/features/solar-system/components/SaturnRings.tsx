@@ -1,11 +1,11 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, type ThreeEvent } from '@react-three/fiber';
-import { DoubleSide, Vector3 } from 'three';
+import { DoubleSide, Mesh, Vector3 } from 'three';
 import { type BodyId } from '../domain/body';
 import {
+  createRingOrientationQuaternion,
   createSaturnRingGeometry,
-  createSaturnRingTexture,
-  SATURN_RING_TILT
+  createSaturnRingTexture
 } from '../rendering/saturnRings';
 import { getSunLightDirection } from '../rendering/sunLighting';
 
@@ -13,6 +13,7 @@ type SaturnRingsProps = {
   bodyId: BodyId;
   bodyPosition: [number, number, number];
   onSelect: (bodyId: BodyId) => void;
+  poleDirectionRender?: [number, number, number];
   radius: number;
   sunPosition: [number, number, number];
 };
@@ -21,6 +22,7 @@ export function SaturnRings({
   bodyId,
   bodyPosition,
   onSelect,
+  poleDirectionRender,
   radius,
   sunPosition
 }: SaturnRingsProps) {
@@ -32,12 +34,22 @@ export function SaturnRings({
     [bodyPosition, sunPosition]
   );
   const lastTouchTapRef = useRef(0);
+  const ringMeshRef = useRef<Mesh>(null);
   const shaderRef = useRef<{
     uniforms: {
       saturnBodyCenter?: { value: Vector3 };
       saturnLightDirection?: { value: Vector3 };
     };
   } | null>(null);
+
+  // Orient the ring mesh so its normal aligns with the body's north pole.
+  useEffect(() => {
+    if (!ringMeshRef.current || !poleDirectionRender) {
+      return;
+    }
+    const q = createRingOrientationQuaternion(poleDirectionRender);
+    ringMeshRef.current.quaternion.copy(q);
+  }, [poleDirectionRender]);
 
   useFrame(() => {
     const shader = shaderRef.current;
@@ -75,10 +87,10 @@ export function SaturnRings({
 
   return (
     <mesh
+      ref={ringMeshRef}
       geometry={geometry}
       onDoubleClick={handleDoubleClick}
       onPointerDown={handlePointerDown}
-      rotation={[SATURN_RING_TILT, 0, 0]}
     >
       <meshBasicMaterial
         color="#fff6dd"

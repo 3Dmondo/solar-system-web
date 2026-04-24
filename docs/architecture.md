@@ -55,12 +55,13 @@
 - `bodyPresentation.ts` contains the shared display metadata that stays stable across data sources.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
-- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, and exposes one minimal playback-rate cycle across the current forward-speed presets.
+- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, exposes one minimal playback-rate cycle across the current forward-speed presets, and emits a stable `simulationInitialUtcMs` used to anchor Earth's prime-meridian orientation.
+- `SimulationClockContext` in `src/features/experience/state` exposes `playbackRateMultiplier`, `isPaused`, and `simulationInitialUtcMs` via React context so all rotation consumers share one source of truth without prop drilling.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame, and it now reuses the scaled metadata across clock-driven refreshes instead of rebuilding that static layer every tick.
 - `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space, and the current runtime caches per-chunk trail sampler state so stable interior trail segments can be reused across nearby frames.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
-- The current metadata path materially improves positional accuracy and mean-radius scaling, but axial orientation, spin-period fidelity, and Earth-Sun seasonal orientation still need a dedicated Milestone 5 alignment pass.
-- `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`.
+- The physical alignment pass is now complete: `mapPhysicalMetadataToScaledBodyMetadata` transforms each body's `northPoleUnitVectorJ2000` through the J2000-to-render-frame matrix and computes a signed angular velocity from the sidereal rotation period and retrograde flag, emitting `poleDirectionRender` and `angularVelocityRadPerSec` on every `BodyMetadata` entry consumed by the scene.
+- `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`. `BodyMetadata` now carries `poleDirectionRender` (north-pole unit vector in render space) and `angularVelocityRadPerSec` (signed physical spin rate) alongside radius and focus offset.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
@@ -72,9 +73,11 @@
 - The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
 - Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.
-- Saturn uses a custom surface material and ring mesh.
-- Earth uses day, night, normal, specular, and cloud layers.
-- Venus uses a textured surface plus a cloud shell.
+- Every body mesh now rotates around its physical north-pole axis at its physical sidereal rate via a quaternion composed of a pole-alignment quaternion and a per-frame spin quaternion. Rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)` so it stays consistent with the simulation clock.
+- The Moon is tidally locked: its spin angle is derived each frame from the Moon-to-Earth direction projected onto its equatorial plane, keeping the same face toward Earth at all simulation speeds.
+- Saturn uses a custom surface material and a ring mesh whose plane is kept perpendicular to Saturn's physical spin axis by orienting it with a quaternion derived from the metadata pole direction. The `ringNormal` shader uniform in `SaturnSurfaceMaterial` uses the same pole vector so ring shadows remain geometrically consistent with the ring mesh.
+- Earth uses day, night, normal, specular, and cloud layers. The cloud shell and the cloud-shadow UV offset in the surface shader advance in sync around Earth's tilted pole axis at the same angular rate. The surface shader samples cloud shadows using an `earthPoleDirection` uniform (from metadata) instead of world Y so shadow latitude rings track the correct axis. Earth's prime meridian is anchored to solar noon at simulation start and advances at the physical sidereal rate.
+- Venus uses a textured surface plus a cloud shell that rotates retrograde around Venus's tilted pole, drifting relative to the surface for visible atmospheric super-rotation.
 - Moon uses texture and height data for extra relief.
 - The remaining bodies use shared texture-driven materials from `bodyTextures.ts`.
 
@@ -106,5 +109,4 @@ Additional notes:
 - Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
-- Align rendered axial tilt, rotation speeds, Earth-Sun orientation, and other high-value physical characteristics with the available solar-system metadata.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.

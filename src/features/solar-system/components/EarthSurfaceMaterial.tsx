@@ -10,14 +10,17 @@ import {
   loadEarthSpecularTexture
 } from '../rendering/earthSurface';
 import { getSunLightDirection } from '../rendering/sunLighting';
+import { useSimulationClockContext } from '../../experience/state/SimulationClockContext';
 
 type EarthSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
+  poleDirectionRender?: [number, number, number];
   sunPosition: [number, number, number];
 };
 
 export function EarthSurfaceMaterial({
   bodyPosition,
+  poleDirectionRender,
   sunPosition
 }: EarthSurfaceMaterialProps) {
   const dayTexture = useMemo(() => loadEarthDayTexture(), []);
@@ -37,6 +40,13 @@ export function EarthSurfaceMaterial({
       earthSpecularTexture?: { value: unknown };
     };
   } | null>(null);
+  const { playbackRateMultiplier, isPaused } = useSimulationClockContext();
+  // Build a normalised Vector3 for the pole direction uniform (defaults to Y-up
+  // if metadata is not yet available, to stay backwards-compatible).
+  const poleVec = useMemo(() => {
+    if (!poleDirectionRender) return new Vector3(0, 1, 0)
+    return new Vector3(...poleDirectionRender).normalize()
+  }, [poleDirectionRender])
 
   useFrame((_, delta) => {
     const earthCloudOffset = shaderRef.current?.uniforms.earthCloudOffset;
@@ -46,7 +56,8 @@ export function EarthSurfaceMaterial({
       return;
     }
 
-    earthCloudOffset.value = (earthCloudOffset.value + delta * EARTH_CLOUD_UV_SPEED) % 1;
+    const simDelta = isPaused ? 0 : delta * playbackRateMultiplier;
+    earthCloudOffset.value = (earthCloudOffset.value + simDelta * EARTH_CLOUD_UV_SPEED) % 1;
 
     if (earthLightDirection) {
       earthLightDirection.value.copy(lightDirection);
@@ -67,6 +78,7 @@ export function EarthSurfaceMaterial({
         shader.uniforms.earthSpecularTexture = { value: specularTexture };
         shader.uniforms.earthCloudOffset = { value: 0 };
         shader.uniforms.earthLightDirection = { value: lightDirection };
+        shader.uniforms.earthPoleDirection = { value: poleVec };
         shaderRef.current = shader as typeof shaderRef.current;
 
         shader.vertexShader = shader.vertexShader.replace(
@@ -104,16 +116,30 @@ uniform sampler2D earthCloudTexture;
 uniform sampler2D earthSpecularTexture;
 uniform float earthCloudOffset;
 uniform vec3 earthLightDirection;
+uniform vec3 earthPoleDirection;
 varying vec2 vEarthUv;
 varying vec3 vEarthWorldNormal;
 varying vec3 vEarthWorldPosition;
 const float EARTH_CLOUD_SHADOW_SHELL_RADIUS = ${EARTH_CLOUD_SHADOW_SHELL_RADIUS.toFixed(3)};
 const float EARTH_CLOUD_SEAM_BLEND_WIDTH = 0.01;
 
+// Project a world-space direction onto the cloud texture UV space, taking into
+// account Earth's actual (tilted) pole direction so that shadow latitude rings
+// follow the body pole rather than world Y.
 vec2 directionToCloudUv(vec3 direction) {
   vec3 dir = normalize(direction);
-  float u = atan(dir.z, dir.x) / (2.0 * PI) + 0.5;
-  float v = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
+  vec3 pole = normalize(earthPoleDirection);
+  // Build an equatorial reference frame in the plane perpendicular to the pole.
+  // Use world X as the reference unless it is nearly parallel to the pole.
+  vec3 worldRef = abs(pole.x) < 0.9 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 0.0, 1.0);
+  // equatX: component of worldRef perpendicular to the pole (Gram-Schmidt).
+  vec3 equatX = normalize(worldRef - dot(worldRef, pole) * pole);
+  // equatY completes the right-hand equatorial frame; cross(equatX, pole)
+  // gives the +longitude direction consistent with the original atan(z,x) convention.
+  vec3 equatY = cross(equatX, pole);
+  float sinLat = clamp(dot(dir, pole), -1.0, 1.0);
+  float v = asin(sinLat) / PI + 0.5;
+  float u = atan(dot(dir, equatY), dot(dir, equatX)) / (2.0 * PI) + 0.5;
   return vec2(fract(1.0 - u - earthCloudOffset), clamp(v, 0.001, 0.999));
 }
 

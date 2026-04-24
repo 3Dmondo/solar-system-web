@@ -30,7 +30,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - The first runtime optimization task is now closed for the current scope after landing the debug benchmarking seam, catalog and trail caching passes, closer overview inspection zoom, and a layout-synchronized focused follow update; reopen it only if later Milestone 5 work materially changes the runtime cost profile.
 - The focused camera follow task is now complete, and the latest pass translates the in-progress focused transition with the live body motion so long jumps keep the travel animation without world-space chasing.
 - The current lighting path now derives Earth, Venus-cloud, and Saturn lighting from the live Sun body position instead of assuming the Sun is fixed at scene origin, and the related shader uniforms now refresh from live body motion after compile so Venus and Saturn lighting or shadowing no longer freeze on their initial vectors.
-- The current rendering path still treats axial orientation, spin-rate fidelity, and Earth-Sun seasonal orientation as planned follow-up work rather than finished physical alignment.
+- The physical alignment pass (5.3) is now complete: every solar-system body rotates around its metadata-derived north pole axis at its physical sidereal rate, scaled consistently with the simulation clock and playback speed. Earth's prime meridian is oriented toward the Sun at solar noon and drifts correctly at all playback rates. The cloud shell and cloud-shadow UV offset drift in sync around the same pole axis. Saturn's ring plane is perpendicular to its physical spin axis, derived from the same metadata pole vector. Venus clouds rotate retrograde around Venus's tilted pole. The Moon is tidally locked, always keeping the same face toward Earth. Rotation of all bodies stops when paused and scales with the playback-rate multiplier.
 
 ## Agreed Milestone Direction
 
@@ -94,7 +94,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] 5.1 Optimize the new per-frame runtime path, with attention to catalog recomputation, interpolation cost, avoidable React churn, and scene update overhead.
 - [x] Refine focused camera targeting and post-focus stabilization at high playback rates.
 - [x] 5.2 Review dynamic lighting coherence for Earth layers, Saturn ring shadows on the globe, and Venus cloud lighting so the apparent sun direction tracks live body positions.
-- [ ] 5.3 Align scene rendering with solar-system metadata, including axial orientation, rotation speed, Earth-Sun orientation, and other physical characteristics worth bringing into the runtime contract.
+- [x] 5.3 Align scene rendering with solar-system metadata, including axial orientation, rotation speed, Earth-Sun orientation, and other physical characteristics worth bringing into the runtime contract.
 - [ ] Add reverse playback after the current performance, lighting, and physical-alignment follow-up.
 - [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
 - [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
@@ -127,10 +127,17 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### 5.3 Physical Alignment Review
 
-- Align each body's rendered spin axis with the best accepted physical metadata we have available, rather than relying on presentation-friendly defaults where they diverge.
-- Review body rotation speeds so self-rotation timing is coherent with real periods and remains stable under the current simulation clock.
-- Make Earth's orientation toward the Sun seasonally coherent instead of leaving the apparent solar exposure to texture or shader assumptions alone.
-- Identify which additional physical characteristics are worth bringing into the Milestone 5 runtime contract next, such as pole orientation, obliquity, prime meridian or epoch anchoring, and sidereal rotation metadata.
+- This task is now complete for the current Milestone 5 scope.
+- Every body now rotates around its physical north-pole axis (derived from `northPoleUnitVectorJ2000` in `body-metadata.json`, transformed through the same J2000-to-render-frame matrix used for positions) at its physical sidereal rate (±2π / siderealPeriodHours × 3600 rad/s, negative for retrograde bodies).
+- All rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)`, so spin is consistent with simulation speed, stops when paused, and responds immediately to rate changes.
+- `playbackRateMultiplier` and `isPaused` are threaded via a new `SimulationClockContext` so all rotation consumers (surface mesh, cloud shell, cloud UV shadow) share one source of truth without prop drilling.
+- Earth's prime meridian is anchored to solar noon: on the first render frame the spin angle is computed so the meridian faces the Sun at 12:00 UTC, offset by the simulation start time, and then advances at the physical sidereal rate.
+- Earth's cloud shell and the cloud-shadow UV offset in the surface shader both advance at `EARTH_CLOUD_ANGULAR_VELOCITY_RAD_PER_SEC` (surface rate × 1.0625) around the same tilted pole axis, keeping shadow and shell permanently synchronized at all playback speeds.
+- The cloud-shadow projection in the Earth surface shader now uses `earthPoleDirection` uniform (passed from metadata) instead of world Y, so shadow latitude rings track the correct tilted pole.
+- Saturn's ring plane is set via quaternion from the same `poleDirectionRender` vector (`setFromUnitVectors([0,0,1], pole)`), so the ring plane is always perpendicular to the body's spin axis regardless of its tilt in the scene.
+- The `ringNormal` uniform in `SaturnSurfaceMaterial` and the ring orientation in `SaturnRings` are now both derived from the same metadata pole vector, keeping ring shadows geometrically consistent with the ring mesh.
+- Venus clouds rotate retrograde (negative angular velocity) around Venus's tilted pole, drifting relative to the surface at 60× the surface rate for visible atmospheric super-rotation.
+- The Moon is tidally locked: each frame its spin angle is derived from the Moon-to-Earth direction projected onto Moon's equatorial plane, so the same face always points toward Earth regardless of simulation speed.
 
 ## Remaining Plan
 
@@ -189,4 +196,3 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 - Should the local helper script only generate data when missing, or also support an explicit refresh mode?
 - What final production chunk duration falls out of the accepted `de440s` benchmark once Moon and inner-planet cadence are factored in?
-- Which physical metadata fields beyond mean radius give the best visual payoff for Milestone 5.3 without overcomplicating the web-data contract?

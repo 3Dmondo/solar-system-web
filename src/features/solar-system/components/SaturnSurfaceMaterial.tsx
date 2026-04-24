@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import {
-  createSaturnRingNormal,
+  createSaturnRingNormalFromPole,
   createSaturnRingTexture,
   SATURN_RING_INNER_MULTIPLIER,
   SATURN_RING_OUTER_MULTIPLIER
@@ -15,18 +15,26 @@ import { getSunLightDirection } from '../rendering/sunLighting';
 
 type SaturnSurfaceMaterialProps = {
   bodyPosition: [number, number, number];
+  poleDirectionRender?: [number, number, number];
   radius: number;
   sunPosition: [number, number, number];
 };
 
 export function SaturnSurfaceMaterial({
   bodyPosition,
+  poleDirectionRender,
   radius,
   sunPosition
 }: SaturnSurfaceMaterialProps) {
   const ringTexture = useMemo(() => createSaturnRingTexture(), []);
   const surfaceTexture = useMemo(() => loadSaturnSurfaceTexture(), []);
-  const ringNormal = useMemo(() => new Vector3(...createSaturnRingNormal()).normalize(), []);
+  const ringNormal = useMemo(
+    () =>
+      poleDirectionRender
+        ? createSaturnRingNormalFromPole(poleDirectionRender)
+        : new Vector3(0, 1, 0),
+    [poleDirectionRender]
+  );
   const bodyCenter = useMemo(() => new Vector3(...bodyPosition), [bodyPosition]);
   const lightDirection = useMemo(
     () => getSunLightDirection(bodyPosition, sunPosition),

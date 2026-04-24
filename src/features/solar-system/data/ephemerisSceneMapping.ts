@@ -15,6 +15,30 @@ const J2000_ECLIPTIC_OBLIQUITY_RADIANS = (23.439291111 * Math.PI) / 180
 const J2000_ECLIPTIC_OBLIQUITY_COSINE = Math.cos(J2000_ECLIPTIC_OBLIQUITY_RADIANS)
 const J2000_ECLIPTIC_OBLIQUITY_SINE = Math.sin(J2000_ECLIPTIC_OBLIQUITY_RADIANS)
 
+/**
+ * Converts a unit vector from J2000 equatorial to the app render frame
+ * (ecliptic-aligned, Y-up). Applies the same two-step transform used for
+ * body positions so pole vectors live in the same coordinate space.
+ */
+export function mapJ2000VectorToRenderSpace(
+  v: [number, number, number]
+): [number, number, number] {
+  const ecl = rotateJ2000EquatorialVectorToEcliptic(v)
+  return [ecl[0], ecl[2], -ecl[1]]
+}
+
+/**
+ * Returns the physical spin rate in rad/s from a sidereal rotation period.
+ * Retrograde bodies (isRetrograde=true) receive a negative value.
+ */
+export function computeBodyAngularVelocityRadPerSec(
+  siderealRotationPeriodHours: number,
+  isRetrograde: boolean
+): number {
+  const magnitude = (2 * Math.PI) / (siderealRotationPeriodHours * 3600)
+  return isRetrograde ? -magnitude : magnitude
+}
+
 export function createPhysicalSceneScale(
   sceneUnitsPerKilometer: number
 ): PhysicalSceneScale {
@@ -63,11 +87,20 @@ export function mapPhysicalMetadataToScaledBodyMetadata(
     const scaledRadius = physicalBody.meanRadiusKm * scale.sceneUnitsPerKilometer
     const focusOffsetScale =
       metadata.radius > 0 ? scaledRadius / metadata.radius : 1
+    const poleDirectionRender = mapJ2000VectorToRenderSpace(
+      physicalBody.poleOrientation.northPoleUnitVectorJ2000
+    )
+    const angularVelocityRadPerSec = computeBodyAngularVelocityRadPerSec(
+      physicalBody.rotationModel.siderealRotationPeriodHours,
+      physicalBody.rotationModel.isRetrograde
+    )
 
     return {
       ...metadata,
       radius: scaledRadius,
-      focusOffset: scaleVector(metadata.focusOffset, focusOffsetScale)
+      focusOffset: scaleVector(metadata.focusOffset, focusOffsetScale),
+      poleDirectionRender,
+      angularVelocityRadPerSec
     }
   })
 }

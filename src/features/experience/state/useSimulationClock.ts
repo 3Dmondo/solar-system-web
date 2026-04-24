@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics';
 
 export type UseSimulationClockOptions = {
@@ -27,6 +27,8 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
   const [simulationTimeMs, setSimulationTimeMs] = useState(() => normalizeStartAt(startAt).getTime());
   const [isPaused, setIsPaused] = useState(false);
   const [playbackRateMultiplier, setPlaybackRateMultiplier] = useState(defaultPlaybackRateMultiplier);
+  // Capture the simulation start time once at mount (stable across re-renders).
+  const simulationInitialUtcMs = useRef(normalizeStartAt(startAt).getTime()).current;
 
   useEffect(() => {
     if (
@@ -87,6 +89,7 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
     playbackRateMultiplier,
     requestedUtc: new Date(simulationTimeMs).toISOString(),
     resume: () => setIsPaused(false),
+    simulationInitialUtcMs,
     cyclePlaybackRate: () =>
       setPlaybackRateMultiplier((currentMultiplier) =>
         getNextPlaybackRateMultiplier(currentMultiplier)

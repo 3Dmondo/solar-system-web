@@ -1,9 +1,7 @@
-import { RingGeometry, SRGBColorSpace, TextureLoader } from 'three';
+import { Quaternion, RingGeometry, SRGBColorSpace, TextureLoader, Vector3 } from 'three';
 
 export const SATURN_RING_INNER_MULTIPLIER = 1.25;
 export const SATURN_RING_OUTER_MULTIPLIER = 2.25;
-export const SATURN_RING_TILT = Math.PI / 2.35;
-export const SATURN_SPHERE_TILT = Math.PI / 2 + SATURN_RING_TILT;
 export const SATURN_RING_SHADOW_TEXTURE_MIN_U = 0.055;
 export const SATURN_RING_SHADOW_TEXTURE_MAX_U = 0.945;
 export const SATURN_RING_VISIBLE_TEXTURE_MIN_U = 0.105;
@@ -47,6 +45,24 @@ export function createSaturnRingGeometry(radius: number) {
   return geometry;
 }
 
-export function createSaturnRingNormal() {
-  return [0, -Math.sin(SATURN_RING_TILT), Math.cos(SATURN_RING_TILT)] as const;
+/**
+ * Quaternion that orients a Three.js RingGeometry (whose default normal is +Z)
+ * so that its normal aligns with the given pole direction.
+ * The ring plane is then perpendicular to the body's spin axis.
+ */
+export function createRingOrientationQuaternion(
+  poleDirection: [number, number, number]
+): Quaternion {
+  const poleVec = new Vector3(...poleDirection).normalize();
+  return new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), poleVec);
+}
+
+/**
+ * Returns the ring-plane normal (= the body north pole) as a Three.js Vector3.
+ * Used for shadow/lighting shader uniforms.
+ */
+export function createSaturnRingNormalFromPole(
+  poleDirection: [number, number, number]
+): Vector3 {
+  return new Vector3(...poleDirection).normalize();
 }

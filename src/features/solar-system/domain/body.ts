@@ -25,6 +25,10 @@ export type BodyMetadata = {
   surfaceRotation?: [number, number, number];
   surfaceRotationSpeed?: number;
   hasRings?: boolean;
+  /** Body north-pole unit vector in the app render frame (ecliptic-aligned, Y-up). */
+  poleDirectionRender?: [number, number, number];
+  /** Signed angular velocity in rad/s; negative for retrograde bodies. */
+  angularVelocityRadPerSec?: number;
 };
 
 export type BodyPhysicalShape = {

@@ -7,6 +7,7 @@ import {
   useResolvedBodyCatalog
 } from './state/useResolvedBodyCatalog';
 import { useSimulationClock } from './state/useSimulationClock';
+import { SimulationClockContext } from './state/SimulationClockContext';
 import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
 
 type SolarSystemExperienceProps = {
@@ -26,7 +27,9 @@ export function SolarSystemExperience({
     cyclePlaybackRate,
     isPaused,
     playbackRateLabel,
+    playbackRateMultiplier,
     requestedUtc,
+    simulationInitialUtcMs,
     togglePaused
   } = useSimulationClock({
     startAt: simulationClockStartAt
@@ -34,28 +37,30 @@ export function SolarSystemExperience({
   const { catalog, status, error } = useResolvedBodyCatalog(requestedUtc, catalogSource);
 
   return (
-    <main className="experience-shell" aria-label="Solar system experience">
-      <ExperienceScene
-        catalog={catalog}
-        focusedBodyId={focusedBodyId}
-        isCoarsePointer={isCoarsePointer}
-        onFocusBody={setFocusedBodyId}
-      />
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={error}
-        catalogStatus={status}
-        focusedBodyId={focusedBodyId}
-        isCoarsePointer={isCoarsePointer}
-        isSimulationPaused={isPaused}
-        playbackRateLabel={playbackRateLabel}
-        requestedUtc={requestedUtc}
-        onFocusBody={setFocusedBodyId}
-        onReturnToOverview={() => setFocusedBodyId('overview')}
-        onCyclePlaybackRate={cyclePlaybackRate}
-        onToggleSimulationPaused={togglePaused}
-      />
-      {showDebugOverlay ? <DebugFpsOverlay clockStartAt={simulationClockStartAt} /> : null}
-    </main>
+    <SimulationClockContext.Provider value={{ playbackRateMultiplier, isPaused, simulationInitialUtcMs }}>
+      <main className="experience-shell" aria-label="Solar system experience">
+        <ExperienceScene
+          catalog={catalog}
+          focusedBodyId={focusedBodyId}
+          isCoarsePointer={isCoarsePointer}
+          onFocusBody={setFocusedBodyId}
+        />
+        <ExperienceHud
+          catalog={catalog}
+          catalogError={error}
+          catalogStatus={status}
+          focusedBodyId={focusedBodyId}
+          isCoarsePointer={isCoarsePointer}
+          isSimulationPaused={isPaused}
+          playbackRateLabel={playbackRateLabel}
+          requestedUtc={requestedUtc}
+          onFocusBody={setFocusedBodyId}
+          onReturnToOverview={() => setFocusedBodyId('overview')}
+          onCyclePlaybackRate={cyclePlaybackRate}
+          onToggleSimulationPaused={togglePaused}
+        />
+        {showDebugOverlay ? <DebugFpsOverlay clockStartAt={simulationClockStartAt} /> : null}
+      </main>
+    </SimulationClockContext.Provider>
   );
 }
