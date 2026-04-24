@@ -1,5 +1,5 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
@@ -111,7 +111,7 @@ function FocusCameraRig({
   );
   const isTransitioning = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousFocusedBodyId.current === focusedBodyId) {
       return;
     }
@@ -139,7 +139,7 @@ function FocusCameraRig({
     isTransitioning.current = true;
   }, [camera, cameraAspect, catalog, focusedBodyId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const nextFocusTarget = new Vector3(...getFocusTarget(focusedBodyId, catalog));
 
     if (focusedBodyId === 'overview') {
@@ -181,7 +181,7 @@ function FocusCameraRig({
     trackedFocusTarget.current.copy(nextFocusTarget);
   }, [camera, cameraAspect, catalog, focusedBodyId]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (focusedBodyId !== 'overview') {
       return;
     }

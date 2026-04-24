@@ -36,7 +36,8 @@
 - The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
 - Overview mode now keeps the broad scene framing but allows a much closer minimum zoom distance in the physically scaled runtime so planets can be inspected manually without leaving overview.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
-- Focused-body tracking now uses a split update path: live ephemeris refreshes keep recomputing the authored focused camera pose while the transition is still settling, then translate the current camera and target together once focus is active so manual orbit and zoom adjustments are preserved.
+- Focused-body tracking now uses a split update path: live ephemeris refreshes keep recomputing the authored focused camera pose while the transition is still settling, then translate the current camera and target together once focus is active so manual orbit and zoom adjustments are preserved, with those focused follow updates now applied in a layout-synchronized pass before paint rather than after paint.
+- High-rate focused tracking is improved, but one follow-up task still remains open around live focus-target lock during the first focus acquisition and around residual post-focus jumping that disappears after the first manual orbit or zoom interaction.
 - `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, pause or resume plus playback-rate controls, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
 - The app still starts in the `overview` target, and smaller scenes keep the legacy `[0, 14, 46]` overview framing.
 
@@ -107,5 +108,6 @@ Additional notes:
 - Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
 - Address visible pole artifacts on some body textures.
 - Review the live sun-direction response of layered Earth shading, Saturn's ring shadow on the globe, and Venus cloud lighting under moving-body updates.
+- Refine focused camera target lock and post-focus stabilization at high playback rates so the camera always looks at and orbits around the live body center immediately after focus changes.
 - Align rendered axial tilt, rotation speeds, Earth-Sun orientation, and other high-value physical characteristics with the available solar-system metadata.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.

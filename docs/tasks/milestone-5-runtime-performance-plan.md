@@ -2,7 +2,22 @@
 
 ## Status
 
-In Progress
+Complete
+
+## Closeout
+
+- The first Milestone 5.1 runtime optimization pass is closed for the current Milestone 5 scope.
+- Landed work in this task:
+  - `/debug` now starts from the fixed benchmark timestamp and shows lightweight timing samples for clock, catalog, snapshot, trail, mapping, and scene work.
+  - scaled body metadata is reused across clock-driven catalog refreshes.
+  - resolved-catalog merging now avoids repeated linear body lookups by indexing snapshot bodies by id.
+  - per-chunk trail sampler state and stable interior trail segments are cached instead of rewalking chunk samples from scratch on every snapshot.
+  - overview mode now allows closer manual zoom for runtime inspection in the physically scaled scene.
+  - focused camera follow updates now apply in a layout-synchronized pass before paint rather than after paint.
+- Current outcome:
+  - runtime performance is acceptable for the current Milestone 5 scope.
+  - this task may be reopened later if follow-up work changes the runtime cost profile, for example denser trail sampling, richer trail rendering, or other scene updates that invalidate the current measurements.
+- The baseline notes below are preserved as historical context for future comparison.
 
 ## Goal
 
@@ -16,7 +31,7 @@ Defaults locked by this brief:
 - Defer low-level WebGL optimization until simpler CPU and data-flow changes are measured and shown insufficient.
 - Tie every performance claim to one reproducible benchmark setup with explicit route, timestamp, playback rate, and measurement method.
 
-## Verified Repo Facts
+## Baseline Facts At Task Start
 
 - `src/features/experience/state/useSimulationClock.ts` advances `simulationTimeMs` on every `requestAnimationFrame` by default and emits a new ISO `requestedUtc` string every frame.
 - `src/features/experience/SolarSystemExperience.tsx` feeds that per-frame `requestedUtc` directly into `useResolvedBodyCatalog(...)`.
