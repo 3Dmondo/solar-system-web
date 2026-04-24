@@ -4,6 +4,7 @@ import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
 import { OrbitTrails } from '../../solar-system/components/OrbitTrails';
+import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics';
 import { getControlDistanceRange, getControlProfile } from '../domain/controlProfile';
 import { translateFocusView } from '../domain/focusTracking';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
@@ -226,48 +227,50 @@ function FocusCameraRig({
   }, []);
 
   useFrame((_, delta) => {
-    const currentTarget = controlsRef.current?.target ?? desiredTarget.current;
-    const clipPlanes = getCameraClipPlanes(
-      focusedBodyId,
-      [camera.position.x, camera.position.y, camera.position.z],
-      [currentTarget.x, currentTarget.y, currentTarget.z],
-      catalog
-    );
+    measureRuntimeDebugMetric('sceneUpdate', () => {
+      const currentTarget = controlsRef.current?.target ?? desiredTarget.current;
+      const clipPlanes = getCameraClipPlanes(
+        focusedBodyId,
+        [camera.position.x, camera.position.y, camera.position.z],
+        [currentTarget.x, currentTarget.y, currentTarget.z],
+        catalog
+      );
 
-    if (
-      Math.abs(camera.near - clipPlanes.near) > Math.max(0.01, camera.near * 0.05) ||
-      Math.abs(camera.far - clipPlanes.far) > Math.max(1, camera.far * 0.05)
-    ) {
-      camera.near = clipPlanes.near;
-      camera.far = clipPlanes.far;
-      camera.updateProjectionMatrix();
-    }
+      if (
+        Math.abs(camera.near - clipPlanes.near) > Math.max(0.01, camera.near * 0.05) ||
+        Math.abs(camera.far - clipPlanes.far) > Math.max(1, camera.far * 0.05)
+      ) {
+        camera.near = clipPlanes.near;
+        camera.far = clipPlanes.far;
+        camera.updateProjectionMatrix();
+      }
 
-    if (!isTransitioning.current) {
-      return;
-    }
+      if (!isTransitioning.current) {
+        return;
+      }
 
-    const cameraEasing =
-      1 - Math.exp(-delta * transitionProfileRef.current.cameraEasingRate);
-    const targetEasing =
-      1 - Math.exp(-delta * transitionProfileRef.current.targetEasingRate);
+      const cameraEasing =
+        1 - Math.exp(-delta * transitionProfileRef.current.cameraEasingRate);
+      const targetEasing =
+        1 - Math.exp(-delta * transitionProfileRef.current.targetEasingRate);
 
-    camera.position.lerp(desiredCameraPosition.current, cameraEasing);
-    controlsRef.current?.target.lerp(desiredTarget.current, targetEasing);
-    controlsRef.current?.update();
-
-    const cameraSettled =
-      camera.position.distanceToSquared(desiredCameraPosition.current) <
-      transitionProfileRef.current.settleDistanceSquared;
-    const targetSettled =
-      controlsRef.current?.target.distanceToSquared(desiredTarget.current) ?? 0;
-
-    if (cameraSettled && targetSettled < transitionProfileRef.current.settleDistanceSquared) {
-      camera.position.copy(desiredCameraPosition.current);
-      controlsRef.current?.target.copy(desiredTarget.current);
+      camera.position.lerp(desiredCameraPosition.current, cameraEasing);
+      controlsRef.current?.target.lerp(desiredTarget.current, targetEasing);
       controlsRef.current?.update();
-      isTransitioning.current = false;
-    }
+
+      const cameraSettled =
+        camera.position.distanceToSquared(desiredCameraPosition.current) <
+        transitionProfileRef.current.settleDistanceSquared;
+      const targetSettled =
+        controlsRef.current?.target.distanceToSquared(desiredTarget.current) ?? 0;
+
+      if (cameraSettled && targetSettled < transitionProfileRef.current.settleDistanceSquared) {
+        camera.position.copy(desiredCameraPosition.current);
+        controlsRef.current?.target.copy(desiredTarget.current);
+        controlsRef.current?.update();
+        isTransitioning.current = false;
+      }
+    });
   });
 
   return (

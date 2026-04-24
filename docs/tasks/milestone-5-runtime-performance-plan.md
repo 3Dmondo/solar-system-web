@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready
+In Progress
 
 ## Goal
 
@@ -61,6 +61,7 @@ Measurement method:
 - Wait until the initial catalog load settles and the overview is interactive.
 - Leave the camera in the overview unless the specific test says otherwise.
 - Record the `/debug` FPS overlay result after the scene reaches a steady state.
+- The current `/debug` route now defaults the simulation clock to the benchmark timestamp above and accepts `?startAt=` only as an explicit override for comparison runs.
 - If instrumentation is added, capture per-frame time attributed to:
   - clock advancement
   - catalog refresh orchestration
@@ -179,4 +180,3 @@ Verification scenarios required after each optimization slice:
 - Physical-alignment follow-up for axial orientation, rotation speed, and Earth-Sun seasonal orientation
 - Analytical trail approximation
   - keep this out of scope unless later evidence shows both CPU-side and GPU-side trail costs still block Milestone 5 after the earlier steps
-

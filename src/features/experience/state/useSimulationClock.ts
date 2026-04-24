@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics';
 
 export type UseSimulationClockOptions = {
   startAt?: Date | string;
@@ -46,11 +47,13 @@ export function useSimulationClock(options: UseSimulationClockOptions = {}) {
     let previousRealTimeMs = getCurrentRealTimeMs();
 
     const advanceSimulationClock = () => {
-      const currentRealTimeMs = getCurrentRealTimeMs();
-      const elapsedRealTimeMs = currentRealTimeMs - previousRealTimeMs;
+      measureRuntimeDebugMetric('clockAdvancement', () => {
+        const currentRealTimeMs = getCurrentRealTimeMs();
+        const elapsedRealTimeMs = currentRealTimeMs - previousRealTimeMs;
 
-      previousRealTimeMs = currentRealTimeMs;
-      setSimulationTimeMs((value) => value + elapsedRealTimeMs * playbackRateMultiplier);
+        previousRealTimeMs = currentRealTimeMs;
+        setSimulationTimeMs((value) => value + elapsedRealTimeMs * playbackRateMultiplier);
+      });
     };
 
     if (updateMode === 'animation-frame') {

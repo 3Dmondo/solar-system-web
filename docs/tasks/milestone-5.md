@@ -25,6 +25,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - The HUD now exposes one minimal playback-rate control that cycles through the current Milestone 5 speed presets while reverse playback remains pending.
 - The default runtime now advances the simulation clock on every animation frame for visibly smoother motion through the interpolated ephemeris curve.
 - Visiting `/debug` on the current host now enables a lightweight FPS overlay without changing the default clock cadence.
+- Visiting `/debug` now also starts from the Milestone 5.1 benchmark timestamp by default and shows lightweight runtime timing samples for clock, catalog, snapshot, trail, mapping, and scene-update work.
 - The first runtime optimization pass now reuses scaled body metadata across catalog refreshes and indexes snapshot bodies by id during catalog resolution so the per-frame path does less avoidable work before deeper profiling continues.
 - The current rendering path still treats axial orientation, spin-rate fidelity, and Earth-Sun seasonal orientation as planned follow-up work rather than finished physical alignment.
 
@@ -101,6 +102,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 ### 5.1 Optimization
 
 - The first optimization pass now keeps the physically scaled metadata stable across clock-driven catalog refreshes and avoids repeated linear body lookups while merging snapshot state into the resolved catalog.
+- The current measurement pass now gives `/debug` one repeatable benchmark timestamp by default plus debug-only timing samples across the main runtime phases called out in the Milestone 5.1 plan.
 - Profile the now-default per-frame runtime with `/debug` and isolate the heaviest cost centers across catalog refreshes, interpolation, React updates, and scene work.
 - Reduce avoidable per-frame recomputation before Milestone 5 closeout, especially where derived data can be cached or scene updates can be narrowed.
 - Re-measure desktop and mobile FPS after each optimization pass so the smoother cadence does not regress usability.

@@ -2,6 +2,7 @@ import {
   type BodyEphemerisProvider,
   type BodyMetadata
 } from '../domain/body'
+import { measureRuntimeDebugMetric, measureRuntimeDebugMetricAsync } from '../../experience/debug/runtimeDebugMetrics'
 import {
   getChunkRangeForTdbTime,
   getNextChunkRange,
@@ -43,12 +44,29 @@ export function createWebEphemerisProvider({
 
   return {
     getBodyMetadata: () => presentationMetadata,
-    loadSnapshotAtUtc: async (utc) => {
+    loadSnapshotAtUtc: async (utc) =>
+      measureRuntimeDebugMetricAsync('ephemerisSnapshotGeneration', async () => {
       const utcDate = normalizeUtcInput(utc)
       const dataset = await datasetLoader.load()
       const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
       const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
       const chunk = await loadChunk(dataset, chunkRange)
+      const trails = measureRuntimeDebugMetric('trailGeneration', () =>
+        dataset.manifest.bodies
+          .map((body) => {
+            const trailWindowDays =
+              presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+
+            return sampleChunkBodyTrailAtTdbTime(
+              dataset.manifest,
+              chunk,
+              body.bodyId,
+              approximateTdbSecondsFromJ2000,
+              trailWindowDays
+            )
+          })
+          .filter((trail) => trail.positionsKm.length >= 2)
+      )
 
       return {
         capturedAt: utcDate.toISOString(),
@@ -70,22 +88,9 @@ export function createWebEphemerisProvider({
             velocityKmPerSecond: state.velocityKmPerSecond
           }
         }),
-        trails: dataset.manifest.bodies
-          .map((body) => {
-            const trailWindowDays =
-              presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
-
-            return sampleChunkBodyTrailAtTdbTime(
-              dataset.manifest,
-              chunk,
-              body.bodyId,
-              approximateTdbSecondsFromJ2000,
-              trailWindowDays
-            )
-          })
-          .filter((trail) => trail.positionsKm.length >= 2)
+        trails
       }
-    },
+    }),
     prefetchAroundUtc: async (utc) => {
       const utcDate = normalizeUtcInput(utc)
       const dataset = await datasetLoader.load()

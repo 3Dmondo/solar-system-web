@@ -1,16 +1,17 @@
 import { SolarSystemExperience } from './features/experience/SolarSystemExperience';
-import { getIsCurrentPathDebugExperience } from './features/experience/debug/debugRoute';
+import { getCurrentDebugExperienceOptions } from './features/experience/debug/debugRoute';
 import { createConfiguredWebBodyCatalogSource } from './features/solar-system/data/webBodyCatalogRuntime';
 
 const configuredCatalogSource = createConfiguredWebBodyCatalogSource(import.meta.env)
 
 export function App() {
-  const isDebugExperience = getIsCurrentPathDebugExperience()
+  const debugExperienceOptions = getCurrentDebugExperienceOptions()
 
   return (
     <SolarSystemExperience
       catalogSource={configuredCatalogSource}
-      showDebugOverlay={isDebugExperience}
+      showDebugOverlay={debugExperienceOptions.showDebugOverlay}
+      simulationClockStartAt={debugExperienceOptions.clockStartAt}
     />
   );
 }

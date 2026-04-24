@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics'
 import {
   createEmptyResolvedBodyCatalog,
   type BodyCatalogSource,
@@ -43,54 +44,56 @@ export function useResolvedBodyCatalog(
     let loadingTimeoutId: number | undefined
     const isRefreshingLoadedCatalog = hasLoadedSourceCatalog.current
 
-    setError(null)
+    measureRuntimeDebugMetric('catalogRefresh', () => {
+      setError(null)
 
-    if (isRefreshingLoadedCatalog) {
-      setStatus('ready')
-      loadingTimeoutId = window.setTimeout(() => {
-        if (!isCancelled) {
-          setStatus('loading')
-        }
-      }, refreshLoadingDelayMs)
-    } else {
-      setCatalog(emptyCatalog)
-      setStatus('loading')
-    }
-
-    source.prefetchAroundUtc(normalizedRequestedUtc).catch(() => undefined)
-
-    source
-      .loadBodyCatalogAtUtc(normalizedRequestedUtc)
-      .then((loadedCatalog) => {
-        if (isCancelled) {
-          return
-        }
-
-        if (loadingTimeoutId !== undefined) {
-          window.clearTimeout(loadingTimeoutId)
-        }
-
-        hasLoadedSourceCatalog.current = true
-        setCatalog(loadedCatalog)
+      if (isRefreshingLoadedCatalog) {
         setStatus('ready')
-      })
-      .catch((reason: unknown) => {
-        if (isCancelled) {
-          return
-        }
+        loadingTimeoutId = window.setTimeout(() => {
+          if (!isCancelled) {
+            setStatus('loading')
+          }
+        }, refreshLoadingDelayMs)
+      } else {
+        setCatalog(emptyCatalog)
+        setStatus('loading')
+      }
 
-        if (loadingTimeoutId !== undefined) {
-          window.clearTimeout(loadingTimeoutId)
-        }
+      source.prefetchAroundUtc(normalizedRequestedUtc).catch(() => undefined)
 
-        setStatus('error')
-        setError(toError(reason))
+      source
+        .loadBodyCatalogAtUtc(normalizedRequestedUtc)
+        .then((loadedCatalog) => {
+          if (isCancelled) {
+            return
+          }
 
-        if (!isRefreshingLoadedCatalog) {
-          hasLoadedSourceCatalog.current = false
-          setCatalog(emptyCatalog)
-        }
-      })
+          if (loadingTimeoutId !== undefined) {
+            window.clearTimeout(loadingTimeoutId)
+          }
+
+          hasLoadedSourceCatalog.current = true
+          setCatalog(loadedCatalog)
+          setStatus('ready')
+        })
+        .catch((reason: unknown) => {
+          if (isCancelled) {
+            return
+          }
+
+          if (loadingTimeoutId !== undefined) {
+            window.clearTimeout(loadingTimeoutId)
+          }
+
+          setStatus('error')
+          setError(toError(reason))
+
+          if (!isRefreshingLoadedCatalog) {
+            hasLoadedSourceCatalog.current = false
+            setCatalog(emptyCatalog)
+          }
+        })
+    })
 
     return () => {
       isCancelled = true

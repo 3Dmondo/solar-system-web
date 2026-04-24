@@ -12,11 +12,13 @@ import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
 type SolarSystemExperienceProps = {
   catalogSource?: BodyCatalogSource;
   showDebugOverlay?: boolean;
+  simulationClockStartAt?: Date | string;
 };
 
 export function SolarSystemExperience({
   catalogSource,
-  showDebugOverlay = false
+  showDebugOverlay = false,
+  simulationClockStartAt
 }: SolarSystemExperienceProps) {
   const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
@@ -26,7 +28,9 @@ export function SolarSystemExperience({
     playbackRateLabel,
     requestedUtc,
     togglePaused
-  } = useSimulationClock();
+  } = useSimulationClock({
+    startAt: simulationClockStartAt
+  });
   const { catalog, status, error } = useResolvedBodyCatalog(requestedUtc, catalogSource);
 
   return (
@@ -51,7 +55,7 @@ export function SolarSystemExperience({
         onCyclePlaybackRate={cyclePlaybackRate}
         onToggleSimulationPaused={togglePaused}
       />
-      {showDebugOverlay ? <DebugFpsOverlay /> : null}
+      {showDebugOverlay ? <DebugFpsOverlay clockStartAt={simulationClockStartAt} /> : null}
     </main>
   );
 }

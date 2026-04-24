@@ -1,4 +1,5 @@
 import { type BodyEphemerisProvider } from '../domain/body'
+import { measureRuntimeDebugMetric } from '../../experience/debug/runtimeDebugMetrics'
 import {
   type PhysicalSceneScale,
   mapEphemerisSnapshotToSceneSnapshot,
@@ -29,7 +30,9 @@ export function createWebBodyCatalogSource({
       ])
       const snapshot = mapEphemerisSnapshotToSceneSnapshot(ephemerisSnapshot, scale)
 
-      return resolveBodyCatalog(metadata, snapshot)
+      return measureRuntimeDebugMetric('catalogRefresh', () =>
+        resolveBodyCatalog(metadata, snapshot)
+      )
     },
     prefetchAroundUtc: async (utc) => {
       await Promise.all([loadScaledMetadata(), ephemerisProvider.prefetchAroundUtc(utc)])

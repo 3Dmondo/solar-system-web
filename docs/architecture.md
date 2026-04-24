@@ -25,7 +25,7 @@
 ## Current Runtime Shape
 
 - `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides.
-- Visiting `/debug` on the current host enables a lightweight FPS overlay for local performance sampling without changing the normal runtime behavior.
+- Visiting `/debug` on the current host enables a lightweight FPS overlay for local performance sampling, starts the clock from the Milestone 5.1 benchmark timestamp by default, and adds debug-only timing samples across the main runtime phases without changing the normal route behavior.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
 - The first real-data activation pass uses a default physical scale of `0.001` scene units per kilometer unless `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` overrides it.

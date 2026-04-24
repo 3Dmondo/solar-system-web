@@ -4,6 +4,7 @@ import {
   type BodyPhysicalMetadata,
   type BodySnapshot
 } from '../domain/body'
+import { measureRuntimeDebugMetric } from '../../experience/debug/runtimeDebugMetrics'
 import { presentationBodyMetadata } from './bodyPresentation'
 
 export type PhysicalSceneScale = {
@@ -30,7 +31,7 @@ export function mapEphemerisSnapshotToSceneSnapshot(
   snapshot: BodyEphemerisSnapshot,
   scale: PhysicalSceneScale
 ): BodySnapshot {
-  return {
+  return measureRuntimeDebugMetric('sceneSpaceMapping', () => ({
     capturedAt: snapshot.capturedAt,
     bodies: snapshot.bodies.map((body) => ({
       id: body.id,
@@ -42,7 +43,7 @@ export function mapEphemerisSnapshotToSceneSnapshot(
         mapJ2000PositionKmToScenePosition(positionKm, scale)
       )
     }))
-  }
+  }))
 }
 
 export function mapPhysicalMetadataToScaledBodyMetadata(
