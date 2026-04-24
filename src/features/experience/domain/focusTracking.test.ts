@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { translateFocusView } from './focusTracking';
+import {
+  getFocusViewCameraOffsetDistanceSquared,
+  translateFocusView
+} from './focusTracking';
 
 describe('focusTracking', () => {
   it('translates camera and target together when a focused body moves', () => {
@@ -31,5 +34,30 @@ describe('focusTracking', () => {
       translated.cameraPosition[1] - translated.target[1],
       translated.cameraPosition[2] - translated.target[2]
     ]).toEqual([12, 3, 10]);
+  });
+
+  it('treats equally translated views as the same camera offset', () => {
+    const desiredView = {
+      cameraPosition: [18, 4, 12] as [number, number, number],
+      target: [6, 1, 2] as [number, number, number]
+    };
+    const currentView = translateFocusView(desiredView, [12, -5, 9]);
+
+    expect(getFocusViewCameraOffsetDistanceSquared(currentView, desiredView)).toBe(0);
+  });
+
+  it('detects when the camera offset from the target is still changing', () => {
+    expect(
+      getFocusViewCameraOffsetDistanceSquared(
+        {
+          cameraPosition: [24, 7, 15],
+          target: [10, 2, 6]
+        },
+        {
+          cameraPosition: [20, 6, 14],
+          target: [10, 2, 6]
+        }
+      )
+    ).toBe(18);
   });
 });

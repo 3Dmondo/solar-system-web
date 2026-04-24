@@ -2,7 +2,7 @@
 
 ## Status
 
-Ready
+Implemented
 
 ## Goal
 
@@ -12,13 +12,14 @@ Remove the remaining high-rate focused-camera issues in Milestone 5 so focusing 
 
 - The first Milestone 5 runtime optimization task is now closed for the current scope after landing the debug benchmark seam, catalog and trail caching passes, closer overview inspection zoom, and a layout-synchronized focused follow update.
 - Overview mode now allows much closer manual zoom in the physically scaled runtime, which made it easier to compare overview motion with focused motion during diagnosis.
-- Focused follow behavior is materially improved, but high playback rates still expose residual camera-target issues during and just after focus changes.
+- Focused transitions keep the orbit target snapped to the live body center while the camera eases into the authored focused framing.
+- The latest follow-up pass now also translates the in-progress transition path with the live body motion so the camera no longer chases a moving world-space endpoint during long jumps.
 
-## Reported Issues To Fix
+## Outcome
 
-- At `1d/s`, focusing on a planet can leave the camera looking at where the body was when the focus action was triggered instead of the body's live center.
-- At `1d/s`, after focus changes to a planet, the planet can still jump back and forth until the first manual orbit or zoom interaction.
-- After that first manual interaction, the planet appears to stay fixed on screen, although not necessarily centered, which suggests the manual controls path is stabilizing a state that the automatic follow path should already own.
+- At `1d/s`, focusing on a far planet now keeps the travel animation intact without the transition chasing the moving body.
+- The focused transition now completes cleanly without requiring the simulation to be paused or a manual orbit or zoom interaction to stabilize the view.
+- Manual orbit and zoom still work after focus settles because the steady-state translated follow path remains responsible for the live orbit center.
 
 ## Investigation Targets
 
@@ -54,3 +55,12 @@ Remove the remaining high-rate focused-camera issues in Milestone 5 so focusing 
 - focus another planet at `1d/s` and confirm no back-and-forth jump appears before user interaction
 - orbit and zoom after focus settles and confirm the selected body remains the orbit center
 - return to overview and confirm the comparison workflow still works
+
+## Automated Verification
+
+- `pnpm test`
+- `pnpm build`
+
+## Manual Verification
+
+- `/debug` focus checks now confirm the high-rate jump is resolved, including far-planet transitions where the issue was most visible before.

@@ -28,6 +28,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - Visiting `/debug` now also starts from the Milestone 5.1 benchmark timestamp by default and shows lightweight runtime timing samples for clock, catalog, snapshot, trail, mapping, and scene-update work.
 - The first runtime optimization pass now reuses scaled body metadata across catalog refreshes and indexes snapshot bodies by id during catalog resolution so the per-frame path does less avoidable work before deeper profiling continues.
 - The first runtime optimization task is now closed for the current scope after landing the debug benchmarking seam, catalog and trail caching passes, closer overview inspection zoom, and a layout-synchronized focused follow update; reopen it only if later Milestone 5 work materially changes the runtime cost profile.
+- The focused camera follow task is now complete, and the latest pass translates the in-progress focused transition with the live body motion so long jumps keep the travel animation without world-space chasing.
 - The current rendering path still treats axial orientation, spin-rate fidelity, and Earth-Sun seasonal orientation as planned follow-up work rather than finished physical alignment.
 
 ## Agreed Milestone Direction
@@ -90,7 +91,7 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Support body-specific default trail windows while keeping the visible UI minimal in Milestone 5.
 - [x] Add rate changes to the current playback controls.
 - [x] 5.1 Optimize the new per-frame runtime path, with attention to catalog recomputation, interpolation cost, avoidable React churn, and scene update overhead.
-- [ ] Refine focused camera targeting and post-focus stabilization at high playback rates.
+- [x] Refine focused camera targeting and post-focus stabilization at high playback rates.
 - [ ] 5.2 Review dynamic lighting coherence for Earth layers, Saturn ring shadows on the globe, and Venus cloud lighting so the apparent sun direction tracks live body positions.
 - [ ] 5.3 Align scene rendering with solar-system metadata, including axial orientation, rotation speed, Earth-Sun orientation, and other physical characteristics worth bringing into the runtime contract.
 - [ ] Add reverse playback after the current performance, lighting, and physical-alignment follow-up.
@@ -114,8 +115,8 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 
 ### Camera Focus Tweaks
 
-- The next open runtime-follow task is tracked in `docs/tasks/milestone-5-camera-focus-tweaks.md`.
-- Remaining work is now about focused camera target lock and high-rate follow stability rather than broad runtime performance.
+- The focused camera follow task tracked in `docs/tasks/milestone-5-camera-focus-tweaks.md` is now complete.
+- Focused transitions now keep the orbit target on the live body center and translate the in-progress travel path with live body motion so long jumps settle cleanly without losing the travel feel.
 
 ### 5.2 Lighting Coherence Review
 

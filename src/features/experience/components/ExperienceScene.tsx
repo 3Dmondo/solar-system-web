@@ -6,7 +6,10 @@ import { PlanetBody } from '../../solar-system/components/PlanetBody';
 import { OrbitTrails } from '../../solar-system/components/OrbitTrails';
 import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics';
 import { getControlDistanceRange, getControlProfile } from '../domain/controlProfile';
-import { translateFocusView } from '../domain/focusTracking';
+import {
+  getFocusViewCameraOffsetDistanceSquared,
+  translateFocusView
+} from '../domain/focusTracking';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import {
@@ -154,27 +157,42 @@ function FocusCameraRig({
       return;
     }
 
-    const nextFocusCameraPosition = new Vector3(
-      ...getFocusCameraPosition(focusedBodyId, catalog, cameraAspect)
+    const currentTarget = controlsRef.current?.target ?? trackedFocusTarget.current;
+    const translatedCurrentView = translateFocusView(
+      {
+        cameraPosition: [camera.position.x, camera.position.y, camera.position.z],
+        target: [currentTarget.x, currentTarget.y, currentTarget.z]
+      },
+      [focusDelta.x, focusDelta.y, focusDelta.z]
     );
 
     if (isTransitioning.current) {
-      desiredTarget.current.copy(nextFocusTarget);
-      desiredCameraPosition.current.copy(nextFocusCameraPosition);
-    } else {
-      const currentTarget = controlsRef.current?.target ?? trackedFocusTarget.current;
-      const translatedFocusView = translateFocusView(
+      const translatedDesiredView = translateFocusView(
         {
-          cameraPosition: [camera.position.x, camera.position.y, camera.position.z],
-          target: [currentTarget.x, currentTarget.y, currentTarget.z]
+          cameraPosition: [
+            desiredCameraPosition.current.x,
+            desiredCameraPosition.current.y,
+            desiredCameraPosition.current.z
+          ],
+          target: [
+            desiredTarget.current.x,
+            desiredTarget.current.y,
+            desiredTarget.current.z
+          ]
         },
         [focusDelta.x, focusDelta.y, focusDelta.z]
       );
 
-      camera.position.set(...translatedFocusView.cameraPosition);
-      controlsRef.current?.target.set(...translatedFocusView.target);
-      desiredTarget.current.set(...translatedFocusView.target);
-      desiredCameraPosition.current.set(...translatedFocusView.cameraPosition);
+      camera.position.set(...translatedCurrentView.cameraPosition);
+      controlsRef.current?.target.copy(nextFocusTarget);
+      desiredTarget.current.copy(nextFocusTarget);
+      desiredCameraPosition.current.set(...translatedDesiredView.cameraPosition);
+      controlsRef.current?.update();
+    } else {
+      camera.position.set(...translatedCurrentView.cameraPosition);
+      controlsRef.current?.target.copy(nextFocusTarget);
+      desiredTarget.current.copy(nextFocusTarget);
+      desiredCameraPosition.current.set(...translatedCurrentView.cameraPosition);
       controlsRef.current?.update();
     }
 
@@ -255,16 +273,42 @@ function FocusCameraRig({
         1 - Math.exp(-delta * transitionProfileRef.current.targetEasingRate);
 
       camera.position.lerp(desiredCameraPosition.current, cameraEasing);
-      controlsRef.current?.target.lerp(desiredTarget.current, targetEasing);
+      if (focusedBodyId === 'overview') {
+        controlsRef.current?.target.lerp(desiredTarget.current, targetEasing);
+      } else {
+        controlsRef.current?.target.copy(desiredTarget.current);
+      }
       controlsRef.current?.update();
 
-      const cameraSettled =
-        camera.position.distanceToSquared(desiredCameraPosition.current) <
-        transitionProfileRef.current.settleDistanceSquared;
+      const transitionTarget = controlsRef.current?.target ?? desiredTarget.current;
       const targetSettled =
-        controlsRef.current?.target.distanceToSquared(desiredTarget.current) ?? 0;
+        focusedBodyId === 'overview'
+          ? transitionTarget.distanceToSquared(desiredTarget.current)
+          : 0;
+      const cameraSettled =
+        focusedBodyId === 'overview'
+          ? camera.position.distanceToSquared(desiredCameraPosition.current)
+          : getFocusViewCameraOffsetDistanceSquared(
+              {
+                cameraPosition: [camera.position.x, camera.position.y, camera.position.z],
+                target: [transitionTarget.x, transitionTarget.y, transitionTarget.z]
+              },
+              {
+                cameraPosition: [
+                  desiredCameraPosition.current.x,
+                  desiredCameraPosition.current.y,
+                  desiredCameraPosition.current.z
+                ],
+                target: [
+                  desiredTarget.current.x,
+                  desiredTarget.current.y,
+                  desiredTarget.current.z
+                ]
+              }
+            );
 
-      if (cameraSettled && targetSettled < transitionProfileRef.current.settleDistanceSquared) {
+      if (cameraSettled < transitionProfileRef.current.settleDistanceSquared &&
+          targetSettled < transitionProfileRef.current.settleDistanceSquared) {
         camera.position.copy(desiredCameraPosition.current);
         controlsRef.current?.target.copy(desiredTarget.current);
         controlsRef.current?.update();
