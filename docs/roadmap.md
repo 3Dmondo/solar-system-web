@@ -98,7 +98,21 @@ Deferred to later milestones:
 - browser coverage for real-data edge cases
 - chunk-size and startup-latency benchmarking
 
-## Milestone 6: Reference Frames And Trail UX
+## Milestone 6: Body Discovery And UI Controls
+
+Status: Planned
+
+Goals:
+
+- add body indicator billboards that appear when bodies are too small to see, with auto-threshold based on screen-space radius
+- make indicator billboards selectable with the same interaction model as body meshes
+- handle indicator overlap when distant bodies cluster by applying a radial spread algorithm
+- add a Sun impostor with bloom post-processing for visibility from far distances, blending smoothly with the rendered sphere
+- add a collapsible layer visibility panel with toggles for trails and body indicators, designed for future cinematic-scale toggle
+- add a floating fullscreen button in the top-right corner
+- verify body discovery and selection work correctly on both desktop and mobile
+
+## Milestone 7: Reference Frames And Trail UX
 
 Status: Planned
 
@@ -111,7 +125,7 @@ Goals:
 - refine trail presentation with a brighter, thicker, non-transparent look and evaluate a tail-fade treatment
 - design controls for frame, trail window, and trail style
 
-## Milestone 7: Cinematic View Mode
+## Milestone 8: Cinematic View Mode
 
 Status: Planned
 
@@ -122,7 +136,7 @@ Goals:
 - introduce extra separation offsets only for moons and other satellites so local systems stay readable without moving unrelated bodies
 - label the cinematic mode clearly so it is understood as a non-physical presentation
 
-## Milestone 8: Sky Catalog And Rendering Controls
+## Milestone 9: Sky Catalog And Rendering Controls
 
 Status: Planned
 
@@ -134,7 +148,7 @@ Goals:
 - add a rendering-configuration UI that stays minimized by default and uses as little screen space as possible
 - design the controls so they remain clear and low-friction on both mobile and desktop
 
-## Milestone 9: Rendering And Performance Refinement
+## Milestone 10: Rendering And Performance Refinement
 
 Status: Planned
 
@@ -145,7 +159,7 @@ Goals:
 - add quality or performance presets only if needed
 - revisit bundle size and mobile fallbacks as the scene grows
 
-## Milestone 10: Full Solar System Explorer
+## Milestone 11: Full Solar System Explorer
 
 Status: Backlog
 
