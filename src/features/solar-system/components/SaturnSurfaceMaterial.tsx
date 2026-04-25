@@ -108,22 +108,9 @@ varying vec3 vWorldNormal;
 
 const float SATURN_AMBIENT = 0.05;
 
-float computeSaturnDiffuse(vec3 normal, vec3 lightDir) {
-  float diffuse = max(dot(normal, lightDir), 0.0);
-  return SATURN_AMBIENT + (1.0 - SATURN_AMBIENT) * diffuse;
-}
-
+// Ring shadow blocks sunlight, so it only affects the diffuse component.
+// Returns the shadow mask (0 = no shadow, 1 = full shadow).
 float getRingShadowMask(vec3 worldPosition, vec3 lightDirection) {
-  vec3 fromCenter = worldPosition - bodyCenter;
-  vec3 worldNormal = normalize(fromCenter);
-  float lightFacing = dot(worldNormal, lightDirection);
-
-  if (lightFacing <= -0.08) {
-    return 0.0;
-  }
-
-  float litFade = smoothstep(-0.08, 0.18, lightFacing);
-
   float planeDot = dot(lightDirection, ringNormal);
 
   if (abs(planeDot) < 0.0001) {
@@ -149,7 +136,17 @@ float getRingShadowMask(vec3 worldPosition, vec3 lightDirection) {
   float textureU = mix(ringTextureMinU, ringTextureMaxU, radialT);
   float bandAlpha = texture2D(ringTexture, vec2(textureU, 0.5)).a;
 
-  return bandAlpha * ringShadowStrength * litFade;
+  return bandAlpha * ringShadowStrength;
+}
+
+// Compute lighting with ring shadow affecting only the diffuse term.
+// This naturally blends at the terminator: night side is already at ambient,
+// so the shadow has no additional darkening effect there.
+float computeSaturnLighting(vec3 normal, vec3 lightDir, float shadowMask) {
+  float diffuse = max(dot(normal, lightDir), 0.0);
+  // Shadow blocks sunlight, reducing diffuse contribution
+  float shadowedDiffuse = diffuse * (1.0 - shadowMask);
+  return SATURN_AMBIENT + (1.0 - SATURN_AMBIENT) * shadowedDiffuse;
 }`
         );
 
@@ -159,9 +156,9 @@ float getRingShadowMask(vec3 worldPosition, vec3 lightDirection) {
           `#include <map_fragment>
 vec3 lightDir = normalize(saturnLightDirection);
 vec3 worldNormal = normalize(vWorldNormal);
-float diffuseLighting = computeSaturnDiffuse(worldNormal, lightDir);
 float ringShadowMask = getRingShadowMask(vWorldPosition, lightDir);
-diffuseColor.rgb *= diffuseLighting * (1.0 - ringShadowMask);`
+float lighting = computeSaturnLighting(worldNormal, lightDir, ringShadowMask);
+diffuseColor.rgb *= lighting;`
         );
       }}
     />
