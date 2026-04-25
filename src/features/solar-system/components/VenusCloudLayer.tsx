@@ -33,8 +33,6 @@ export function VenusCloudLayer({
       bodyPosition={bodyPosition}
       colorTexture={cloudTexture}
       focused={focused}
-      maxVisibility={0.96}
-      minVisibility={0.28}
       opacity={2.5}
       poleDirectionRender={poleDirectionRender}
       radius={radius}

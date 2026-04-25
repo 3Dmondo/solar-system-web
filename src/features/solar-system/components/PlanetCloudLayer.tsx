@@ -20,9 +20,6 @@ type PlanetCloudLayerProps = {
   color?: string;
   colorTexture?: Texture;
   focused: boolean;
-  lightFacingThresholds?: [number, number];
-  maxVisibility?: number;
-  minVisibility?: number;
   opacity: number;
   poleDirectionRender?: [number, number, number];
   radius: number;
@@ -39,9 +36,6 @@ export function PlanetCloudLayer({
   color = '#ffffff',
   colorTexture,
   focused,
-  lightFacingThresholds = [0, 0.22],
-  maxVisibility = 1,
-  minVisibility = 0.08,
   opacity,
   poleDirectionRender,
   radius,
@@ -110,10 +104,6 @@ export function PlanetCloudLayer({
         transparent
         onBeforeCompile={(shader) => {
           shader.uniforms.cloudLightDirection = { value: lightDirection };
-          shader.uniforms.cloudMinVisibility = { value: minVisibility };
-          shader.uniforms.cloudMaxVisibility = { value: maxVisibility };
-          shader.uniforms.cloudLightMin = { value: lightFacingThresholds[0] };
-          shader.uniforms.cloudLightMax = { value: lightFacingThresholds[1] };
           shader.uniforms.cloudAlphaMax = {
             value: transparencyHeuristic?.maxAlpha ?? 1
           };
@@ -145,17 +135,13 @@ vCloudWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);`
             '#include <common>',
             `#include <common>
 uniform vec3 cloudLightDirection;
-uniform float cloudMinVisibility;
-uniform float cloudMaxVisibility;
-uniform float cloudLightMin;
-uniform float cloudLightMax;
 uniform float cloudAlphaMax;
 uniform float cloudAlphaMinLuminance;
 uniform float cloudAlphaMaxLuminance;
 uniform float cloudAlphaPower;
 varying vec3 vCloudWorldNormal;
 
-const float CLOUD_AMBIENT = 0.04;
+const float CLOUD_AMBIENT = 0.02;
 
 float computeCloudDiffuse(vec3 normal, vec3 lightDir) {
   float diffuse = max(dot(normal, lightDir), 0.0);
@@ -169,12 +155,6 @@ float computeCloudDiffuse(vec3 normal, vec3 lightDir) {
             `#include <map_fragment>
 vec3 cloudNormal = normalize(vCloudWorldNormal);
 vec3 cloudLightDir = normalize(cloudLightDirection);
-float cloudLightFacing = max(dot(cloudNormal, cloudLightDir), 0.0);
-float cloudVisibility = mix(
-  cloudMinVisibility,
-  cloudMaxVisibility,
-  smoothstep(cloudLightMin, cloudLightMax, cloudLightFacing)
-);
 float cloudDiffuse = computeCloudDiffuse(cloudNormal, cloudLightDir);
 float cloudLuminance = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 float cloudAlphaHeuristic = pow(
@@ -182,8 +162,8 @@ float cloudAlphaHeuristic = pow(
   cloudAlphaPower
 );
 
-diffuseColor.rgb *= cloudDiffuse * cloudVisibility;
-diffuseColor.a *= cloudVisibility * mix(1.0, cloudAlphaHeuristic, cloudAlphaMax);`
+diffuseColor.rgb *= cloudDiffuse;
+diffuseColor.a *= mix(1.0, cloudAlphaHeuristic, cloudAlphaMax);`
           );
         }}
       />
