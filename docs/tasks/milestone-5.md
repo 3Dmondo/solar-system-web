@@ -2,7 +2,7 @@
 
 ## Status
 
-In Progress
+Complete
 
 ## Goal
 
@@ -95,11 +95,14 @@ Ship real ephemeris-driven positions as the default startup experience so the sc
 - [x] Refine focused camera targeting and post-focus stabilization at high playback rates.
 - [x] 5.2 Review dynamic lighting coherence for Earth layers, Saturn ring shadows on the globe, and Venus cloud lighting so the apparent sun direction tracks live body positions.
 - [x] 5.3 Align scene rendering with solar-system metadata, including axial orientation, rotation speed, Earth-Sun orientation, and other physical characteristics worth bringing into the runtime contract.
-- [ ] Add reverse playback after the current performance, lighting, and physical-alignment follow-up.
-- [ ] Defer explicit date picking unless Milestone 5 usability shows it is necessary.
-- [ ] Add browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery while data is loading.
-- [ ] Finish chunk-size, startup-latency, and production chunk-duration benchmarking for the browser runtime.
-- [ ] Run milestone closeout manual verification for the real-data path on desktop and mobile.
+- [x] 5.4 Mobile lighting fix: replace PointLight with custom world-space shaders across all materials.
+
+### Deferred To Later Milestones
+
+- Reverse playback
+- Explicit date picking
+- Browser coverage for real-data startup, chunk-boundary loading, scrubbing, and focused-body recovery
+- Chunk-size, startup-latency, and production chunk-duration benchmarking
 
 ## Follow-up Tasks Within Milestone 5
 

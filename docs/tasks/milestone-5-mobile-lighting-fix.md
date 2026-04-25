@@ -1,5 +1,9 @@
 # Milestone 5: Mobile Lighting Fix
 
+## Status
+
+Complete
+
 ## Problem Statement
 
 On Chrome/Android, the lighting direction on planetary bodies appears to change based on camera position. This does NOT happen on desktop Chrome. The issue affects bodies that rely on Three.js built-in `meshStandardMaterial` lighting, which performs calculations in view-space. On some mobile GPUs, there appears to be an inconsistency in how the view matrix affects the light position vs the normal matrix.

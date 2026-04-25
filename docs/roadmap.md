@@ -6,7 +6,7 @@
 - Milestone 2 mocked overview work is complete, including browser smoke coverage and manual closeout verification.
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
-- Milestone 5 browser data-integration work is in progress, with typed parsing, cached dataset loading, runtime chunk-selection plus Hermite interpolation helpers, an async ephemeris provider layer, a uniform physical-scale mapping seam, an app-facing resolved-catalog source, a real-time simulation clock with rate changes and now per-frame default advancement, a committed `public/ephemeris/body-metadata.json` snapshot, an ignored local `public/ephemeris/generated/` asset root plus helper script, a GitHub Pages workflow that checks out `SpiceNet` tag `v0.0.1` and generates deployment assets from the JPL SSD `de440s.bsp` source before the app build, a runtime that now starts from real ephemeris data by default with explicit loading or error messaging instead of placeholder startup positions, a `/debug` FPS overlay for local profiling, a repeatable `/debug` benchmark start timestamp plus runtime timing samples for the main Milestone 5.1 phases, a first trail pass that renders active-chunk sampled history with body-specific default windows, a first catalog-refresh optimization pass that reuses scaled metadata plus indexed body merging to reduce avoidable per-frame work, a follow-up trail-sampling pass that caches per-chunk sampler state and stable interior trail segments instead of rewalking chunk samples on every snapshot, a focused-follow pass that now translates the transition path with live body motion so high-rate jumps settle cleanly without losing the travel feel, a lighting-coherence pass that now keeps Earth, Venus-cloud, and Saturn lighting or shadowing aligned with the live Sun position, and a physical-alignment pass (5.3) that wires every body's sidereal rotation around its metadata-derived north pole axis, synchronizes rotation with the simulation clock and playback speed, anchors Earth's prime meridian to solar noon, keeps cloud shadows and cloud shell in sync on the correct axis, derives Saturn's ring plane from its pole, applies retrograde rotation to Venus clouds, and tidally locks the Moon to Earth.
+- Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -66,7 +66,7 @@ Delivered:
 
 ## Milestone 5: Real Positions And Time
 
-Status: In Progress
+Status: Complete
 
 Goals:
 
@@ -81,12 +81,22 @@ Goals:
 - replace circular mock trails with sampled position history and support body-specific default trail windows
 - benchmark chunk size, prefetch behavior, and startup latency so the overview stays smooth on mobile and desktop
 
-Current focus:
+Delivered:
 
-- add reverse playback after the current performance, lighting, and physical-alignment follow-up
-- add browser coverage for the real-data-only startup path, chunk-boundary loading, and focused-body recovery
-- finish chunk-size, startup-latency, and chunk-duration benchmarking for the deployed and local generated-data paths
-- manually verify the real-data startup flow on desktop and mobile before milestone closeout
+- real ephemeris-driven positions from startup with explicit loading and error states
+- simulation clock with pause, resume, and playback-rate controls
+- sampled position history trails with body-specific windows
+- physical alignment: axial orientation, sidereal rotation, Earth prime meridian, Saturn ring plane, Venus retrograde clouds, tidally locked Moon
+- lighting coherence: Earth, Saturn, and Venus lighting tracks live Sun position
+- mobile lighting fix: all materials use custom world-space shaders via meshBasicMaterial + onBeforeCompile to avoid mobile Chrome lighting inconsistencies
+- shared shader utilities for world-space lighting, bump mapping, and shadow calculations
+
+Deferred to later milestones:
+
+- reverse playback
+- explicit date picking
+- browser coverage for real-data edge cases
+- chunk-size and startup-latency benchmarking
 
 ## Milestone 6: Reference Frames And Trail UX
 

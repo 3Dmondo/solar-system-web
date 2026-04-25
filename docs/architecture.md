@@ -68,7 +68,11 @@
 
 ## Rendering Model
 
-- Lighting uses a point light at the Sun plus a small ambient contribution.
+- Lighting uses custom world-space shaders on all planet materials. The scene has only a small ambient light for non-custom materials (e.g., orbit trails); there is no PointLight.
+- All planet materials use `meshBasicMaterial` as a base with `onBeforeCompile` shader injection to compute world-space diffuse lighting. This avoids view-matrix inconsistencies that caused incorrect lighting on mobile Chrome/Android with Three.js built-in lighting.
+- Shared shader utilities live in `src/features/solar-system/rendering/shaderChunks.ts` (GLSL snippets) and `shaderInjection.ts` (injection helpers). The `useWorldSpaceLighting` hook manages light-direction uniforms and per-frame updates.
+- Bump mapping (Moon) and normal mapping (Earth) use fixed UV offsets instead of screen-space derivatives for consistent results at any zoom level.
+- Ring shadows (Saturn) and cloud layers (Earth, Venus) apply shadow/lighting only to the diffuse component, naturally blending at the terminator without artificial cutoffs.
 - `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
 - The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
 - Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
