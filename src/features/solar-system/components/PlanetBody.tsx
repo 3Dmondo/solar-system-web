@@ -146,9 +146,13 @@ export function PlanetBody({
         ) : body.material === 'earth' ? (
           <EarthSurfaceMaterial bodyPosition={body.position} poleDirectionRender={body.poleDirectionRender} sunPosition={sunPosition} />
         ) : body.material === 'moon' ? (
-          <MoonSurfaceMaterial />
+          <MoonSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
         ) : (
-          <TexturedPlanetMaterial bodyId={body.id} />
+          <TexturedPlanetMaterial
+            bodyId={body.id}
+            bodyPosition={body.position}
+            sunPosition={sunPosition}
+          />
         )}
       </mesh>
 

@@ -64,8 +64,9 @@ export function ExperienceScene({
     >
       <color attach="background" args={['#000000']} />
       <StarBackground />
-      <ambientLight intensity={0.1} />
-      <pointLight decay={0} distance={0} intensity={4.8} position={sunPosition} />
+      {/* Ambient light for non-custom-shader materials (e.g., orbit trails).
+          Custom planet shaders compute their own world-space lighting. */}
+      <ambientLight intensity={0.08} />
       <FocusCameraRig
         catalog={catalog}
         controlDistanceRange={controlDistanceRange}

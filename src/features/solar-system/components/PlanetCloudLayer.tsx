@@ -99,15 +99,13 @@ export function PlanetCloudLayer({
   return (
     <mesh ref={cloudMeshRef} scale={shellScale}>
       <sphereGeometry args={[radius, 64, 64]} />
-      <meshStandardMaterial
+      <meshBasicMaterial
         alphaMap={alphaTexture}
         alphaTest={0.08}
         color={color}
         depthWrite={false}
         map={colorTexture ?? null}
-        metalness={0}
         opacity={opacity}
-        roughness={0.95}
         side={FrontSide}
         transparent
         onBeforeCompile={(shader) => {
@@ -136,10 +134,11 @@ export function PlanetCloudLayer({
 varying vec3 vCloudWorldNormal;`
           );
 
+          // meshBasicMaterial: inject world normal after project_vertex
           shader.vertexShader = shader.vertexShader.replace(
-            '#include <defaultnormal_vertex>',
-            `#include <defaultnormal_vertex>
-vCloudWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
+            '#include <project_vertex>',
+            `#include <project_vertex>
+vCloudWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);`
           );
 
           shader.fragmentShader = shader.fragmentShader.replace(
@@ -154,27 +153,37 @@ uniform float cloudAlphaMax;
 uniform float cloudAlphaMinLuminance;
 uniform float cloudAlphaMaxLuminance;
 uniform float cloudAlphaPower;
-varying vec3 vCloudWorldNormal;`
+varying vec3 vCloudWorldNormal;
+
+const float CLOUD_AMBIENT = 0.04;
+
+float computeCloudDiffuse(vec3 normal, vec3 lightDir) {
+  float diffuse = max(dot(normal, lightDir), 0.0);
+  return CLOUD_AMBIENT + (1.0 - CLOUD_AMBIENT) * diffuse;
+}`
           );
 
+          // meshBasicMaterial: apply custom lighting after map is sampled
           shader.fragmentShader = shader.fragmentShader.replace(
-            '#include <dithering_fragment>',
-            `float cloudLightFacing = max(dot(normalize(vCloudWorldNormal), normalize(cloudLightDirection)), 0.0);
+            '#include <map_fragment>',
+            `#include <map_fragment>
+vec3 cloudNormal = normalize(vCloudWorldNormal);
+vec3 cloudLightDir = normalize(cloudLightDirection);
+float cloudLightFacing = max(dot(cloudNormal, cloudLightDir), 0.0);
 float cloudVisibility = mix(
   cloudMinVisibility,
   cloudMaxVisibility,
   smoothstep(cloudLightMin, cloudLightMax, cloudLightFacing)
 );
-float cloudLuminance = dot(gl_FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+float cloudDiffuse = computeCloudDiffuse(cloudNormal, cloudLightDir);
+float cloudLuminance = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 float cloudAlphaHeuristic = pow(
   smoothstep(cloudAlphaMinLuminance, cloudAlphaMaxLuminance, cloudLuminance),
   cloudAlphaPower
 );
 
-gl_FragColor.rgb *= cloudVisibility;
-gl_FragColor.a *= cloudVisibility * mix(1.0, cloudAlphaHeuristic, cloudAlphaMax);
-
-#include <dithering_fragment>`
+diffuseColor.rgb *= cloudDiffuse * cloudVisibility;
+diffuseColor.a *= cloudVisibility * mix(1.0, cloudAlphaHeuristic, cloudAlphaMax);`
           );
         }}
       />

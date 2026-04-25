@@ -26,7 +26,7 @@ export function EarthCloudLayer({
       angularVelocityRadPerSec={EARTH_CLOUD_ANGULAR_VELOCITY_RAD_PER_SEC}
       bodyPosition={bodyPosition}
       focused={focused}
-      opacity={0.58}
+      opacity={1.0}
       poleDirectionRender={poleDirectionRender}
       radius={radius}
       shellScaleDefault={1.01}

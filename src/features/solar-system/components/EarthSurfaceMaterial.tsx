@@ -1,12 +1,12 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { TangentSpaceNormalMap, Vector2, Vector3 } from 'three';
+import { Vector3 } from 'three';
 import { EARTH_CLOUD_UV_SPEED, EARTH_CLOUD_SHADOW_SHELL_RADIUS } from '../rendering/earthMotion';
 import {
   loadEarthCloudTexture,
   loadEarthDayTexture,
-  loadEarthNormalTexture,
   loadEarthNightTexture,
+  loadEarthNormalTexture,
   loadEarthSpecularTexture
 } from '../rendering/earthSurface';
 import { getSunLightDirection } from '../rendering/sunLighting';
@@ -65,16 +65,13 @@ export function EarthSurfaceMaterial({
   });
 
   return (
-    <meshStandardMaterial
+    <meshBasicMaterial
       color="#ffffff"
       map={dayTexture}
-      metalness={0.02}
-      normalMap={normalTexture}
-      normalMapType={TangentSpaceNormalMap}
-      normalScale={new Vector2(3.0, 3.0)}
       onBeforeCompile={(shader) => {
         shader.uniforms.earthNightTexture = { value: nightTexture };
         shader.uniforms.earthCloudTexture = { value: cloudTexture };
+        shader.uniforms.earthNormalTexture = { value: normalTexture };
         shader.uniforms.earthSpecularTexture = { value: specularTexture };
         shader.uniforms.earthCloudOffset = { value: 0 };
         shader.uniforms.earthLightDirection = { value: lightDirection };
@@ -89,23 +86,13 @@ varying vec3 vEarthWorldNormal;
 varying vec3 vEarthWorldPosition;`
         );
 
+        // meshBasicMaterial: inject world normal and position after project_vertex
         shader.vertexShader = shader.vertexShader.replace(
-          '#include <uv_vertex>',
-          `#include <uv_vertex>
-vEarthUv = uv;`
-        );
-
-        shader.vertexShader = shader.vertexShader.replace(
-          '#include <defaultnormal_vertex>',
-          `#include <defaultnormal_vertex>
-vEarthWorldNormal = normalize(mat3(modelMatrix) * objectNormal);`
-        );
-
-        shader.vertexShader = shader.vertexShader.replace(
-          '#include <worldpos_vertex>',
-          `#include <worldpos_vertex>
-vec4 earthWorldPosition = modelMatrix * vec4(transformed, 1.0);
-vEarthWorldPosition = earthWorldPosition.xyz;`
+          '#include <project_vertex>',
+          `#include <project_vertex>
+vEarthUv = uv;
+vEarthWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+vEarthWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;`
         );
 
         shader.fragmentShader = shader.fragmentShader.replace(
@@ -113,6 +100,7 @@ vEarthWorldPosition = earthWorldPosition.xyz;`
           `#include <common>
 uniform sampler2D earthNightTexture;
 uniform sampler2D earthCloudTexture;
+uniform sampler2D earthNormalTexture;
 uniform sampler2D earthSpecularTexture;
 uniform float earthCloudOffset;
 uniform vec3 earthLightDirection;
@@ -122,6 +110,29 @@ varying vec3 vEarthWorldNormal;
 varying vec3 vEarthWorldPosition;
 const float EARTH_CLOUD_SHADOW_SHELL_RADIUS = ${EARTH_CLOUD_SHADOW_SHELL_RADIUS.toFixed(3)};
 const float EARTH_CLOUD_SEAM_BLEND_WIDTH = 0.01;
+const float EARTH_NORMAL_SCALE = 2.0;
+
+// Perturb normal using tangent-space normal map
+// Uses spherical tangent frame which is robust regardless of screen size
+vec3 perturbNormalWithNormalMap(vec3 normal, vec2 uv) {
+  // Compute tangent frame from spherical geometry
+  // Tangent points along longitude (U direction), bitangent along latitude (V direction)
+  vec3 up = vec3(0.0, 1.0, 0.0);
+  vec3 tangent = normalize(cross(up, normal));
+  if (length(tangent) < 0.001) {
+    tangent = vec3(1.0, 0.0, 0.0);
+  }
+  vec3 bitangent = normalize(cross(normal, tangent));
+  
+  // Sample normal map and convert from [0,1] to [-1,1]
+  vec3 mapN = texture2D(earthNormalTexture, uv).xyz * 2.0 - 1.0;
+  mapN.xy *= EARTH_NORMAL_SCALE;
+  mapN = normalize(mapN);
+  
+  // Transform from tangent space to world space
+  mat3 TBN = mat3(tangent, bitangent, normal);
+  return normalize(TBN * mapN);
+}
 
 // Project a world-space direction onto the cloud texture UV space, taking into
 // account Earth's actual (tilted) pole direction so that shadow latitude rings
@@ -129,13 +140,8 @@ const float EARTH_CLOUD_SEAM_BLEND_WIDTH = 0.01;
 vec2 directionToCloudUv(vec3 direction) {
   vec3 dir = normalize(direction);
   vec3 pole = normalize(earthPoleDirection);
-  // Build an equatorial reference frame in the plane perpendicular to the pole.
-  // Use world X as the reference unless it is nearly parallel to the pole.
   vec3 worldRef = abs(pole.x) < 0.9 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 0.0, 1.0);
-  // equatX: component of worldRef perpendicular to the pole (Gram-Schmidt).
   vec3 equatX = normalize(worldRef - dot(worldRef, pole) * pole);
-  // equatY completes the right-hand equatorial frame; cross(equatX, pole)
-  // gives the +longitude direction consistent with the original atan(z,x) convention.
   vec3 equatY = cross(equatX, pole);
   float sinLat = clamp(dot(dir, pole), -1.0, 1.0);
   float v = asin(sinLat) / PI + 0.5;
@@ -163,45 +169,65 @@ float sampleWrappedCloudMask(vec2 uv) {
 }
 
 vec3 applyEarthNightLights(vec3 baseColor) {
-  vec3 worldNormal = normalize(vEarthWorldNormal);
+  vec3 geometryNormal = normalize(vEarthWorldNormal);
   vec3 lightDirection = normalize(earthLightDirection);
-  float lightFacing = max(dot(worldNormal, lightDirection), 0.0);
-  float nightMask = 1.0 - smoothstep(0.08, 0.24, lightFacing);
+  
+  // Perturb normal with normal map for terrain detail
+  vec3 worldNormal = perturbNormalWithNormalMap(geometryNormal, vEarthUv);
+  
+  // Use geometry normal for large-scale lighting, perturbed normal for detail
+  float geometryLightFacing = max(dot(geometryNormal, lightDirection), 0.0);
+  float detailLightFacing = max(dot(worldNormal, lightDirection), 0.0);
+  
+  // Blend between geometry and detail lighting for better mountain shadows
+  float lightFacing = mix(geometryLightFacing, detailLightFacing, 0.7);
+  
+  // Custom diffuse lighting
+  const float EARTH_AMBIENT = 0.04;
+  float diffuse = EARTH_AMBIENT + (1.0 - EARTH_AMBIENT) * lightFacing;
+  vec3 litBaseColor = baseColor * diffuse;
+  
+  // Night lights - push further into dark side
+  // Start appearing when geometryLightFacing < 0.05, full at < -0.1
+  float nightMask = 1.0 - smoothstep(-0.1, 0.05, geometryLightFacing);
   vec3 nightColor = texture2D(earthNightTexture, vEarthUv).rgb;
-  float normalLightDot = dot(worldNormal, lightDirection);
+  
+  // Cloud shadow projection
+  float normalLightDot = dot(geometryNormal, lightDirection);
   float shellIntersection = -normalLightDot + sqrt(
     max(
       normalLightDot * normalLightDot + (EARTH_CLOUD_SHADOW_SHELL_RADIUS * EARTH_CLOUD_SHADOW_SHELL_RADIUS - 1.0),
       0.0
     )
   );
-  vec3 cloudSampleDirection = normalize(worldNormal + lightDirection * shellIntersection);
+  vec3 cloudSampleDirection = normalize(geometryNormal + lightDirection * shellIntersection);
   vec2 cloudUv = directionToCloudUv(cloudSampleDirection);
   float cloudMask = 3.0 * sampleWrappedCloudMask(cloudUv);
-  float cloudShadow = smoothstep(0.1, 0.9, cloudMask) * lightFacing * 0.3;
+  float cloudShadow = smoothstep(0.1, 0.9, cloudMask) * geometryLightFacing * 0.8;
+  
+  // Ocean specular with perturbed normal for wave detail
   vec3 viewDirection = normalize(cameraPosition - vEarthWorldPosition);
   vec3 halfVector = normalize(lightDirection + viewDirection);
   float rawSpecular = texture2D(earthSpecularTexture, vEarthUv).r;
   float waterMask = smoothstep(0.72, 0.98, rawSpecular);
   float specularTerm = pow(max(dot(worldNormal, halfVector), 0.0), 10.0);
   float fresnel = pow(1.0 - max(dot(worldNormal, viewDirection), 0.0), 2.5);
-  float oceanSpecular = waterMask * specularTerm * lightFacing * (0.18 + fresnel * 0.32);
+  float oceanSpecular = waterMask * specularTerm * geometryLightFacing * (0.18 + fresnel * 0.32);
 
-  vec3 darkenedDay = baseColor * mix(0.18, 1.0 - cloudShadow, 1.0 - nightMask);
+  vec3 darkenedDay = litBaseColor * (1.0 - cloudShadow);
   vec3 specularColor = vec3(0.7, 0.84, 0.96) * oceanSpecular * 2.0;
 
   return darkenedDay + nightColor * nightMask * 0.7 + specularColor;
 }`
         );
 
+        // meshBasicMaterial: apply custom lighting after map is sampled
         shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <dithering_fragment>',
-          `gl_FragColor.rgb = applyEarthNightLights(gl_FragColor.rgb);
-
-#include <dithering_fragment>`
+          '#include <map_fragment>',
+          `#include <map_fragment>
+diffuseColor.rgb = applyEarthNightLights(diffuseColor.rgb);`
         );
       }}
-      roughness={0.88}
     />
   );
 }

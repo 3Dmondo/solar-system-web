@@ -61,10 +61,9 @@ export function SaturnSurfaceMaterial({
   });
 
   return (
-    <meshStandardMaterial
+    <meshBasicMaterial
       color="#ffffff"
       map={surfaceTexture}
-      metalness={0.02}
       onBeforeCompile={(shader) => {
         shader.uniforms.bodyCenter = { value: bodyCenter };
         shader.uniforms.ringTexture = { value: ringTexture };
@@ -80,14 +79,16 @@ export function SaturnSurfaceMaterial({
         shader.vertexShader = shader.vertexShader.replace(
           '#include <common>',
           `#include <common>
-varying vec3 vWorldPosition;`
+varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;`
         );
 
+        // meshBasicMaterial: inject world normal and position after project_vertex
         shader.vertexShader = shader.vertexShader.replace(
-          '#include <worldpos_vertex>',
-          `#include <worldpos_vertex>
-vec4 saturnWorldPosition = modelMatrix * vec4(transformed, 1.0);
-vWorldPosition = saturnWorldPosition.xyz;`
+          '#include <project_vertex>',
+          `#include <project_vertex>
+vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;`
         );
 
         shader.fragmentShader = shader.fragmentShader.replace(
@@ -103,6 +104,14 @@ uniform float ringTextureMaxU;
 uniform float ringShadowStrength;
 uniform vec3 saturnLightDirection;
 varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;
+
+const float SATURN_AMBIENT = 0.05;
+
+float computeSaturnDiffuse(vec3 normal, vec3 lightDir) {
+  float diffuse = max(dot(normal, lightDir), 0.0);
+  return SATURN_AMBIENT + (1.0 - SATURN_AMBIENT) * diffuse;
+}
 
 float getRingShadowMask(vec3 worldPosition, vec3 lightDirection) {
   vec3 fromCenter = worldPosition - bodyCenter;
@@ -144,15 +153,17 @@ float getRingShadowMask(vec3 worldPosition, vec3 lightDirection) {
 }`
         );
 
+        // meshBasicMaterial: apply custom lighting after map is sampled
         shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <dithering_fragment>',
-          `float ringShadowMask = getRingShadowMask(vWorldPosition, normalize(saturnLightDirection));
-gl_FragColor.rgb *= (1.0 - ringShadowMask);
-
-#include <dithering_fragment>`
+          '#include <map_fragment>',
+          `#include <map_fragment>
+vec3 lightDir = normalize(saturnLightDirection);
+vec3 worldNormal = normalize(vWorldNormal);
+float diffuseLighting = computeSaturnDiffuse(worldNormal, lightDir);
+float ringShadowMask = getRingShadowMask(vWorldPosition, lightDir);
+diffuseColor.rgb *= diffuseLighting * (1.0 - ringShadowMask);`
         );
       }}
-      roughness={0.82}
     />
   );
 }
