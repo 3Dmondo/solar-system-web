@@ -98,6 +98,39 @@ export type BodyEphemerisTrail = {
 
 export type BodyDefinition = BodyMetadata & BodyState;
 
+/**
+ * Body hierarchy defining parent-child relationships.
+ * Planets orbit the Sun; satellites orbit planets.
+ * Used for label occlusion (satellite labels hidden when overlapping parent).
+ */
+export const BODY_HIERARCHY: Record<BodyId, BodyId | null> = {
+  sun: null,
+  mercury: 'sun',
+  venus: 'sun',
+  earth: 'sun',
+  moon: 'earth',
+  mars: 'sun',
+  jupiter: 'sun',
+  saturn: 'sun',
+  uranus: 'sun',
+  neptune: 'sun'
+};
+
+/**
+ * Returns true if the body is a satellite (orbits a non-Sun body).
+ */
+export function isSatellite(bodyId: BodyId): boolean {
+  const parent = BODY_HIERARCHY[bodyId];
+  return parent !== null && parent !== 'sun';
+}
+
+/**
+ * Returns the parent body ID, or null for the Sun.
+ */
+export function getParentBody(bodyId: BodyId): BodyId | null {
+  return BODY_HIERARCHY[bodyId];
+}
+
 export type BodySnapshot = {
   capturedAt: string;
   bodies: BodyState[];

@@ -25,6 +25,10 @@ type BodyLabelProps = {
   onSelect: (bodyId: BodyId) => void;
   /** Whether to show the label (controlled by parent) */
   visible?: boolean;
+  /** Screen-space offset [x, y] in pixels for spreading apart overlapping labels */
+  screenOffset?: [number, number];
+  /** Whether the label is hidden due to hierarchy occlusion (satellite overlapping parent) */
+  occluded?: boolean;
 };
 
 // Reusable vector to avoid allocations
@@ -35,7 +39,13 @@ const tempPosition = new Vector3();
  * Rendered as HTML overlay positioned above the body or its indicator.
  * Selectable via click or tap to focus the body.
  */
-export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
+export function BodyLabel({
+  body,
+  onSelect,
+  visible = true,
+  screenOffset,
+  occluded = false
+}: BodyLabelProps) {
   const groupRef = useRef<Group>(null);
   const htmlRef = useRef<HTMLDivElement>(null);
   const isVisibleRef = useRef(true);
@@ -80,9 +90,14 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
         // When close, the planet sphere is visible (screenRadius * 2 diameter)
         const visualHeightPx = Math.max(screenRadius, INDICATOR_SIZE_PX / 2);
         const totalOffsetPx = visualHeightPx + MIN_LABEL_OFFSET_PX;
-        
-        // Apply the offset via CSS transform (negative Y moves up in screen space)
-        htmlRef.current.style.transform = `translateY(-${totalOffsetPx}px)`;
+
+        // Combine vertical offset with any screen-space spread offset
+        const offsetX = screenOffset?.[0] ?? 0;
+        const offsetY = screenOffset?.[1] ?? 0;
+
+        // Apply the combined offset via CSS transform
+        // Negative Y moves up in screen space; positive X moves right
+        htmlRef.current.style.transform = `translate(${offsetX}px, ${-totalOffsetPx - offsetY}px)`;
       }
     }
   });
@@ -91,7 +106,7 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
     onSelect(body.id);
   };
 
-  if (!visible) return null;
+  if (!visible || occluded) return null;
 
   return (
     <group ref={groupRef}>
