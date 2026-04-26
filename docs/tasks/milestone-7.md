@@ -1,6 +1,6 @@
 # Milestone 7: Reference Frames And Trail UX
 
-Status: In Progress
+Status: Complete
 
 ## Overview
 
@@ -70,9 +70,9 @@ Add reference frame selection (Solar System Barycenter / Earth-centered) that tr
 - [x] Satellite trails computed parent-relative at provider level
 - [x] Fixed different sample rate handling (Moon vs Earth)
 - [x] Removed per-frame useFrame blending check in GlowingTrailLine
-- [ ] Extend `prefetchAroundUtc` to load chunks further into the past
-- [ ] Increase LRU cache capacity from 4 to 6-8 chunks
-- [ ] Review outer planet trail window defaults
+- [x] Extend `prefetchAroundUtc` to load 2 previous chunks for outer planet trails
+- [x] Increase LRU cache capacity from 4 to 6 chunks
+- [x] Review outer planet trail window defaults (Neptune/Uranus: 25y, Saturn: 22y, Jupiter: 12y)
 
 ## Files Changed
 

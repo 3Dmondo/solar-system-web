@@ -33,7 +33,9 @@ export type WebEphemerisProviderOptions = {
   presentationMetadata?: BodyMetadata[]
 }
 
-const defaultMaxCachedChunks = 4
+// Increased from 4 to support outer planet trails (up to 25 years)
+// that may span across chunk boundaries
+const defaultMaxCachedChunks = 6
 
 export function createWebEphemerisProvider({
   chunkBaseUrl,
@@ -119,8 +121,14 @@ export function createWebEphemerisProvider({
       const dataset = await datasetLoader.load()
       const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
       const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
+
+      // Load 2 previous chunks to support outer planet trails (up to 25 years)
+      const prev1 = getPreviousChunkRange(dataset.manifest, chunkRange)
+      const prev2 = prev1 ? getPreviousChunkRange(dataset.manifest, prev1) : undefined
+
       const ranges = [
-        getPreviousChunkRange(dataset.manifest, chunkRange),
+        prev2,
+        prev1,
         chunkRange,
         getNextChunkRange(dataset.manifest, chunkRange)
       ].filter((value): value is WebEphemerisChunkRange => value !== undefined)

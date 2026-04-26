@@ -8,7 +8,7 @@
 - Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
 - Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
-- Milestone 7 reference frames and trail UX work is in progress, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, and UI selector implemented. Extended chunk prefetch is deferred.
+- Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -131,7 +131,7 @@ Delivered:
 
 ## Milestone 7: Reference Frames And Trail UX
 
-Status: In Progress
+Status: Complete
 
 Goals:
 
@@ -143,17 +143,21 @@ Goals:
 - replace trail rendering with glowing lines using additive blending
 - extend trail history further into the past via background chunk prefetch
 
-In Progress:
+Delivered:
 
-- reference frame state and transformation layer complete
-- satellite parent-relative trail positioning complete
-- glowing trail rendering with additive blending complete
-- reference frame selector UI complete
+- reference frame state and transformation layer with 16 unit tests
+- satellite parent-relative trail positioning for Moon orbit visibility
+- glowing trail rendering with additive blending and tuned opacity
+- reference frame selector UI with glassmorphic styling
+- time-based relative trail sampling for proper cycloid/retrograde shapes in Earth-centered view
+- performance optimizations: trail epoch quantization (100ms), cached relative samplers, one-time material setup
+- extended chunk prefetch (2 previous chunks) and increased cache capacity (4 → 6) for outer planet trails
+- different sample rate handling for bodies with varying cadences (e.g., Moon vs Earth)
 
 Deferred:
 
-- extended chunk prefetch for outer planet trail history
 - tail-fade treatment evaluation
+- GPU-based trail transformation (TrailLineMaterial prepared but not yet integrated)
 
 ## Milestone 8: Cinematic View Mode
 
