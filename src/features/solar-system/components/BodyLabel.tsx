@@ -1,6 +1,6 @@
 import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Group, Vector3 } from 'three';
 import type { BodyDefinition, BodyId } from '../domain/body';
 
@@ -11,10 +11,14 @@ import type { BodyDefinition, BodyId } from '../domain/body';
  */
 export const LABEL_THRESHOLDS = {
   /** Hide label when body's screen-space radius exceeds this (too big, obvious what it is) */
-  hideAbovePx: 80,
-  /** Always show label when body's screen-space radius is below this */
-  showBelowPx: 60
+  hideAbovePx: 80
 } as const;
+
+/** Minimum screen-space offset in pixels above the body/indicator */
+const MIN_LABEL_OFFSET_PX = 20;
+
+/** Size of the indicator billboard in pixels (must match BodyIndicator) */
+const INDICATOR_SIZE_PX = 24;
 
 type BodyLabelProps = {
   body: BodyDefinition;
@@ -28,12 +32,13 @@ const tempPosition = new Vector3();
 
 /**
  * A text label that follows a body in 3D space.
- * Rendered as HTML overlay positioned slightly above the body.
+ * Rendered as HTML overlay positioned above the body or its indicator.
  * Selectable via click or tap to focus the body.
  */
 export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
   const groupRef = useRef<Group>(null);
-  const [computedVisible, setComputedVisible] = useState(true);
+  const htmlRef = useRef<HTMLDivElement>(null);
+  const isVisibleRef = useRef(true);
 
   // Update position and visibility each frame
   useFrame(({ camera, size }) => {
@@ -48,7 +53,10 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
 
     if (distance <= body.radius) {
       // Camera inside body - hide label
-      if (computedVisible) setComputedVisible(false);
+      if (isVisibleRef.current && htmlRef.current) {
+        htmlRef.current.style.display = 'none';
+        isVisibleRef.current = false;
+      }
       return;
     }
 
@@ -59,8 +67,23 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
 
     // Hide when body is very large on screen (obvious what it is)
     const shouldShow = screenRadius < LABEL_THRESHOLDS.hideAbovePx;
-    if (shouldShow !== computedVisible) {
-      setComputedVisible(shouldShow);
+    
+    if (htmlRef.current) {
+      if (shouldShow !== isVisibleRef.current) {
+        htmlRef.current.style.display = shouldShow ? 'block' : 'none';
+        isVisibleRef.current = shouldShow;
+      }
+
+      if (shouldShow) {
+        // Compute the offset needed to place label above the visible element
+        // When far away, the indicator is visible (INDICATOR_SIZE_PX tall)
+        // When close, the planet sphere is visible (screenRadius * 2 diameter)
+        const visualHeightPx = Math.max(screenRadius, INDICATOR_SIZE_PX / 2);
+        const totalOffsetPx = visualHeightPx + MIN_LABEL_OFFSET_PX;
+        
+        // Apply the offset via CSS transform (negative Y moves up in screen space)
+        htmlRef.current.style.transform = `translateY(-${totalOffsetPx}px)`;
+      }
     }
   });
 
@@ -68,16 +91,11 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
     onSelect(body.id);
   };
 
-  if (!visible || !computedVisible) return null;
-
-  // Offset the label above the body by a small multiple of its radius
-  // Using body.radius ensures the label clears the sphere
-  const labelOffset = body.radius * 1.5;
+  if (!visible) return null;
 
   return (
     <group ref={groupRef}>
       <Html
-        position={[0, labelOffset, 0]}
         center
         style={{
           pointerEvents: 'auto',
@@ -85,32 +103,34 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
           whiteSpace: 'nowrap'
         }}
       >
-        <button
-          onClick={handleClick}
-          className="body-label"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            padding: '4px 8px',
-            cursor: 'pointer',
-            color: '#fff',
-            fontSize: '12px',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            fontWeight: 500,
-            textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
-            letterSpacing: '0.02em',
-            opacity: 0.9,
-            transition: 'opacity 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '1';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '0.9';
-          }}
-        >
-          {body.displayName}
-        </button>
+        <div ref={htmlRef} style={{ display: 'block' }}>
+          <button
+            onClick={handleClick}
+            className="body-label"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              color: '#fff',
+              fontSize: '12px',
+              fontFamily: 'system-ui, -apple-system, sans-serif',
+              fontWeight: 500,
+              textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
+              letterSpacing: '0.02em',
+              opacity: 0.9,
+              transition: 'opacity 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.9';
+            }}
+          >
+            {body.displayName}
+          </button>
+        </div>
       </Html>
     </group>
   );
