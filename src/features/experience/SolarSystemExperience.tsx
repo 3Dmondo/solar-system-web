@@ -1,17 +1,21 @@
+import { useMemo } from 'react';
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
 import { DebugFpsOverlay } from './components/DebugFpsOverlay';
 import { FullscreenButton } from './components/FullscreenButton';
 import { LayerPanel } from './components/LayerPanel';
+import { ReferenceFrameSelector } from './components/ReferenceFrameSelector';
 import { useCoarsePointer } from './hooks/useCoarsePointer';
 import { useFocusedBody } from './state/useFocusedBody';
 import { useLayerVisibility } from './state/useLayerVisibility';
+import { useReferenceFrame } from './state/useReferenceFrame';
 import {
   useResolvedBodyCatalog
 } from './state/useResolvedBodyCatalog';
 import { useSimulationClock } from './state/useSimulationClock';
 import { SimulationClockContext } from './state/SimulationClockContext';
 import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
+import { transformCatalogToFrame } from '../solar-system/data/referenceFrameTransform';
 
 type SolarSystemExperienceProps = {
   catalogSource?: BodyCatalogSource;
@@ -37,8 +41,22 @@ export function SolarSystemExperience({
   } = useSimulationClock({
     startAt: simulationClockStartAt
   });
-  const { catalog, status, error } = useResolvedBodyCatalog(requestedUtc, catalogSource);
+  const { selectedFrame, selectFrame, availableFrames } = useReferenceFrame();
   const { visibility, toggleLayer, layerConfigs } = useLayerVisibility();
+
+  // Load catalog with trails computed relative to the selected reference frame's origin
+  const { catalog: baseCatalog, status, error } = useResolvedBodyCatalog(
+    requestedUtc,
+    catalogSource,
+    { trailOriginBodyId: selectedFrame.originBodyId }
+  );
+
+  // Transform body positions to selected reference frame
+  // (trails are already frame-relative from the provider)
+  const catalog = useMemo(
+    () => transformCatalogToFrame(baseCatalog, selectedFrame),
+    [baseCatalog, selectedFrame]
+  );
 
   return (
     <SimulationClockContext.Provider value={{ playbackRateMultiplier, isPaused, simulationInitialUtcMs }}>
@@ -65,6 +83,11 @@ export function SolarSystemExperience({
           onToggleSimulationPaused={togglePaused}
         />
         <FullscreenButton />
+        <ReferenceFrameSelector
+          selectedFrameId={selectedFrame.id}
+          availableFrames={availableFrames}
+          onSelectFrame={selectFrame}
+        />
         <LayerPanel
           visibility={visibility}
           layerConfigs={layerConfigs}

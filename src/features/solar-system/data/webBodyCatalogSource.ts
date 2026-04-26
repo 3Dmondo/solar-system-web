@@ -23,10 +23,12 @@ export function createWebBodyCatalogSource({
     | undefined
 
   return {
-    loadBodyCatalogAtUtc: async (utc) => {
+    loadBodyCatalogAtUtc: async (utc, options) => {
       const [metadata, ephemerisSnapshot] = await Promise.all([
         loadScaledMetadata(),
-        ephemerisProvider.loadSnapshotAtUtc(utc)
+        ephemerisProvider.loadSnapshotAtUtc(utc, {
+          trailOriginBodyId: options?.trailOriginBodyId ?? null
+        })
       ])
       const snapshot = mapEphemerisSnapshotToSceneSnapshot(ephemerisSnapshot, scale)
 

@@ -167,7 +167,10 @@ describe('webBodyCatalogSource', () => {
     const moon = catalog.bodies.find((body) => body.id === 'moon')
 
     expect(datasetLoader.load).toHaveBeenCalledTimes(1)
-    expect(ephemerisProvider.loadSnapshotAtUtc).toHaveBeenCalledWith('2000-01-01T12:00:00Z')
+    expect(ephemerisProvider.loadSnapshotAtUtc).toHaveBeenCalledWith(
+      '2000-01-01T12:00:00Z',
+      { trailOriginBodyId: null }
+    )
     expect(catalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
     expect(catalog.snapshot.trails).toHaveLength(2)
     expect(catalog.snapshot.trails[0]?.id).toBe('earth')

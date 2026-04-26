@@ -1,4 +1,4 @@
-import { type BodyDefinition, type BodyMetadata, type BodySnapshot } from '../domain/body'
+import { type BodyDefinition, type BodyId, type BodyMetadata, type BodySnapshot } from '../domain/body'
 
 export type ResolvedBodyCatalog = {
   metadata: BodyMetadata[]
@@ -6,8 +6,16 @@ export type ResolvedBodyCatalog = {
   bodies: BodyDefinition[]
 }
 
+export type LoadCatalogOptions = {
+  /**
+   * Body ID to use as the origin for trail positions.
+   * When set, trail positions are computed relative to this body at each sample time.
+   */
+  trailOriginBodyId?: BodyId | null
+}
+
 export type BodyCatalogSource = {
-  loadBodyCatalogAtUtc: (utc: Date | string) => Promise<ResolvedBodyCatalog>
+  loadBodyCatalogAtUtc: (utc: Date | string, options?: LoadCatalogOptions) => Promise<ResolvedBodyCatalog>
   prefetchAroundUtc: (utc: Date | string) => Promise<void>
 }
 

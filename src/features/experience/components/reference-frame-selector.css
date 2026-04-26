@@ -1,0 +1,117 @@
+.reference-frame-selector-container {
+  position: absolute;
+  right: 1rem;
+  bottom: 9.5rem;
+  z-index: 15;
+}
+
+.reference-frame-selector__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem 0.4rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: rgba(9, 13, 31, 0.85);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.reference-frame-selector__toggle:hover {
+  background: rgba(9, 13, 31, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.reference-frame-selector__toggle:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.reference-frame-selector__toggle svg {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.8;
+}
+
+.reference-frame-selector__label {
+  color: var(--text);
+}
+
+.reference-frame-selector__panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.5rem);
+  min-width: 14rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  background: rgba(9, 13, 31, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
+}
+
+.reference-frame-selector__header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.reference-frame-selector__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.reference-frame-selector__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.reference-frame-selector__option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.reference-frame-selector__option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.reference-frame-selector__option--selected {
+  background: rgba(90, 180, 120, 0.15);
+  border-color: rgba(90, 180, 120, 0.3);
+}
+
+.reference-frame-selector__option--selected:hover {
+  background: rgba(90, 180, 120, 0.2);
+  border-color: rgba(90, 180, 120, 0.4);
+}
+
+.reference-frame-selector__option-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.reference-frame-selector__option-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}

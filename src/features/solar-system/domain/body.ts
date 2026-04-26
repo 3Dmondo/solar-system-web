@@ -147,9 +147,18 @@ export type BodyEphemerisSnapshot = {
   trails: BodyEphemerisTrail[];
 };
 
+export type LoadSnapshotOptions = {
+  /**
+   * Body ID to use as the origin for trail positions.
+   * When set, trail positions are computed relative to this body at each sample time.
+   * When null/undefined, trails are in SSB-centered coordinates.
+   */
+  trailOriginBodyId?: BodyId | null;
+};
+
 export type BodyEphemerisProvider = {
   getBodyMetadata: () => BodyMetadata[];
-  loadSnapshotAtUtc: (utc: Date | string) => Promise<BodyEphemerisSnapshot>;
+  loadSnapshotAtUtc: (utc: Date | string, options?: LoadSnapshotOptions) => Promise<BodyEphemerisSnapshot>;
   prefetchAroundUtc: (utc: Date | string) => Promise<void>;
   clearCache: () => void;
 };

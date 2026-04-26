@@ -3,6 +3,7 @@ import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics'
 import {
   createEmptyResolvedBodyCatalog,
   type BodyCatalogSource,
+  type LoadCatalogOptions,
   type ResolvedBodyCatalog
 } from '../../solar-system/data/bodyStateStore'
 
@@ -12,12 +13,14 @@ const refreshLoadingDelayMs = 150
 
 export function useResolvedBodyCatalog(
   requestedUtc: Date | string,
-  source?: BodyCatalogSource
+  source?: BodyCatalogSource,
+  options?: LoadCatalogOptions
 ) {
   const normalizedRequestedUtc = useMemo(
     () => normalizeRequestedUtc(requestedUtc),
     [requestedUtc]
   )
+  const trailOriginBodyId = options?.trailOriginBodyId ?? null
   const emptyCatalog = useMemo(
     () => createEmptyResolvedBodyCatalog(normalizedRequestedUtc),
     [normalizedRequestedUtc]
@@ -62,7 +65,7 @@ export function useResolvedBodyCatalog(
       source.prefetchAroundUtc(normalizedRequestedUtc).catch(() => undefined)
 
       source
-        .loadBodyCatalogAtUtc(normalizedRequestedUtc)
+        .loadBodyCatalogAtUtc(normalizedRequestedUtc, { trailOriginBodyId })
         .then((loadedCatalog) => {
           if (isCancelled) {
             return
@@ -102,7 +105,7 @@ export function useResolvedBodyCatalog(
         window.clearTimeout(loadingTimeoutId)
       }
     }
-  }, [emptyCatalog, normalizedRequestedUtc, source])
+  }, [emptyCatalog, normalizedRequestedUtc, source, trailOriginBodyId])
 
   return {
     catalog,

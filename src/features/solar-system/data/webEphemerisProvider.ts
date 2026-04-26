@@ -1,4 +1,6 @@
 import {
+  getParentBody,
+  isSatellite,
   type BodyEphemerisProvider,
   type BodyId,
   type BodyMetadata
@@ -21,7 +23,7 @@ import {
 } from './webEphemeris'
 import { type WebDataset, type WebDatasetLoader } from './webDatasetLoader'
 import { presentationBodyMetadata } from './bodyPresentation'
-import { createChunkBodyTrailSampler } from './webEphemerisTrails'
+import { createChunkBodyTrailSampler, createRelativeTrailSampler } from './webEphemerisTrails'
 
 export type WebEphemerisProviderOptions = {
   chunkBaseUrl: string
@@ -43,32 +45,51 @@ export function createWebEphemerisProvider({
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
   const chunkCache = new Map<string, Promise<WebEphemerisChunk>>()
   const trailSamplerCache = new Map<string, ReturnType<typeof createChunkBodyTrailSampler>>()
+  const relativeTrailSamplerCache = new Map<string, ReturnType<typeof createRelativeTrailSampler>>()
   const presentationMetadataByBodyId = new Map(
     presentationMetadata.map((body) => [body.id, body])
   )
 
+  // Trail caching - trails don't need to update every frame
+  // Quantize to ~100ms epochs (movement is imperceptible at this scale)
+  const trailQuantizationSeconds = 0.1
+  let cachedTrails: ReturnType<typeof generateTrails> | undefined
+  let cachedTrailsKey = ''
+
   return {
     getBodyMetadata: () => presentationMetadata,
-    loadSnapshotAtUtc: async (utc) =>
+    loadSnapshotAtUtc: async (utc, options) =>
       measureRuntimeDebugMetricAsync('ephemerisSnapshotGeneration', async () => {
         const utcDate = normalizeUtcInput(utc)
         const dataset = await datasetLoader.load()
         const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
         const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
         const chunk = await loadChunk(dataset, chunkRange)
-        const trails = measureRuntimeDebugMetric('trailGeneration', () =>
-          dataset.manifest.bodies
-            .map((body) => {
-              const trailWindowDays =
-                presentationMetadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+        const trailOriginBodyId = options?.trailOriginBodyId ?? null
 
-              return getTrailSampler(dataset, chunk, body.bodyId).sampleAtTdbTime(
-                approximateTdbSecondsFromJ2000,
-                trailWindowDays
-              )
-            })
-            .filter((trail) => trail.positionsKm.length >= 2)
-        )
+        // Compute trail cache key - only regenerate when epoch changes
+        const trailEpoch = Math.floor(approximateTdbSecondsFromJ2000 / trailQuantizationSeconds)
+        const trailCacheKey = `${chunkRange.fileName}:${trailOriginBodyId}:${trailEpoch}`
+
+        // Reuse cached trails if key matches
+        let trails: ReturnType<typeof generateTrails>
+        if (trailCacheKey === cachedTrailsKey && cachedTrails) {
+          trails = cachedTrails
+        } else {
+          trails = measureRuntimeDebugMetric('trailGeneration', () =>
+            generateTrails(
+              dataset,
+              chunk,
+              approximateTdbSecondsFromJ2000,
+              trailOriginBodyId,
+              presentationMetadataByBodyId,
+              getTrailSampler,
+              getRelativeTrailSampler
+            )
+          )
+          cachedTrails = trails
+          cachedTrailsKey = trailCacheKey
+        }
 
         return {
           capturedAt: utcDate.toISOString(),
@@ -110,7 +131,48 @@ export function createWebEphemerisProvider({
       datasetLoader.clearCache()
       chunkCache.clear()
       trailSamplerCache.clear()
+      relativeTrailSamplerCache.clear()
+      cachedTrails = undefined
+      cachedTrailsKey = ''
     }
+  }
+
+  function generateTrails(
+    dataset: WebDataset,
+    chunk: WebEphemerisChunk,
+    approximateTdbSecondsFromJ2000: number,
+    trailOriginBodyId: BodyId | null,
+    metadataByBodyId: Map<BodyId, BodyMetadata>,
+    getAbsoluteSampler: typeof getTrailSampler,
+    getRelativeSampler: typeof getRelativeTrailSampler
+  ) {
+    return dataset.manifest.bodies
+      .map((body) => {
+        const trailWindowDays = metadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+        const bodyId = body.bodyId
+
+        // Determine the effective origin for this body's trail
+        // - If explicit origin is set (e.g., Earth-centered frame): use that
+        // - If body is a satellite: use parent as origin (so trail shows orbit around parent)
+        // - Otherwise: use absolute SSB positions
+        let effectiveOrigin: BodyId | null = trailOriginBodyId
+
+        if (effectiveOrigin === null && isSatellite(bodyId)) {
+          const parentId = getParentBody(bodyId)
+          if (parentId) {
+            effectiveOrigin = parentId
+          }
+        }
+
+        if (effectiveOrigin !== null && bodyId !== effectiveOrigin) {
+          return getRelativeSampler(dataset, chunk, bodyId, effectiveOrigin)
+            .sampleAtTdbTime(approximateTdbSecondsFromJ2000, trailWindowDays)
+        }
+
+        return getAbsoluteSampler(dataset, chunk, bodyId)
+          .sampleAtTdbTime(approximateTdbSecondsFromJ2000, trailWindowDays)
+      })
+      .filter((trail) => trail.positionsKm.length >= 2)
   }
 
   function getTrailSampler(
@@ -128,6 +190,31 @@ export function createWebEphemerisProvider({
     const nextSampler = createChunkBodyTrailSampler(dataset.manifest, chunk, bodyId)
 
     trailSamplerCache.set(cacheKey, nextSampler)
+
+    return nextSampler
+  }
+
+  function getRelativeTrailSampler(
+    dataset: WebDataset,
+    chunk: WebEphemerisChunk,
+    bodyId: BodyId,
+    originBodyId: BodyId
+  ) {
+    const cacheKey = `${chunk.range.fileName}:${bodyId}:${originBodyId}`
+    const cachedSampler = relativeTrailSamplerCache.get(cacheKey)
+
+    if (cachedSampler) {
+      return cachedSampler
+    }
+
+    const nextSampler = createRelativeTrailSampler(
+      dataset.manifest,
+      chunk,
+      bodyId,
+      originBodyId
+    )
+
+    relativeTrailSamplerCache.set(cacheKey, nextSampler)
 
     return nextSampler
   }

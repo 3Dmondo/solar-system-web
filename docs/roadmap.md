@@ -8,6 +8,7 @@
 - Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
 - Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
+- Milestone 7 reference frames and trail UX work is in progress, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, and UI selector implemented. Extended chunk prefetch is deferred.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -130,16 +131,29 @@ Delivered:
 
 ## Milestone 7: Reference Frames And Trail UX
 
-Status: Planned
+Status: In Progress
 
 Goals:
 
-- add reference-frame selection
-- support sun-centered, barycentric, and planet-centered views
-- render satellite trails correctly across frame changes
-- extend trail history further into the past for bodies such as the outer planets without forcing the Milestone 5 startup path to fetch too much data up front
-- refine trail presentation with a brighter, thicker, non-transparent look and evaluate a tail-fade treatment
-- design controls for frame, trail window, and trail style
+- add reference-frame selection with SSB and Earth-centered options
+- design extensible frame system for future body-centered views
+- keep reference frame selection independent from focus/overview modes
+- transform all body positions to selected frame origin
+- render satellite trails always parent-relative regardless of frame
+- replace trail rendering with glowing lines using additive blending
+- extend trail history further into the past via background chunk prefetch
+
+In Progress:
+
+- reference frame state and transformation layer complete
+- satellite parent-relative trail positioning complete
+- glowing trail rendering with additive blending complete
+- reference frame selector UI complete
+
+Deferred:
+
+- extended chunk prefetch for outer planet trail history
+- tail-fade treatment evaluation
 
 ## Milestone 8: Cinematic View Mode
 
