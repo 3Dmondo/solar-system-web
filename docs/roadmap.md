@@ -7,6 +7,7 @@
 - Milestone 3 interaction and readability work is complete, including the grouped `Jump to` chooser, eased focus transitions, a focused-mode overview return control, and manual closeout verification.
 - Milestone 4 data-abstraction work is complete, including separated presentation metadata, the selector-backed `bodyStateStore`, and provider-backed scene consumers.
 - Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
+- Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -100,7 +101,7 @@ Deferred to later milestones:
 
 ## Milestone 6: Body Discovery And UI Controls
 
-Status: Planned
+Status: Complete
 
 Goals:
 
@@ -108,9 +109,24 @@ Goals:
 - make indicator billboards selectable with the same interaction model as body meshes
 - handle indicator overlap when distant bodies cluster by applying a radial spread algorithm
 - add a Sun impostor with bloom post-processing for visibility from far distances, blending smoothly with the rendered sphere
-- add a collapsible layer visibility panel with toggles for trails and body indicators, designed for future cinematic-scale toggle
+- add body labels as HTML overlays that help identify bodies at a glance
+- add a collapsible layer visibility panel with toggles for trails, body indicators, and labels, designed for future cinematic-scale toggle
 - add a floating fullscreen button in the top-right corner
 - verify body discovery and selection work correctly on both desktop and mobile
+
+Delivered:
+
+- camera-facing ring indicator billboards with GLSL shader, auto-appearing below 4 px screen radius threshold
+- indicator selection via click/tap using drei Billboard raycasting
+- radial spread algorithm for overlapping indicators in screen space
+- Sun impostor billboard with radial gradient shader and smooth opacity blend based on screen-space radius
+- post-processing bloom effect via @react-three/postprocessing
+- body labels using drei Html component with click-to-focus and auto-hide when body is large on screen
+- collapsible layer visibility panel with toggles for trails, body indicators, and labels
+- floating fullscreen button with Fullscreen API and graceful degradation
+- useScreenSpaceRadius hook with batch computation support
+- useLayerVisibility state management hook
+- unit test coverage for screen-space radius and layer visibility logic
 
 ## Milestone 7: Reference Frames And Trail UX
 

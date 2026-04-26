@@ -1,0 +1,41 @@
+.fullscreen-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: rgba(9, 13, 31, 0.85);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.fullscreen-button:hover {
+  background: rgba(9, 13, 31, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.fullscreen-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.fullscreen-button:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 767px) {
+  .fullscreen-button {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}

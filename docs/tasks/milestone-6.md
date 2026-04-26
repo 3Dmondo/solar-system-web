@@ -2,7 +2,7 @@
 
 ## Status
 
-Planned
+Complete
 
 ## Goal
 
@@ -34,43 +34,54 @@ Make bodies visible and selectable at all zoom levels, add essential UI controls
 
 ### Phase 1: Body Indicator Billboards
 
-- [ ] 6.1.1 Create `BodyIndicator` component — camera-facing billboard rendered at body position with fixed screen-space diameter (8-12px), using body's presentation color and subtle glow effect.
-- [ ] 6.1.2 Create `useScreenSpaceRadius` hook — compute body's on-screen radius in pixels each frame using camera projection; cache or batch calculations for performance.
-- [ ] 6.1.3 Implement auto-threshold logic — show indicator billboard when body radius < ~4px on screen.
-- [ ] 6.1.4 Make indicators selectable — add pointer event handlers (`onPointerDown`, `onDoubleClick`) matching `PlanetBody.tsx` pattern; ensure touch target is at least 44px for accessibility.
-- [ ] 6.1.5 Create `useIndicatorSpread` hook — detect screen-space position overlaps and apply radial spread algorithm to offset overlapping indicators while maintaining selection accuracy.
-- [ ] 6.1.6 Integrate body indicators into scene — render conditionally in `ExperienceScene.tsx` based on auto-threshold and layer visibility.
+- [x] 6.1.1 Create `BodyIndicator` component — camera-facing billboard rendered at body position with fixed screen-space diameter (8-12px), using body's presentation color and subtle glow effect.
+- [x] 6.1.2 Create `useScreenSpaceRadius` hook — compute body's on-screen radius in pixels each frame using camera projection; cache or batch calculations for performance.
+- [x] 6.1.3 Implement auto-threshold logic — show indicator billboard when body radius < ~4px on screen.
+- [x] 6.1.4 Make indicators selectable — add pointer event handlers (`onPointerDown`, `onDoubleClick`) matching `PlanetBody.tsx` pattern; ensure touch target is at least 44px for accessibility.
+- [x] 6.1.5 Create `useIndicatorSpread` hook — detect screen-space position overlaps and apply radial spread algorithm to offset overlapping indicators while maintaining selection accuracy.
+- [x] 6.1.6 Integrate body indicators into scene — render conditionally in `ExperienceScene.tsx` based on auto-threshold and layer visibility.
 
 ### Phase 2: Sun Impostor And Bloom
 
-- [ ] 6.2.1 Create `SunImpostor` component — bright billboard sprite with radial gradient texture or shader for soft falloff.
-- [ ] 6.2.2 Create `PostProcessing` component — add `EffectComposer` from `@react-three/postprocessing` with selective bloom effect.
-- [ ] 6.2.3 Configure bloom for Sun impostor — use emissive threshold or layer mask; tune intensity to avoid washing out the scene.
-- [ ] 6.2.4 Implement gradual blend — full sphere when Sun radius > ~20px, full impostor when < ~4px, opacity blend between thresholds.
-- [ ] 6.2.5 Integrate Sun impostor into scene — both sphere and impostor can exist simultaneously; opacity controls which is visible.
+- [x] 6.2.1 Create `SunImpostor` component — bright billboard sprite with radial gradient texture or shader for soft falloff.
+- [x] 6.2.2 Create `PostProcessing` component — add `EffectComposer` from `@react-three/postprocessing` with selective bloom effect.
+- [x] 6.2.3 Configure bloom for Sun impostor — use emissive threshold or layer mask; tune intensity to avoid washing out the scene.
+- [x] 6.2.4 Implement gradual blend — full sphere when Sun radius > ~20px, full impostor when < ~4px, opacity blend between thresholds.
+- [x] 6.2.5 Integrate Sun impostor into scene — both sphere and impostor can exist simultaneously; opacity controls which is visible.
 
 ### Phase 3: Layer Visibility Controls
 
-- [ ] 6.3.1 Create `useLayerVisibility` hook — define layers (`trails`, `bodyIndicators`) with default visibility; design interface for future `labels` and `cinematicScale` layers.
-- [ ] 6.3.2 Create `LayerPanel` component — collapsible floating panel with toggle switches; minimal footprint, collapsed by default, mobile-friendly touch targets.
-- [ ] 6.3.3 Wire layer visibility to scene — conditionally render `<OrbitTrails>` based on `trails` layer; conditionally render indicators based on `bodyIndicators` layer.
+- [x] 6.3.1 Create `useLayerVisibility` hook — define layers (`trails`, `bodyIndicators`, `labels`) with default visibility; design interface for future `cinematicScale` layer.
+- [x] 6.3.2 Create `LayerPanel` component — collapsible floating panel with toggle switches; minimal footprint, collapsed by default, mobile-friendly touch targets.
+- [x] 6.3.3 Wire layer visibility to scene — conditionally render `<OrbitTrails>` based on `trails` layer; conditionally render indicators based on `bodyIndicators` layer; conditionally render labels based on `labels` layer.
+
+### Phase 3b: Body Labels
+
+- [x] 6.3b.1 Create `BodyLabel` component — HTML text overlay positioned above each body using drei's `Html` component with click-to-focus behavior.
+- [x] 6.3b.2 Create `BodyLabels` container — render labels for all bodies with visibility controlled by layer toggle.
+- [x] 6.3b.3 Implement auto-hide threshold — hide label when body is large on screen (> 80px radius, obvious what it is).
+- [x] 6.3b.4 Integrate labels into scene — render conditionally in `ExperienceScene.tsx` based on `labels` layer visibility.
 
 ### Phase 4: Fullscreen Button
 
-- [ ] 6.4.1 Create `FullscreenButton` component — floating button using browser Fullscreen API (`document.documentElement.requestFullscreen`); handle API availability with graceful degradation.
-- [ ] 6.4.2 Position and style — top-right floating corner; glassmorphic style consistent with existing HUD; toggle icon between enter/exit states; accessible focus states.
+- [x] 6.4.1 Create `FullscreenButton` component — floating button using browser Fullscreen API (`document.documentElement.requestFullscreen`); handle API availability with graceful degradation.
+- [x] 6.4.2 Position and style — top-right floating corner; glassmorphic style consistent with existing HUD; toggle icon between enter/exit states; accessible focus states.
 
 ### Phase 5: Integration And Testing
 
-- [ ] 6.5.1 Update `SolarSystemExperience.tsx` — orchestrate layer visibility hook, pass visibility to scene, render fullscreen button and layer panel.
-- [ ] 6.5.2 Manual desktop verification — body indicators appear at correct threshold, indicators are selectable, overlapping indicators spread correctly, Sun impostor transitions smoothly with bloom, layer toggles work, fullscreen works.
-- [ ] 6.5.3 Manual mobile verification — touch selection on indicators works, fullscreen works on supported browsers, layer panel is usable on small screens.
-- [ ] 6.5.4 Unit tests — screen-space radius calculation, indicator overlap detection and spread, layer visibility state transitions, fullscreen state handling.
+- [x] 6.5.1 Update `SolarSystemExperience.tsx` — orchestrate layer visibility hook, pass visibility to scene, render fullscreen button and layer panel.
+- [x] 6.5.2 Manual desktop verification — body indicators appear at correct threshold, indicators are selectable, overlapping indicators spread correctly, Sun impostor transitions smoothly with bloom, layer toggles work, fullscreen works.
+- [x] 6.5.3 Manual mobile verification — touch selection on indicators works, fullscreen works on supported browsers, layer panel is usable on small screens.
+- [x] 6.5.4 Unit tests — screen-space radius calculation, indicator overlap detection and spread, layer visibility state transitions, fullscreen state handling.
 
 ## Files To Create
 
 - `src/features/solar-system/components/BodyIndicator.tsx` — billboard indicator component
+- `src/features/solar-system/components/BodyIndicators.tsx` — container managing all body indicators
+- `src/features/solar-system/components/BodyLabel.tsx` — HTML text label component
+- `src/features/solar-system/components/BodyLabels.tsx` — container managing all body labels
 - `src/features/solar-system/components/SunImpostor.tsx` — bright Sun impostor
+- `src/features/solar-system/components/SunImpostorWrapper.tsx` — opacity blend wrapper
 - `src/features/solar-system/components/PostProcessing.tsx` — bloom effect wrapper
 - `src/features/solar-system/hooks/useScreenSpaceRadius.ts` — screen-space size calculation
 - `src/features/solar-system/hooks/useIndicatorSpread.ts` — overlap detection and spread algorithm

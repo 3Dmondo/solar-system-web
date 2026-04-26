@@ -1,8 +1,11 @@
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
 import { DebugFpsOverlay } from './components/DebugFpsOverlay';
+import { FullscreenButton } from './components/FullscreenButton';
+import { LayerPanel } from './components/LayerPanel';
 import { useCoarsePointer } from './hooks/useCoarsePointer';
 import { useFocusedBody } from './state/useFocusedBody';
+import { useLayerVisibility } from './state/useLayerVisibility';
 import {
   useResolvedBodyCatalog
 } from './state/useResolvedBodyCatalog';
@@ -35,6 +38,7 @@ export function SolarSystemExperience({
     startAt: simulationClockStartAt
   });
   const { catalog, status, error } = useResolvedBodyCatalog(requestedUtc, catalogSource);
+  const { visibility, toggleLayer, layerConfigs } = useLayerVisibility();
 
   return (
     <SimulationClockContext.Provider value={{ playbackRateMultiplier, isPaused, simulationInitialUtcMs }}>
@@ -43,6 +47,7 @@ export function SolarSystemExperience({
           catalog={catalog}
           focusedBodyId={focusedBodyId}
           isCoarsePointer={isCoarsePointer}
+          layerVisibility={visibility}
           onFocusBody={setFocusedBodyId}
         />
         <ExperienceHud
@@ -58,6 +63,12 @@ export function SolarSystemExperience({
           onReturnToOverview={() => setFocusedBodyId('overview')}
           onCyclePlaybackRate={cyclePlaybackRate}
           onToggleSimulationPaused={togglePaused}
+        />
+        <FullscreenButton />
+        <LayerPanel
+          visibility={visibility}
+          layerConfigs={layerConfigs}
+          onToggleLayer={toggleLayer}
         />
         {showDebugOverlay ? <DebugFpsOverlay clockStartAt={simulationClockStartAt} /> : null}
       </main>

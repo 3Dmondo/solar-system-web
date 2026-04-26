@@ -49,6 +49,8 @@
 - Focus transitions now keep the selected body centered from the start of the move by snapping the controls target to the selected body before the camera eases into its authored focused distance.
 - The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
+- The fullscreen button toggles immersive mode using the browser Fullscreen API with graceful degradation on unsupported browsers.
+- The layer panel provides toggles for orbital trails and body indicators, collapsible to save screen space.
 
 ## Data And Domain Boundaries
 
@@ -68,6 +70,10 @@
 
 ## Rendering Model
 
+- Body indicators render camera-facing ring billboards for bodies whose screen-space radius is below the visibility threshold (4 px). The indicators use a custom GLSL ring shader and smooth opacity transitions during zoom.
+- Body labels render as HTML overlays using drei's `Html` component, positioned above each body. Labels auto-hide when the body is large on screen (> 80 px radius) and are clickable to focus the body.
+- The Sun impostor is a camera-facing billboard with a radial-gradient shader that remains visible when the Sun sphere is too small to see. It blends opacity based on screen-space radius thresholds (appears below 15 px, full opacity below 3 px).
+- Post-processing uses `@react-three/postprocessing` for a subtle bloom effect on the Sun impostor.
 - Lighting uses custom world-space shaders on all planet materials. The scene has only a small ambient light for non-custom materials (e.g., orbit trails); there is no PointLight.
 - All planet materials use `meshBasicMaterial` as a base with `onBeforeCompile` shader injection to compute world-space diffuse lighting. This avoids view-matrix inconsistencies that caused incorrect lighting on mobile Chrome/Android with Three.js built-in lighting.
 - Shared shader utilities live in `src/features/solar-system/rendering/shaderChunks.ts` (GLSL snippets) and `shaderInjection.ts` (injection helpers). The `useWorldSpaceLighting` hook manages light-direction uniforms and per-frame updates.

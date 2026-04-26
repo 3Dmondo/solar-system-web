@@ -2,14 +2,19 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Vector3 } from 'three';
 import { OrbitControls } from '@react-three/drei';
+import { BodyIndicators } from '../../solar-system/components/BodyIndicators';
+import { BodyLabels } from '../../solar-system/components/BodyLabels';
 import { PlanetBody } from '../../solar-system/components/PlanetBody';
+import { PostProcessing } from '../../solar-system/components/PostProcessing';
 import { OrbitTrails } from '../../solar-system/components/OrbitTrails';
+import { SunImpostorWrapper } from '../../solar-system/components/SunImpostorWrapper';
 import { measureRuntimeDebugMetric } from '../debug/runtimeDebugMetrics';
 import { getControlDistanceRange, getControlProfile } from '../domain/controlProfile';
 import {
   getFocusViewCameraOffsetDistanceSquared,
   translateFocusView
 } from '../domain/focusTracking';
+import { type LayerVisibility } from '../state/useLayerVisibility';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import {
@@ -25,6 +30,7 @@ type ExperienceSceneProps = {
   catalog: ResolvedBodyCatalog;
   focusedBodyId: ViewTargetId;
   isCoarsePointer: boolean;
+  layerVisibility: LayerVisibility;
   onFocusBody: (bodyId: BodyId) => void;
 };
 
@@ -39,6 +45,7 @@ export function ExperienceScene({
   catalog,
   focusedBodyId,
   isCoarsePointer,
+  layerVisibility,
   onFocusBody
 }: ExperienceSceneProps) {
   const controlProfile = getControlProfile(isCoarsePointer);
@@ -48,7 +55,8 @@ export function ExperienceScene({
     isCoarsePointer
   );
   const bodies = catalog.bodies;
-  const sunPosition = bodies.find((body) => body.id === 'sun')?.position ?? [0, 0, 0];
+  const sunBody = bodies.find((body) => body.id === 'sun');
+  const sunPosition = sunBody?.position ?? [0, 0, 0];
   const earthPosition = bodies.find((body) => body.id === 'earth')?.position ?? null;
   const initialAspect = getInitialCameraAspect();
 
@@ -73,11 +81,23 @@ export function ExperienceScene({
         controlProfile={controlProfile}
         focusedBodyId={focusedBodyId}
       />
-      <OrbitTrails
-        focusedBodyId={focusedBodyId}
-        metadata={catalog.metadata}
-        trails={catalog.snapshot.trails}
-      />
+      {layerVisibility.trails ? (
+        <OrbitTrails
+          focusedBodyId={focusedBodyId}
+          metadata={catalog.metadata}
+          trails={catalog.snapshot.trails}
+        />
+      ) : null}
+      {layerVisibility.bodyIndicators ? (
+        <BodyIndicators
+          bodies={bodies}
+          onSelect={onFocusBody}
+        />
+      ) : null}
+      {layerVisibility.labels ? (
+        <BodyLabels bodies={bodies} onSelect={onFocusBody} />
+      ) : null}
+      {sunBody ? <SunImpostorWrapper sunBody={sunBody} /> : null}
 
       {bodies.map((body) => (
         <PlanetBody
@@ -89,6 +109,7 @@ export function ExperienceScene({
           tidalLockTargetPosition={body.id === 'moon' ? earthPosition : null}
         />
       ))}
+      <PostProcessing />
     </Canvas>
   );
 }
