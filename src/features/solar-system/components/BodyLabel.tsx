@@ -50,7 +50,10 @@ export function BodyLabel({
   const htmlRef = useRef<HTMLDivElement>(null);
   const isVisibleRef = useRef(true);
 
-  // Update position and visibility each frame
+  // Update position and visibility each frame.
+  // Priority -1 ensures this runs BEFORE the Html component's useFrame (priority 0),
+  // so the group position is set before Html projects it to screen space.
+  // This prevents oscillation at high simulation speeds.
   useFrame(({ camera, size }) => {
     if (!groupRef.current) return;
 
@@ -100,7 +103,7 @@ export function BodyLabel({
         htmlRef.current.style.transform = `translate(${offsetX}px, ${-totalOffsetPx - offsetY}px)`;
       }
     }
-  });
+  }, -1); // Priority -1: run before Html's useFrame
 
   const handleClick = () => {
     onSelect(body.id);
