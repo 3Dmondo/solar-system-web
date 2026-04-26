@@ -98,12 +98,12 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
       <Html
         center
         style={{
-          pointerEvents: 'auto',
+          pointerEvents: 'none',
           userSelect: 'none',
           whiteSpace: 'nowrap'
         }}
       >
-        <div ref={htmlRef} style={{ display: 'block' }}>
+        <div ref={htmlRef} style={{ display: 'block', pointerEvents: 'none' }}>
           <button
             onClick={handleClick}
             className="body-label"
@@ -119,7 +119,8 @@ export function BodyLabel({ body, onSelect, visible = true }: BodyLabelProps) {
               textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
               letterSpacing: '0.02em',
               opacity: 0.9,
-              transition: 'opacity 0.15s ease'
+              transition: 'opacity 0.15s ease',
+              pointerEvents: 'auto'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.opacity = '1';
