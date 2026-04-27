@@ -201,6 +201,35 @@ describe('webEphemerisProvider', () => {
     expect(fetchMock).toHaveBeenCalledTimes(4)
   })
 
+  it('extends trails with ready previous chunks without refetching during snapshot load', async () => {
+    const datasetLoader = createDatasetLoaderStub(dataset)
+    const fetchMock = createChunkFetchMock()
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock
+    })
+    const requestUtc = new Date(Date.parse(approximateJ2000UtcIso) + 216000 * 1000)
+
+    await provider.prefetchAroundUtc(requestUtc)
+    const snapshot = await provider.loadSnapshotAtUtc(requestUtc)
+
+    expect(snapshot.trails).toEqual([
+      {
+        id: 'earth',
+        positionsKm: [
+          [0, 0, 0],
+          [43200, 0, 0],
+          [86400, 0, 0],
+          [129600, 0, 0],
+          [172800, 0, 0],
+          [216000, 0, 0]
+        ]
+      }
+    ])
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
   it('clears chunk and dataset caches together', async () => {
     const datasetLoader = createDatasetLoaderStub(dataset)
     const fetchMock = createChunkFetchMock()

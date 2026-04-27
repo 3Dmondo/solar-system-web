@@ -21,6 +21,11 @@ export type BodyMetadata = {
   material?: BodyMaterial;
   radius: number;
   defaultTrailWindowDays?: number;
+  /**
+   * Multiplier applied to the source ephemeris cadence when preparing trail points.
+   * A value of 2 samples the trail twice as often as the source ephemeris body cadence.
+   */
+  trailSampleRateMultiplier?: number;
   focusOffset: [number, number, number];
   surfaceRotation?: [number, number, number];
   surfaceRotationSpeed?: number;

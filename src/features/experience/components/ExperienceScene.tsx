@@ -88,7 +88,6 @@ export function ExperienceScene({
       />
       {layerVisibility.trails ? (
         <OrbitTrails
-          focusedBodyId={focusedBodyId}
           metadata={catalog.metadata}
           trails={catalog.snapshot.trails}
         />

@@ -85,12 +85,6 @@ export function interpolateChunkBodyAtTdbTime(
   bodyId: BodyId,
   tdbSecondsFromJ2000: number
 ): WebEphemerisInterpolatedState {
-  if (!isTdbTimeWithinChunkRange(manifest, chunk.range, tdbSecondsFromJ2000)) {
-    throw new RangeError(
-      `tdbSecondsFromJ2000 ${tdbSecondsFromJ2000} is outside chunk ${chunk.range.fileName}`
-    )
-  }
-
   const manifestBody = getManifestBodyById(manifest, bodyId)
 
   if (!manifestBody) {
@@ -112,6 +106,12 @@ export function interpolateChunkBodyAtTdbTime(
   const firstSampleTime = getChunkBodySampleTime(chunk, manifestBody, 0)
   const lastSampleIndex = sampleCount - 1
   const lastSampleTime = getChunkBodySampleTime(chunk, manifestBody, lastSampleIndex)
+
+  if (tdbSecondsFromJ2000 < firstSampleTime || tdbSecondsFromJ2000 > lastSampleTime) {
+    throw new RangeError(
+      `tdbSecondsFromJ2000 ${tdbSecondsFromJ2000} is outside chunk ${chunk.range.fileName}`
+    )
+  }
 
   if (tdbSecondsFromJ2000 <= firstSampleTime) {
     return getChunkBodySampleAt(chunkBody, 0)

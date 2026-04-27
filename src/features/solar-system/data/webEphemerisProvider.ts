@@ -46,6 +46,7 @@ export function createWebEphemerisProvider({
 }: WebEphemerisProviderOptions): BodyEphemerisProvider {
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
   const chunkCache = new Map<string, Promise<WebEphemerisChunk>>()
+  const loadedChunkCache = new Map<string, WebEphemerisChunk>()
   const trailSamplerCache = new Map<string, ReturnType<typeof createChunkBodyTrailSampler>>()
   const relativeTrailSamplerCache = new Map<string, ReturnType<typeof createRelativeTrailSampler>>()
   const presentationMetadataByBodyId = new Map(
@@ -67,11 +68,20 @@ export function createWebEphemerisProvider({
         const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
         const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
         const chunk = await loadChunk(dataset, chunkRange)
+        const trailChunks = getReadyTrailChunks(
+          dataset,
+          chunk,
+          approximateTdbSecondsFromJ2000,
+          getMaxTrailWindowDays(presentationMetadataByBodyId)
+        )
         const trailOriginBodyId = options?.trailOriginBodyId ?? null
 
         // Compute trail cache key - only regenerate when epoch changes
         const trailEpoch = Math.floor(approximateTdbSecondsFromJ2000 / trailQuantizationSeconds)
-        const trailCacheKey = `${chunkRange.fileName}:${trailOriginBodyId}:${trailEpoch}`
+        const trailChunkCacheKey = trailChunks
+          .map((trailChunk) => trailChunk.range.fileName)
+          .join('+')
+        const trailCacheKey = `${trailChunkCacheKey}:${trailOriginBodyId}:${trailEpoch}`
 
         // Reuse cached trails if key matches
         let trails: ReturnType<typeof generateTrails>
@@ -81,7 +91,7 @@ export function createWebEphemerisProvider({
           trails = measureRuntimeDebugMetric('trailGeneration', () =>
             generateTrails(
               dataset,
-              chunk,
+              trailChunks,
               approximateTdbSecondsFromJ2000,
               trailOriginBodyId,
               presentationMetadataByBodyId,
@@ -138,6 +148,7 @@ export function createWebEphemerisProvider({
     clearCache: () => {
       datasetLoader.clearCache()
       chunkCache.clear()
+      loadedChunkCache.clear()
       trailSamplerCache.clear()
       relativeTrailSamplerCache.clear()
       cachedTrails = undefined
@@ -147,7 +158,7 @@ export function createWebEphemerisProvider({
 
   function generateTrails(
     dataset: WebDataset,
-    chunk: WebEphemerisChunk,
+    chunks: WebEphemerisChunk[],
     approximateTdbSecondsFromJ2000: number,
     trailOriginBodyId: BodyId | null,
     metadataByBodyId: Map<BodyId, BodyMetadata>,
@@ -157,6 +168,8 @@ export function createWebEphemerisProvider({
     return dataset.manifest.bodies
       .map((body) => {
         const trailWindowDays = metadataByBodyId.get(body.bodyId)?.defaultTrailWindowDays ?? 0
+        const trailSampleRateMultiplier =
+          metadataByBodyId.get(body.bodyId)?.trailSampleRateMultiplier ?? 1
         const bodyId = body.bodyId
 
         // Determine the effective origin for this body's trail
@@ -173,12 +186,35 @@ export function createWebEphemerisProvider({
         }
 
         if (effectiveOrigin !== null && bodyId !== effectiveOrigin) {
-          return getRelativeSampler(dataset, chunk, bodyId, effectiveOrigin)
-            .sampleAtTdbTime(approximateTdbSecondsFromJ2000, trailWindowDays)
+          const originBodyId = effectiveOrigin
+
+          return sampleTrailAcrossChunks(
+            bodyId,
+            chunks,
+            approximateTdbSecondsFromJ2000,
+            trailWindowDays,
+            (chunk) => getRelativeSampler(
+              dataset,
+              chunk,
+              bodyId,
+              originBodyId,
+              trailSampleRateMultiplier
+            )
+          )
         }
 
-        return getAbsoluteSampler(dataset, chunk, bodyId)
-          .sampleAtTdbTime(approximateTdbSecondsFromJ2000, trailWindowDays)
+        return sampleTrailAcrossChunks(
+          bodyId,
+          chunks,
+          approximateTdbSecondsFromJ2000,
+          trailWindowDays,
+          (chunk) => getAbsoluteSampler(
+            dataset,
+            chunk,
+            bodyId,
+            trailSampleRateMultiplier
+          )
+        )
       })
       .filter((trail) => trail.positionsKm.length >= 2)
   }
@@ -186,16 +222,19 @@ export function createWebEphemerisProvider({
   function getTrailSampler(
     dataset: WebDataset,
     chunk: WebEphemerisChunk,
-    bodyId: BodyId
+    bodyId: BodyId,
+    sampleRateMultiplier: number
   ) {
-    const cacheKey = `${chunk.range.fileName}:${bodyId}`
+    const cacheKey = `${chunk.range.fileName}:${bodyId}:${sampleRateMultiplier}`
     const cachedSampler = trailSamplerCache.get(cacheKey)
 
     if (cachedSampler) {
       return cachedSampler
     }
 
-    const nextSampler = createChunkBodyTrailSampler(dataset.manifest, chunk, bodyId)
+    const nextSampler = createChunkBodyTrailSampler(dataset.manifest, chunk, bodyId, {
+      sampleRateMultiplier
+    })
 
     trailSamplerCache.set(cacheKey, nextSampler)
 
@@ -206,9 +245,10 @@ export function createWebEphemerisProvider({
     dataset: WebDataset,
     chunk: WebEphemerisChunk,
     bodyId: BodyId,
-    originBodyId: BodyId
+    originBodyId: BodyId,
+    sampleRateMultiplier: number
   ) {
-    const cacheKey = `${chunk.range.fileName}:${bodyId}:${originBodyId}`
+    const cacheKey = `${chunk.range.fileName}:${bodyId}:${originBodyId}:${sampleRateMultiplier}`
     const cachedSampler = relativeTrailSamplerCache.get(cacheKey)
 
     if (cachedSampler) {
@@ -219,7 +259,8 @@ export function createWebEphemerisProvider({
       dataset.manifest,
       chunk,
       bodyId,
-      originBodyId
+      originBodyId,
+      { sampleRateMultiplier }
     )
 
     relativeTrailSamplerCache.set(cacheKey, nextSampler)
@@ -240,9 +281,16 @@ export function createWebEphemerisProvider({
       `${normalizedChunkBaseUrl}/${range.fileName}`,
       fetchImpl
     )
-      .then((rawChunk) => parseWebEphemerisChunk(rawChunk, dataset.manifest))
+      .then((rawChunk) => {
+        const parsedChunk = parseWebEphemerisChunk(rawChunk, dataset.manifest)
+        if (chunkCache.get(cacheKey) === chunkPromise) {
+          loadedChunkCache.set(cacheKey, parsedChunk)
+        }
+        return parsedChunk
+      })
       .catch((error) => {
         chunkCache.delete(cacheKey)
+        loadedChunkCache.delete(cacheKey)
         throw error
       })
 
@@ -266,7 +314,36 @@ export function createWebEphemerisProvider({
       }
 
       chunkCache.delete(oldestCacheKey)
+      loadedChunkCache.delete(oldestCacheKey)
     }
+  }
+
+  function getReadyTrailChunks(
+    dataset: WebDataset,
+    activeChunk: WebEphemerisChunk,
+    targetTdbSecondsFromJ2000: number,
+    maxTrailWindowDays: number
+  ) {
+    const earliestTrailTdbSecondsFromJ2000 =
+      targetTdbSecondsFromJ2000 - maxTrailWindowDays * secondsPerDay
+    const chunks = [activeChunk]
+    let previousRange = getPreviousChunkRange(dataset.manifest, activeChunk.range)
+
+    while (
+      previousRange &&
+      previousRange.endTdbSecondsFromJ2000 > earliestTrailTdbSecondsFromJ2000
+    ) {
+      const previousChunk = loadedChunkCache.get(previousRange.fileName)
+
+      if (!previousChunk) {
+        break
+      }
+
+      chunks.unshift(previousChunk)
+      previousRange = getPreviousChunkRange(dataset.manifest, previousRange)
+    }
+
+    return chunks
   }
 }
 
@@ -306,4 +383,59 @@ function normalizeUtcInput(utc: Date | string) {
   }
 
   return utcDate
+}
+
+const secondsPerDay = 86_400
+
+function sampleTrailAcrossChunks(
+  bodyId: BodyId,
+  chunks: WebEphemerisChunk[],
+  targetTdbSecondsFromJ2000: number,
+  trailWindowDays: number,
+  createSampler: (chunk: WebEphemerisChunk) => ReturnType<typeof createChunkBodyTrailSampler>
+) {
+  const trailStartTdbSecondsFromJ2000 =
+    targetTdbSecondsFromJ2000 - trailWindowDays * secondsPerDay
+  const positionsKm: Array<[number, number, number]> = []
+
+  chunks.forEach((chunk) => {
+    const segmentStartTdbSecondsFromJ2000 = Math.max(
+      chunk.range.startTdbSecondsFromJ2000,
+      trailStartTdbSecondsFromJ2000
+    )
+    const segmentEndTdbSecondsFromJ2000 = Math.min(
+      chunk.range.endTdbSecondsFromJ2000,
+      targetTdbSecondsFromJ2000
+    )
+
+    if (segmentStartTdbSecondsFromJ2000 >= segmentEndTdbSecondsFromJ2000) {
+      return
+    }
+
+    const segmentWindowDays =
+      (segmentEndTdbSecondsFromJ2000 - segmentStartTdbSecondsFromJ2000) / secondsPerDay
+    const segmentTrail = createSampler(chunk)
+      .sampleAtTdbTime(segmentEndTdbSecondsFromJ2000, segmentWindowDays)
+    const segmentPositionsKm =
+      positionsKm.length > 0 && segmentTrail.positionsKm.length > 0
+        ? segmentTrail.positionsKm.slice(1)
+        : segmentTrail.positionsKm
+
+    positionsKm.push(...segmentPositionsKm)
+  })
+
+  return {
+    id: bodyId,
+    positionsKm
+  }
+}
+
+function getMaxTrailWindowDays(metadataByBodyId: Map<BodyId, BodyMetadata>) {
+  return Math.max(
+    0,
+    ...Array.from(
+      metadataByBodyId.values(),
+      (metadata) => metadata.defaultTrailWindowDays ?? 0
+    )
+  )
 }

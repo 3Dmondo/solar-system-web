@@ -16,6 +16,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#9f9183',
     radius: 0.25,
     defaultTrailWindowDays: 120,
+    trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.12, 1.8]
   },
   {
@@ -25,6 +26,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'venus',
     radius: 0.52,
     defaultTrailWindowDays: 240,
+    trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.18, 2.6]
   },
   {
@@ -34,6 +36,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     material: 'earth',
     radius: 0.72,
     defaultTrailWindowDays: 365,
+    trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.25, 3.2]
   },
   {
@@ -42,7 +45,8 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#b0b4be',
     material: 'moon',
     radius: 0.22,
-    defaultTrailWindowDays: 35,
+    defaultTrailWindowDays: 27,
+    trailSampleRateMultiplier: 5,
     focusOffset: [0, 0.12, 1.7]
   },
   {
@@ -51,6 +55,7 @@ export const presentationBodyMetadata: BodyMetadata[] = [
     color: '#bf6c4e',
     radius: 0.38,
     defaultTrailWindowDays: 720,
+    trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.14, 2.2]
   },
   {

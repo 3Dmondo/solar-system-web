@@ -86,7 +86,7 @@
 - `SkyLayer` keeps stars and constellations centered on the camera and scales the shared sky shell each frame from the active camera near/far clip planes so both layers remain visible across overview and focused zoom ranges.
 - Star and constellation vertex data remains static after upload; only the shared sky anchor transform is updated each frame.
 - The planned sky evolution still includes better visual tuning, possible star brightness controls, proper motion animation, star name labels, and constellation name overlays.
-- Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
+- Orbital trails now render interpolated history from the active loaded chunk plus any contiguous ready previous chunks, clipped by body-specific default trail windows, resampled with per-body cadence multipliers from presentation metadata, and styled as constant-width opaque screen-space ribbons so sampled point joins do not create additive hot spots.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.
 - Every body mesh now rotates around its physical north-pole axis at its physical sidereal rate via a quaternion composed of a pole-alignment quaternion and a per-frame spin quaternion. Rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)` so it stays consistent with the simulation clock.
 - The Moon is tidally locked: its spin angle is derived each frame from the Moon-to-Earth direction projected onto its equatorial plane, keeping the same face toward Earth at all simulation speeds.

@@ -86,6 +86,27 @@ describe('webEphemerisTrails', () => {
     })
   })
 
+  it('resamples interior trail points with the configured cadence multiplier', () => {
+    expect(
+      sampleChunkBodyTrailAtTdbTime(
+        manifest,
+        chunk,
+        'earth',
+        108000,
+        1,
+        { sampleRateMultiplier: 2 }
+      )
+    ).toEqual({
+      id: 'earth',
+      positionsKm: [
+        [21600, 0, 0],
+        [43200, 0, 0],
+        [86400, 0, 0],
+        [108000, 0, 0]
+      ]
+    })
+  })
+
   it('reuses the stable interior trail segment while the moving endpoints continue to update', () => {
     const sampler = createChunkBodyTrailSampler(manifest, chunk, 'earth')
     const firstTrail = sampler.sampleAtTdbTime(129600, 1)

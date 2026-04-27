@@ -1,9 +1,7 @@
 import { type BodyEphemerisTrail, type BodyId } from '../domain/body'
 import {
   getChunkBodyById,
-  getChunkBodySampleAt,
   getChunkBodySampleCount,
-  getChunkBodySampleTime,
   getManifestBodyById,
   type WebEphemerisChunk,
   type WebEphemerisManifest
@@ -17,6 +15,10 @@ export type ChunkBodyTrailSampler = {
     targetTdbSecondsFromJ2000: number,
     trailWindowDays: number
   ) => BodyEphemerisTrail
+}
+
+export type TrailSamplerOptions = {
+  sampleRateMultiplier?: number
 }
 
 export type RelativeTrailSamplerOptions = {
@@ -42,7 +44,8 @@ export function createRelativeTrailSampler(
   manifest: WebEphemerisManifest,
   chunk: WebEphemerisChunk,
   bodyId: BodyId,
-  originBodyId: BodyId
+  originBodyId: BodyId,
+  options: TrailSamplerOptions = {}
 ): ChunkBodyTrailSampler {
   const manifestBody = getManifestBodyById(manifest, bodyId)
   const manifestOrigin = getManifestBodyById(manifest, originBodyId)
@@ -75,29 +78,16 @@ export function createRelativeTrailSampler(
     }
   }
 
-  // Pre-compute sample times for the body
-  const sampleTimes = Array.from(
-    { length: sampleCount },
-    (_, i) => getChunkBodySampleTime(chunk, manifestBody, i)
-  )
+  if (originSampleCount === 0) {
+    return {
+      sampleAtTdbTime: () => ({ id: bodyId, positionsKm: [] })
+    }
+  }
 
-  // Pre-compute relative positions at each sample time (body - origin)
-  // If bodies have same sample count, use direct indexing; otherwise interpolate origin
-  const bodiesHaveSameSampleCount = sampleCount === originSampleCount
-  const sampleRelativePositionsKm = Array.from({ length: sampleCount }, (_, i) => {
-    const bodyPos = getChunkBodySampleAt(chunkBody, i).positionKm
-    // If sample counts match, direct indexing works; otherwise interpolate origin at body's sample time
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const sampleTime = sampleTimes[i]!
-    const originPos = bodiesHaveSameSampleCount
-      ? getChunkBodySampleAt(chunkOrigin, i).positionKm
-      : interpolateChunkBodyAtTdbTime(manifest, chunk, originBodyId, sampleTime).positionKm
-    return [
-      bodyPos[0] - originPos[0],
-      bodyPos[1] - originPos[1],
-      bodyPos[2] - originPos[2]
-    ] as [number, number, number]
-  })
+  const resampleCadenceSeconds = getTrailResampleCadenceSeconds(
+    manifestBody.sampleDays,
+    options.sampleRateMultiplier
+  )
 
   // Cache for interior positions by range key
   const interiorPositionsByRangeKey = new Map<string, Array<[number, number, number]>>()
@@ -133,17 +123,34 @@ export function createRelativeTrailSampler(
       ])
 
       // Cached interior positions
-      const interiorStartIndex = getFirstSampleIndexAfterTime(
-        sampleTimes, trailStartTdbSecondsFromJ2000
+      const interiorStartIndex = getFirstCadenceIndexAfterTime(
+        chunk.range.startTdbSecondsFromJ2000,
+        resampleCadenceSeconds,
+        trailStartTdbSecondsFromJ2000
       )
-      const interiorEndIndex = getFirstSampleIndexAtOrAfterTime(
-        sampleTimes, targetTdbSecondsFromJ2000
+      const interiorEndIndex = getFirstCadenceIndexAtOrAfterTime(
+        chunk.range.startTdbSecondsFromJ2000,
+        resampleCadenceSeconds,
+        targetTdbSecondsFromJ2000
       )
       const interiorPositionsKm = getCachedInteriorPositions(
         interiorPositionsByRangeKey,
-        sampleRelativePositionsKm,
         interiorStartIndex,
-        interiorEndIndex
+        interiorEndIndex,
+        (interiorIndex) => {
+          const sampleTime =
+            chunk.range.startTdbSecondsFromJ2000 + interiorIndex * resampleCadenceSeconds
+          const body = interpolateChunkBodyAtTdbTime(manifest, chunk, bodyId, sampleTime)
+          const origin = interpolateChunkBodyAtTdbTime(
+            manifest, chunk, originBodyId, sampleTime
+          )
+
+          return [
+            body.positionKm[0] - origin.positionKm[0],
+            body.positionKm[1] - origin.positionKm[1],
+            body.positionKm[2] - origin.positionKm[2]
+          ]
+        }
       )
 
       if (interiorPositionsKm.length > 0) {
@@ -201,9 +208,10 @@ export function sampleChunkBodyTrailAtTdbTime(
   chunk: WebEphemerisChunk,
   bodyId: BodyId,
   targetTdbSecondsFromJ2000: number,
-  trailWindowDays: number
+  trailWindowDays: number,
+  options: TrailSamplerOptions = {}
 ): BodyEphemerisTrail {
-  return createChunkBodyTrailSampler(manifest, chunk, bodyId).sampleAtTdbTime(
+  return createChunkBodyTrailSampler(manifest, chunk, bodyId, options).sampleAtTdbTime(
     targetTdbSecondsFromJ2000,
     trailWindowDays
   )
@@ -212,7 +220,8 @@ export function sampleChunkBodyTrailAtTdbTime(
 export function createChunkBodyTrailSampler(
   manifest: WebEphemerisManifest,
   chunk: WebEphemerisChunk,
-  bodyId: BodyId
+  bodyId: BodyId,
+  options: TrailSamplerOptions = {}
 ): ChunkBodyTrailSampler {
   const manifestBody = getManifestBodyById(manifest, bodyId)
 
@@ -237,18 +246,11 @@ export function createChunkBodyTrailSampler(
     }
   }
 
-  const sampleTimes = Array.from(
-    { length: sampleCount },
-    (_, sampleIndex) => getChunkBodySampleTime(chunk, manifestBody, sampleIndex)
-  )
-  const samplePositionsKm = Array.from(
-    { length: sampleCount },
-    (_, sampleIndex) => getChunkBodySampleAt(chunkBody, sampleIndex).positionKm
+  const resampleCadenceSeconds = getTrailResampleCadenceSeconds(
+    manifestBody.sampleDays,
+    options.sampleRateMultiplier
   )
   const interiorPositionsByRangeKey = new Map<string, Array<[number, number, number]>>()
-  const firstSampleTime = sampleTimes[0] ?? chunk.range.startTdbSecondsFromJ2000
-  const firstSamplePositionKm =
-    samplePositionsKm[0] ?? ([0, 0, 0] as [number, number, number])
 
   return {
     sampleAtTdbTime: (targetTdbSecondsFromJ2000, trailWindowDays) => {
@@ -265,33 +267,38 @@ export function createChunkBodyTrailSampler(
       const positionsKm: Array<[number, number, number]> = []
 
       if (trailStartTdbSecondsFromJ2000 < targetTdbSecondsFromJ2000) {
-        if (trailStartTdbSecondsFromJ2000 === firstSampleTime) {
-          positionsKm.push(firstSamplePositionKm)
-        } else {
-          positionsKm.push(
-            interpolateChunkBodyAtTdbTime(
-              manifest,
-              chunk,
-              bodyId,
-              trailStartTdbSecondsFromJ2000
-            ).positionKm
-          )
-        }
+        positionsKm.push(
+          interpolateChunkBodyAtTdbTime(
+            manifest,
+            chunk,
+            bodyId,
+            trailStartTdbSecondsFromJ2000
+          ).positionKm
+        )
       }
 
-      const interiorStartIndex = getFirstSampleIndexAfterTime(
-        sampleTimes,
+      const interiorStartIndex = getFirstCadenceIndexAfterTime(
+        chunk.range.startTdbSecondsFromJ2000,
+        resampleCadenceSeconds,
         trailStartTdbSecondsFromJ2000
       )
-      const interiorEndIndex = getFirstSampleIndexAtOrAfterTime(
-        sampleTimes,
+      const interiorEndIndex = getFirstCadenceIndexAtOrAfterTime(
+        chunk.range.startTdbSecondsFromJ2000,
+        resampleCadenceSeconds,
         targetTdbSecondsFromJ2000
       )
       const interiorPositionsKm = getCachedInteriorPositions(
         interiorPositionsByRangeKey,
-        samplePositionsKm,
         interiorStartIndex,
-        interiorEndIndex
+        interiorEndIndex,
+        (interiorIndex) =>
+          interpolateChunkBodyAtTdbTime(
+            manifest,
+            chunk,
+            bodyId,
+            chunk.range.startTdbSecondsFromJ2000
+              + interiorIndex * resampleCadenceSeconds
+          ).positionKm
       )
 
       if (interiorPositionsKm.length > 0) {
@@ -313,9 +320,9 @@ export function createChunkBodyTrailSampler(
 
 function getCachedInteriorPositions(
   interiorPositionsByRangeKey: Map<string, Array<[number, number, number]>>,
-  samplePositionsKm: Array<[number, number, number]>,
   startIndex: number,
-  endIndex: number
+  endIndex: number,
+  samplePositionAtIndex: (index: number) => [number, number, number]
 ) {
   if (startIndex >= endIndex) {
     return []
@@ -328,43 +335,45 @@ function getCachedInteriorPositions(
     return cachedPositions
   }
 
-  const nextPositions = samplePositionsKm.slice(startIndex, endIndex)
+  const nextPositions = Array.from(
+    { length: endIndex - startIndex },
+    (_, offset) => samplePositionAtIndex(startIndex + offset)
+  )
 
   interiorPositionsByRangeKey.set(rangeKey, nextPositions)
 
   return nextPositions
 }
 
-function getFirstSampleIndexAfterTime(sampleTimes: number[], time: number) {
-  let low = 0
-  let high = sampleTimes.length
-
-  while (low < high) {
-    const middle = Math.floor((low + high) / 2)
-
-    if ((sampleTimes[middle] ?? Number.POSITIVE_INFINITY) <= time) {
-      low = middle + 1
-    } else {
-      high = middle
-    }
+function getTrailResampleCadenceSeconds(
+  sourceSampleDays: number,
+  sampleRateMultiplier = 1
+) {
+  if (!Number.isFinite(sampleRateMultiplier) || sampleRateMultiplier <= 0) {
+    throw new Error('trail sampleRateMultiplier must be a finite number greater than zero')
   }
 
-  return low
+  return sourceSampleDays * secondsPerDay / sampleRateMultiplier
 }
 
-function getFirstSampleIndexAtOrAfterTime(sampleTimes: number[], time: number) {
-  let low = 0
-  let high = sampleTimes.length
+function getFirstCadenceIndexAfterTime(
+  rangeStartTdbSecondsFromJ2000: number,
+  cadenceSeconds: number,
+  time: number
+) {
+  return Math.max(
+    0,
+    Math.floor((time - rangeStartTdbSecondsFromJ2000) / cadenceSeconds) + 1
+  )
+}
 
-  while (low < high) {
-    const middle = Math.floor((low + high) / 2)
-
-    if ((sampleTimes[middle] ?? Number.POSITIVE_INFINITY) < time) {
-      low = middle + 1
-    } else {
-      high = middle
-    }
-  }
-
-  return low
+function getFirstCadenceIndexAtOrAfterTime(
+  rangeStartTdbSecondsFromJ2000: number,
+  cadenceSeconds: number,
+  time: number
+) {
+  return Math.max(
+    0,
+    Math.ceil((time - rangeStartTdbSecondsFromJ2000) / cadenceSeconds)
+  )
 }
