@@ -131,8 +131,8 @@ export function StarField({
     const mat = new ShaderMaterial({
       uniforms: {
         uBrightnessScale: { value: brightnessScale },
-        uMinSize: { value: 1.5 },
-        uMaxSize: { value: 5.0 }
+        uMinSize: { value: 3.0 },
+        uMaxSize: { value: 15.0 }
       },
       vertexShader: starVertexShader,
       fragmentShader: starFragmentShader,
