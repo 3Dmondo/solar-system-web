@@ -72,12 +72,13 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 
 - The decorative sky texture has been replaced with a real star field sourced from HYG v4.2.
 - Stars render from `public/stars/catalog.json` and constellations render from a curated `public/stars/constellations.json` dataset.
-- The sky layer is camera-centered, with star and constellation positions precomputed once and only the sky transform updated each frame.
-- The current catalog contains 8,920 stars and 33 curated constellation figures.
+- The sky layer now uses a shared camera-centered anchor with clip-plane-aware shell scaling, while star and constellation positions remain precomputed.
+- The current catalog contains 8,920 stars and 34 curated constellation figures.
 
 ## Remaining Polish
 
 - Refine star brightness and point-size tuning for better readability in overview mode.
+- Continue validating sky-layer stability during fast focus transitions and wide overview zoom ranges.
 - Continue validating constellation stick figures against recognizable sky patterns.
 - Add a user-facing star brightness control if the default tuning still feels too faint or too aggressive.
 - Re-run manual performance checks with constellations enabled on lower-powered devices.
@@ -99,6 +100,9 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 - `src/features/solar-system/domain/starCatalog.ts`
 - `src/features/experience/components/StarField.tsx`
 - `src/features/experience/components/ConstellationLines.tsx`
+- `src/features/experience/components/SkyLayer.tsx`
+- `src/features/experience/domain/skyLayer.ts`
+- `src/features/experience/domain/skyLayer.test.ts`
 
 ### Modified
 

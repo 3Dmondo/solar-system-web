@@ -79,10 +79,11 @@
 - Shared shader utilities live in `src/features/solar-system/rendering/shaderChunks.ts` (GLSL snippets) and `shaderInjection.ts` (injection helpers). The `useWorldSpaceLighting` hook manages light-direction uniforms and per-frame updates.
 - Bump mapping (Moon) and normal mapping (Earth) use fixed UV offsets instead of screen-space derivatives for consistent results at any zoom level.
 - Ring shadows (Saturn) and cloud layers (Earth, Venus) apply shadow/lighting only to the diffuse component, naturally blending at the terminator without artificial cutoffs.
-- `StarField` renders real stars from the HYG v4.2 catalog as `Three.Points` on a camera-centered sphere with a fixed radius of 50,000 scene units. The shader uses spectral-type color tinting and the current linear brightness and point-size tuning. The catalog contains 8,920 naked-eye stars loaded from `public/stars/catalog.json`.
-- `ConstellationLines` renders a single precomputed `THREE.LineSegments` geometry on the same camera-centered sphere. The current `public/stars/constellations.json` dataset contains 33 manually curated constellation figures.
+- `StarField` renders real stars from the HYG v4.2 catalog as `Three.Points` under a shared camera-centered sky anchor. The shader uses spectral-type color tinting and the current linear brightness and point-size tuning. The catalog contains 8,920 naked-eye stars loaded from `public/stars/catalog.json`.
+- `ConstellationLines` renders a single precomputed `THREE.LineSegments` geometry under the same shared sky anchor. The current `public/stars/constellations.json` dataset contains 34 curated constellation figures.
 - Star and constellation coordinates use J2000 equatorial RA/Dec transformed to the ecliptic-aligned render frame via `raHoursDecDegreesToRenderFrame` in `starCatalog.ts`, then uploaded once and reused across frames.
-- The sky layer only updates its transform to follow the camera; star and constellation vertex data is not recomputed each frame.
+- `SkyLayer` keeps stars and constellations centered on the camera and scales the shared sky shell each frame from the active camera near/far clip planes so both layers remain visible across overview and focused zoom ranges.
+- Star and constellation vertex data remains static after upload; only the shared sky anchor transform is updated each frame.
 - The planned sky evolution still includes better visual tuning, possible star brightness controls, proper motion animation, star name labels, and constellation name overlays.
 - Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.

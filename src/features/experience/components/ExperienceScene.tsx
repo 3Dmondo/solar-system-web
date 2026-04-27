@@ -25,6 +25,7 @@ import {
   getFocusTransitionProfile
 } from '../../solar-system/domain/focus';
 import { ConstellationLines } from './ConstellationLines';
+import { SkyLayer } from './SkyLayer';
 import { StarField } from './StarField';
 
 type ExperienceSceneProps = {
@@ -72,8 +73,10 @@ export function ExperienceScene({
       shadows
     >
       <color attach="background" args={['#000000']} />
-      <StarField visible={layerVisibility.stars} />
-      <ConstellationLines visible={layerVisibility.constellations} />
+      <SkyLayer>
+        <ConstellationLines visible={layerVisibility.constellations} />
+        <StarField visible={layerVisibility.stars} />
+      </SkyLayer>
       {/* Ambient light for non-custom-shader materials (e.g., orbit trails).
           Custom planet shaders compute their own world-space lighting. */}
       <ambientLight intensity={0.08} />

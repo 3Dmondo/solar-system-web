@@ -1,10 +1,8 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AdditiveBlending,
   BufferAttribute,
   BufferGeometry,
-  Points,
   ShaderMaterial
 } from 'three';
 import {
@@ -14,10 +12,6 @@ import {
   type Star,
   type StarCatalog
 } from '../../solar-system/domain/starCatalog';
-
-// Star sphere radius - small enough to stay inside camera frustum at all zoom levels,
-// large enough to appear behind all scene objects. Scene bodies are at ~6000 max distance.
-const STAR_SPHERE_RADIUS = 50_000;
 
 // Star shader - renders magnitude-based size and brightness with spectral colors
 const starVertexShader = /* glsl */ `
@@ -91,8 +85,6 @@ export function StarField({
   visible = true,
   brightnessScale = 1.0
 }: StarFieldProps) {
-  const pointsRef = useRef<Points>(null);
-  const { camera } = useThree();
   const [catalog, setCatalog] = useState<StarCatalog | null>(null);
 
   // Load star catalog on mount
@@ -116,10 +108,10 @@ export function StarField({
       // Convert RA (hours) / Dec (degrees) to render frame unit vector
       const [x, y, z] = raHoursDecDegreesToRenderFrame(star.ra, star.dec);
 
-      // Scale to star sphere radius (relative to camera position)
-      positions[i * 3] = x * STAR_SPHERE_RADIUS;
-      positions[i * 3 + 1] = y * STAR_SPHERE_RADIUS;
-      positions[i * 3 + 2] = z * STAR_SPHERE_RADIUS;
+      // Keep local positions unit-length; SkyLayer applies dynamic shell scale.
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
 
       // Store magnitude for shader
       magnitudes[i] = star.mag;
@@ -159,30 +151,12 @@ export function StarField({
     }
   }, [material, brightnessScale]);
 
-  // Disable automatic matrix updates - we'll do it manually to stay in sync with camera
-  useEffect(() => {
-    if (pointsRef.current) {
-      pointsRef.current.matrixAutoUpdate = false;
-    }
-  }, [geometry]);
-
-  // Keep star field centered on camera - update matrix directly before render
-  useFrame(() => {
-    if (pointsRef.current) {
-      const p = pointsRef.current;
-      p.position.copy(camera.position);
-      p.updateMatrix();
-      p.updateMatrixWorld();
-    }
-  });
-
   if (!visible || !geometry || !material) {
     return null;
   }
 
   return (
     <points
-      ref={pointsRef}
       geometry={geometry}
       material={material}
       frustumCulled={false}

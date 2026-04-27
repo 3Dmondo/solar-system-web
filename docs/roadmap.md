@@ -188,7 +188,8 @@ Delivered:
 - HYG v4.2 star catalog filtered to naked-eye stars (magnitude ≤ 6.5), producing 8920 stars in ~500KB JSON
 - star rendering via Three.Points with GLSL shaders for magnitude-based size and spectral-type-based color
 - J2000 equatorial RA/Dec to ecliptic-aligned render frame coordinate transformation
-- constellation line overlays for 33 curated constellations using a precomputed `THREE.LineSegments` geometry
+- shared camera-centered sky anchor with clip-plane-aware shell scaling so sky layers stay visible at large overview zoom distances
+- constellation line overlays for 34 curated constellations using a precomputed `THREE.LineSegments` geometry
 - layer visibility toggles for stars (default on) and constellations (default off) in existing LayerPanel
 - removed legacy decorative star texture (8k_stars_milky_way.jpg) saving ~1.9MB
 - constellation data started from d3-celestial patterns (BSD-3-Clause) and is now manually curated for recognizability

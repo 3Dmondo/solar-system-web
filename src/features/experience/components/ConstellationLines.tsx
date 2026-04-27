@@ -1,12 +1,10 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AdditiveBlending,
   BufferAttribute,
   BufferGeometry,
   Color,
   LineBasicMaterial,
-  LineSegments
 } from 'three';
 import {
   getStarCatalogLoader,
@@ -23,21 +21,16 @@ type ConstellationLinesProps = {
   opacity?: number;
 };
 
-// Same radius as star field to keep in sync
-const CONSTELLATION_SPHERE_RADIUS = 50_000;
-
 /**
  * Renders constellation line overlays using a single pre-computed LineSegments object.
  * Lines connect stars following IAU constellation patterns.
- * Geometry is computed once on load and only the position is updated per frame.
+ * Geometry is computed once on load and rendered under the shared SkyLayer anchor.
  */
 export function ConstellationLines({
   visible = true,
   color = '#4488aa',
   opacity = 0.4
 }: ConstellationLinesProps) {
-  const linesRef = useRef<LineSegments>(null);
-  const { camera } = useThree();
   const [catalog, setCatalog] = useState<ConstellationCatalog | null>(null);
 
   // Load constellation catalog on mount
@@ -79,15 +72,14 @@ export function ConstellationLines({
           const [x1, y1, z1] = raHoursDecDegreesToRenderFrame(ra1, dec1);
           const [x2, y2, z2] = raHoursDecDegreesToRenderFrame(ra2, dec2);
 
-          // Start vertex
-          positions[idx++] = x1 * CONSTELLATION_SPHERE_RADIUS;
-          positions[idx++] = y1 * CONSTELLATION_SPHERE_RADIUS;
-          positions[idx++] = z1 * CONSTELLATION_SPHERE_RADIUS;
+          // Keep local positions unit-length; SkyLayer applies dynamic shell scale.
+          positions[idx++] = x1;
+          positions[idx++] = y1;
+          positions[idx++] = z1;
 
-          // End vertex
-          positions[idx++] = x2 * CONSTELLATION_SPHERE_RADIUS;
-          positions[idx++] = y2 * CONSTELLATION_SPHERE_RADIUS;
-          positions[idx++] = z2 * CONSTELLATION_SPHERE_RADIUS;
+          positions[idx++] = x2;
+          positions[idx++] = y2;
+          positions[idx++] = z2;
         }
       }
     }
@@ -107,30 +99,12 @@ export function ConstellationLines({
     return { geometry: geom, material: mat };
   }, [catalog, color, opacity]);
 
-  // Disable automatic matrix updates - we'll do it manually to stay in sync with camera
-  useEffect(() => {
-    if (linesRef.current) {
-      linesRef.current.matrixAutoUpdate = false;
-    }
-  }, [geometry]);
-
-  // Keep constellation lines centered on camera - update matrix directly before render
-  useFrame(() => {
-    if (linesRef.current) {
-      const lines = linesRef.current;
-      lines.position.copy(camera.position);
-      lines.updateMatrix();
-      lines.updateMatrixWorld();
-    }
-  });
-
   if (!visible || !geometry || !material) {
     return null;
   }
 
   return (
     <lineSegments
-      ref={linesRef}
       geometry={geometry}
       material={material}
       frustumCulled={false}
