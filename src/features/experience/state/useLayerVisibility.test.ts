@@ -9,6 +9,8 @@ describe('useLayerVisibility', () => {
     expect(result.current.visibility.trails).toBe(true);
     expect(result.current.visibility.bodyIndicators).toBe(true);
     expect(result.current.visibility.labels).toBe(true);
+    expect(result.current.visibility.stars).toBe(true);
+    expect(result.current.visibility.constellations).toBe(false);
   });
 
   it('accepts initial visibility overrides', () => {
@@ -70,23 +72,22 @@ describe('useLayerVisibility', () => {
     expect(result.current.visibility.trails).toBe(true);
     expect(result.current.visibility.bodyIndicators).toBe(true);
     expect(result.current.visibility.labels).toBe(true);
+    expect(result.current.visibility.stars).toBe(true);
+    expect(result.current.visibility.constellations).toBe(false);
   });
 
   it('provides layer configs', () => {
     const { result } = renderHook(() => useLayerVisibility());
 
     expect(result.current.layerConfigs).toBe(LAYER_CONFIGS);
-    expect(result.current.layerConfigs).toHaveLength(3);
+    expect(result.current.layerConfigs).toHaveLength(5);
 
-    const firstConfig = result.current.layerConfigs[0];
-    const secondConfig = result.current.layerConfigs[1];
-    const thirdConfig = result.current.layerConfigs[2];
-    expect(firstConfig).toBeDefined();
-    expect(secondConfig).toBeDefined();
-    expect(thirdConfig).toBeDefined();
-    expect(firstConfig?.id).toBe('trails');
-    expect(secondConfig?.id).toBe('bodyIndicators');
-    expect(thirdConfig?.id).toBe('labels');
+    const [trails, bodyIndicators, labels, stars, constellations] = result.current.layerConfigs;
+    expect(trails?.id).toBe('trails');
+    expect(bodyIndicators?.id).toBe('bodyIndicators');
+    expect(labels?.id).toBe('labels');
+    expect(stars?.id).toBe('stars');
+    expect(constellations?.id).toBe('constellations');
   });
 
   it('preserves other layer visibility when toggling one', () => {

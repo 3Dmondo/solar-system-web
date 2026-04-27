@@ -9,6 +9,7 @@
 - Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
+- Milestone 9 sky catalog and rendering controls is implemented and usable, with real HYG star data, curated constellation overlays, and visibility toggles, but visual tuning and validation are still open.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -161,7 +162,7 @@ Deferred:
 
 ## Milestone 8: Cinematic View Mode
 
-Status: Planned
+Status: Postponed
 
 Goals:
 
@@ -172,7 +173,7 @@ Goals:
 
 ## Milestone 9: Sky Catalog And Rendering Controls
 
-Status: Planned
+Status: In Progress
 
 Goals:
 
@@ -181,6 +182,22 @@ Goals:
 - support optional constellation-line overlays from a static reference dataset
 - add a rendering-configuration UI that stays minimized by default and uses as little screen space as possible
 - design the controls so they remain clear and low-friction on both mobile and desktop
+
+Delivered:
+
+- HYG v4.2 star catalog filtered to naked-eye stars (magnitude ≤ 6.5), producing 8920 stars in ~500KB JSON
+- star rendering via Three.Points with GLSL shaders for magnitude-based size and spectral-type-based color
+- J2000 equatorial RA/Dec to ecliptic-aligned render frame coordinate transformation
+- constellation line overlays for 33 curated constellations using a precomputed `THREE.LineSegments` geometry
+- layer visibility toggles for stars (default on) and constellations (default off) in existing LayerPanel
+- removed legacy decorative star texture (8k_stars_milky_way.jpg) saving ~1.9MB
+- constellation data started from d3-celestial patterns (BSD-3-Clause) and is now manually curated for recognizability
+
+Remaining:
+
+- finish visual tuning for star brightness and point size
+- complete manual validation of the curated constellation figures
+- run explicit performance checks with constellation overlays enabled
 
 ## Milestone 10: Rendering And Performance Refinement
 

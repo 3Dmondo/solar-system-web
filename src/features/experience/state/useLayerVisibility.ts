@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
  * Layer identifiers for scene visibility control.
  * Designed to accommodate future layers like 'cinematicScale'.
  */
-export type LayerId = 'trails' | 'bodyIndicators' | 'labels';
+export type LayerId = 'trails' | 'bodyIndicators' | 'labels' | 'stars' | 'constellations';
 
 /**
  * Future layer identifiers (not yet implemented)
@@ -41,6 +41,18 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     label: 'Body labels',
     description: 'Show text labels identifying each body',
     defaultVisible: true
+  },
+  {
+    id: 'stars',
+    label: 'Stars',
+    description: 'Show real star catalog background',
+    defaultVisible: true
+  },
+  {
+    id: 'constellations',
+    label: 'Constellations',
+    description: 'Show constellation line patterns',
+    defaultVisible: false
   }
 ];
 
@@ -50,7 +62,9 @@ export const LAYER_CONFIGS: LayerConfig[] = [
 const DEFAULT_VISIBILITY: LayerVisibility = {
   trails: true,
   bodyIndicators: true,
-  labels: true
+  labels: true,
+  stars: true,
+  constellations: false
 };
 
 /**

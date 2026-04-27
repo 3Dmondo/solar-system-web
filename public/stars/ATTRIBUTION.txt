@@ -1,0 +1,36 @@
+# Star Catalog Data Attribution
+
+## Star Catalog (catalog.json)
+
+**Source:** HYG Database v4.2
+**URL:** https://codeberg.org/astronexus/hyg
+**License:** Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+**Processing:** Filtered to apparent magnitude ≤ 6.5 (naked-eye visible stars)
+
+The HYG database combines data from:
+- Hipparcos Catalogue (ESA)
+- Yale Bright Star Catalog (5th Edition)
+- Gliese Catalog of Nearby Stars (3rd Edition)
+
+## Constellation Lines (constellations.json)
+
+**Source:** IAU constellation patterns via d3-celestial
+**URL:** https://github.com/ofrohn/d3-celestial
+**License:** BSD-3-Clause
+**Processing:** Converted to RA (hours) / Dec (degrees) format
+
+## License Notices
+
+### CC BY-SA 4.0 (Star Catalog)
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 
+International License. To view a copy of this license, visit
+http://creativecommons.org/licenses/by-sa/4.0/
+
+### BSD-3-Clause (Constellation Lines)
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice.
+2. Redistributions in binary form must reproduce the above copyright notice.
+3. Neither the name of the copyright holder nor the names of its contributors
+   may be used to endorse or promote products without specific prior written permission.

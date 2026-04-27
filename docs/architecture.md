@@ -32,7 +32,7 @@
 - Real positions and kernel-derived mean radii still share that one explicit km-to-scene factor; the runtime does not apply a second hidden scale to body positions.
 - The scene now presents real positions through one explicit frame transform: raw J2000 ephemeris vectors are rotated into a J2000-ecliptic-aligned render frame and then mapped into the app's `x/z` orbital plane with `y` up before focus, controls, and rendering consume them.
 - `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
-- `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, star background, orbital trails, and the planet list from the current resolved catalog.
+- `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, the sky layers, orbital trails, and the planet list from the current resolved catalog.
 - The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
 - Overview mode now keeps the broad scene framing but allows a much closer minimum zoom distance in the physically scaled runtime so planets can be inspected manually without leaving overview.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
@@ -79,8 +79,11 @@
 - Shared shader utilities live in `src/features/solar-system/rendering/shaderChunks.ts` (GLSL snippets) and `shaderInjection.ts` (injection helpers). The `useWorldSpaceLighting` hook manages light-direction uniforms and per-frame updates.
 - Bump mapping (Moon) and normal mapping (Earth) use fixed UV offsets instead of screen-space derivatives for consistent results at any zoom level.
 - Ring shadows (Saturn) and cloud layers (Earth, Venus) apply shadow/lighting only to the diffuse component, naturally blending at the terminator without artificial cutoffs.
-- `StarBackground` currently renders a camera-centered, non-interactive textured star sphere.
-- The planned sky evolution is a static catalog-driven layer that renders individual stars as points and can optionally draw constellation lines.
+- `StarField` renders real stars from the HYG v4.2 catalog as `Three.Points` on a camera-centered sphere with a fixed radius of 50,000 scene units. The shader uses spectral-type color tinting and the current linear brightness and point-size tuning. The catalog contains 8,920 naked-eye stars loaded from `public/stars/catalog.json`.
+- `ConstellationLines` renders a single precomputed `THREE.LineSegments` geometry on the same camera-centered sphere. The current `public/stars/constellations.json` dataset contains 33 manually curated constellation figures.
+- Star and constellation coordinates use J2000 equatorial RA/Dec transformed to the ecliptic-aligned render frame via `raHoursDecDegreesToRenderFrame` in `starCatalog.ts`, then uploaded once and reused across frames.
+- The sky layer only updates its transform to follow the camera; star and constellation vertex data is not recomputed each frame.
+- The planned sky evolution still includes better visual tuning, possible star brightness controls, proper motion animation, star name labels, and constellation name overlays.
 - Orbital trails now render sampled history from the active loaded chunk, clipped by body-specific default trail windows and lightly emphasized for the focused body.
 - `PlanetBody` routes each body to either a custom material pipeline or the shared textured-material path.
 - Every body mesh now rotates around its physical north-pole axis at its physical sidereal rate via a quaternion composed of a pole-alignment quaternion and a per-frame spin quaternion. Rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)` so it stays consistent with the simulation clock.
@@ -116,7 +119,7 @@ Additional notes:
 ## Known Gaps And Planned Refactors
 
 - Finish manual desktop and mobile validation for the current multi-body overview.
-- Add a static star-catalog data pipeline for a real sky background and optional constellation overlays.
-- Design a minimized rendering-settings UI that can expose sky and scene controls without consuming much screen space.
+- Finish visual tuning and validation for the current real sky background and curated constellation overlays.
+- Extend the minimized rendering-settings UI with sky-specific controls such as brightness.
 - Address visible pole artifacts on some body textures.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
