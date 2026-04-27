@@ -192,7 +192,7 @@ Delivered:
 - constellation line overlays for 34 curated constellations using a precomputed `THREE.LineSegments` geometry
 - layer visibility toggles for stars (default on) and constellations (default off) in existing LayerPanel
 - removed legacy decorative star texture (8k_stars_milky_way.jpg) saving ~1.9MB
-- constellation data started from d3-celestial patterns (BSD-3-Clause) and is now manually curated for recognizability
+- constellation data now regenerates deterministically from d3-celestial source geometry (BSD-3-Clause) for the curated 34-constellation set
 
 Remaining:
 

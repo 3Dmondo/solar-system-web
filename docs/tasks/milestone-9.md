@@ -33,6 +33,7 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 - [x] Extract d3-celestial constellation lines as a starting reference
 - [x] Convert to app coordinate system
 - [x] Create `public/stars/constellations.json`
+- [x] Add deterministic `scripts/Convert-ConstellationLines.ps1` regeneration workflow
 - [x] Create `public/stars/ATTRIBUTION.txt`
 
 ### Phase 2: Star Rendering
@@ -71,7 +72,7 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 ## Current State
 
 - The decorative sky texture has been replaced with a real star field sourced from HYG v4.2.
-- Stars render from `public/stars/catalog.json` and constellations render from a curated `public/stars/constellations.json` dataset.
+- Stars render from `public/stars/catalog.json` and constellations render from a curated `public/stars/constellations.json` dataset regenerated from d3-celestial source geometry.
 - The sky layer now uses a shared camera-centered anchor with clip-plane-aware shell scaling, while star and constellation positions remain precomputed.
 - The current catalog contains 8,920 stars and 34 curated constellation figures.
 
@@ -97,6 +98,7 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 - `public/stars/catalog.json`
 - `public/stars/constellations.json`
 - `public/stars/ATTRIBUTION.txt`
+- `scripts/Convert-ConstellationLines.ps1`
 - `src/features/solar-system/domain/starCatalog.ts`
 - `src/features/experience/components/StarField.tsx`
 - `src/features/experience/components/ConstellationLines.tsx`
