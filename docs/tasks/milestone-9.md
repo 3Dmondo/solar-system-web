@@ -1,6 +1,6 @@
 # Milestone 9: Sky Catalog And Rendering Controls
 
-Status: In Progress
+Status: Complete
 
 ## Goal
 
@@ -57,16 +57,16 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 - [x] Extend `LayerPanel` rather than add a new panel
 - [x] Add star visibility toggle
 - [x] Add constellation lines toggle
-- [ ] Add star brightness preset control
+- [ ] Add star brightness preset control (Deferred to Milestone 10)
 - [x] Keep controls usable on mobile-sized layouts
 
 ### Phase 5: Integration
 
 - [x] Remove legacy `StarBackground.tsx` and `starBackground.ts`
 - [x] Update `ExperienceScene.tsx` to use new components
-- [ ] Visual verification: recognizable star patterns across the curated set
-- [ ] Performance validation at `/debug` route
-- [ ] Cross-browser testing
+- [x] Visual verification: recognizable star patterns across the curated set
+- [ ] Performance validation at `/debug` route (Deferred to Milestone 10)
+- [ ] Cross-browser testing (Deferred to Milestone 10)
 - [x] Update `docs/architecture.md`
 
 ## Current State
@@ -76,7 +76,7 @@ Replace the decorative star texture sphere with a real star catalog rendered as 
 - The sky layer now uses a shared camera-centered anchor with clip-plane-aware shell scaling, while star and constellation positions remain precomputed.
 - The current catalog contains 8,920 stars and 34 curated constellation figures.
 
-## Remaining Polish
+## Deferred Follow-up
 
 - Refine star brightness and point-size tuning for better readability in overview mode.
 - Continue validating sky-layer stability during fast focus transitions and wide overview zoom ranges.

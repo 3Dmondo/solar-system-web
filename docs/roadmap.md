@@ -9,7 +9,7 @@
 - Milestone 5 browser data-integration work is complete, with real ephemeris-driven positions from startup, simulation clock with playback controls, physical alignment across all bodies, lighting coherence with live Sun position, and a mobile lighting fix that replaces Three.js built-in lighting with custom world-space shaders across all materials. Reverse playback, explicit date picking, and additional browser coverage are deferred to later milestones.
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
-- Milestone 9 sky catalog and rendering controls is implemented and usable, with real HYG star data, curated constellation overlays, and visibility toggles, but visual tuning and validation are still open.
+- Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring; brightness tuning and extra validation are deferred to Milestone 10.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -173,7 +173,7 @@ Goals:
 
 ## Milestone 9: Sky Catalog And Rendering Controls
 
-Status: In Progress
+Status: Complete
 
 Goals:
 
@@ -194,7 +194,7 @@ Delivered:
 - removed legacy decorative star texture (8k_stars_milky_way.jpg) saving ~1.9MB
 - constellation data now regenerates deterministically from d3-celestial source geometry (BSD-3-Clause) for the curated 34-constellation set
 
-Remaining:
+Deferred to Milestone 10:
 
 - finish visual tuning for star brightness and point size
 - complete manual validation of the curated constellation figures

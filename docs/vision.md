@@ -16,7 +16,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - a minimal HUD with a help overlay, focused-mode overview return, pause or resume, and cycling playback-rate controls
 - per-frame simulation-time advancement for smoother orbital motion
 - chunk-derived orbital trails clipped by per-body default trail windows
-- a Milky Way star background
+- a real star-catalog sky layer with optional constellation overlays and layer toggles
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
 
@@ -28,7 +28,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - Body axial orientation, self-rotation periods, and Earth-Sun seasonal orientation are not yet aligned as tightly as the real-data path should allow.
 - The experience uses a cinematic scale model only.
 - Discovery aids are limited to the HUD and direct body interaction.
-- There is no dedicated rendering-configuration UI yet.
+- The current rendering controls are limited to the layer panel and still need brightness tuning controls.
 - Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
@@ -45,9 +45,8 @@ Focus areas:
 
 ## Long-Term Direction
 
-- replace the decorative star background with a real star-catalog sky layer
-- support optional constellation-line overlays
-- add a minimized rendering-controls interface that stays usable on both mobile and desktop
+- extend the current sky rendering controls with brightness tuning and optional readability presets
+- continue validating constellation readability across the curated overlays
 - introduce a stable body-state provider boundary
 - support date and time selection plus different time rates
 - expand the body catalog and educational context
