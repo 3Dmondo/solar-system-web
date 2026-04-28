@@ -4,7 +4,13 @@ import { useCallback, useState } from 'react';
  * Layer identifiers for scene visibility control.
  * Designed to accommodate future layers like 'cinematicScale'.
  */
-export type LayerId = 'trails' | 'bodyIndicators' | 'labels' | 'stars' | 'constellations';
+export type LayerId =
+  | 'trails'
+  | 'bodyIndicators'
+  | 'labels'
+  | 'milkyWay'
+  | 'stars'
+  | 'constellations';
 
 /**
  * Future layer identifiers (not yet implemented)
@@ -43,6 +49,12 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     defaultVisible: true
   },
   {
+    id: 'milkyWay',
+    label: 'Milky Way',
+    description: 'Show the compressed Milky Way sky texture',
+    defaultVisible: true
+  },
+  {
     id: 'stars',
     label: 'Stars',
     description: 'Show real star catalog background',
@@ -52,7 +64,7 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     id: 'constellations',
     label: 'Constellations',
     description: 'Show constellation line patterns',
-    defaultVisible: false
+    defaultVisible: true
   }
 ];
 
@@ -63,8 +75,9 @@ const DEFAULT_VISIBILITY: LayerVisibility = {
   trails: true,
   bodyIndicators: true,
   labels: true,
+  milkyWay: true,
   stars: true,
-  constellations: false
+  constellations: true
 };
 
 /**

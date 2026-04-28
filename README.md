@@ -9,7 +9,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - Renders the Sun, Mercury, Venus, Earth, Moon, Mars, Jupiter, Saturn, Uranus, and Neptune.
 - Supports desktop orbit plus wheel zoom and mobile drag plus pinch zoom.
 - Uses a `Jump to` HUD menu plus double click or double tap to focus a body, and keeps `Jump to` available while focused so another body can be selected directly.
-- Includes a HUD help overlay, a focused-mode overview return control, a Milky Way star sphere, and continuous self-rotation.
+- Includes a HUD help overlay, a focused-mode overview return control, a real star catalog, default-on constellation overlays, an aligned Milky Way texture background, and continuous self-rotation.
 - Uses directional camera easing, snaps the focus target onto the selected body center, frames focused bodies from the authored focus direction at about `10 x` body radius, and pulls back more decisively when returning to overview.
 - Uses thicker opaque orbital trails so they read consistently even when they cross in front of planets.
 - Uses custom material pipelines for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-based materials.

@@ -15,6 +15,8 @@
 - App entry: `src/main.tsx`, `src/App.tsx`
 - Versioned kernel-derived metadata snapshot: `public/ephemeris/body-metadata.json`
 - Local generated ephemeris asset root: `public/ephemeris/generated/`
+- Generated Milky Way sky texture target: `public/sky/milky-way.etc1s.ktx2`
+- Basis Universal transcoder runtime files for KTX2 sky textures: `public/basis/`
 - Local ephemeris helper: `scripts/Ensure-LocalWebEphemerisData.ps1`
 - Experience shell and HUD: `src/features/experience`
 - Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
@@ -33,6 +35,7 @@
 - The scene now presents real positions through one explicit frame transform: raw J2000 ephemeris vectors are rotated into a J2000-ecliptic-aligned render frame and then mapped into the app's `x/z` orbital plane with `y` up before focus, controls, and rendering consume them.
 - `SolarSystemExperience` owns the focused target state, coarse-pointer detection, the simulation clock, and the resolved body-catalog hook.
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, the sky layers, orbital trails, and the planet list from the current resolved catalog.
+- The Milky Way sky texture layer is wired as a KTX2 asset at `./sky/milky-way.etc1s.ktx2`, defaults visible, and remains user-toggleable. Missing generated texture assets fail quietly so normal development remains usable if the generated asset is absent.
 - The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
 - Overview mode now keeps the broad scene framing but allows a much closer minimum zoom distance in the physically scaled runtime so planets can be inspected manually without leaving overview.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
@@ -50,7 +53,7 @@
 - The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 - The fullscreen button toggles immersive mode using the browser Fullscreen API with graceful degradation on unsupported browsers.
-- The layer panel provides toggles for orbital trails and body indicators, collapsible to save screen space.
+- The layer panel provides toggles for orbital trails, body indicators, labels, stars, constellations, and the Milky Way texture layer, collapsible to save screen space. Milky Way, stars, and constellations are visible by default.
 
 ## Data And Domain Boundaries
 
@@ -80,10 +83,11 @@
 - Bump mapping (Moon) and normal mapping (Earth) use fixed UV offsets instead of screen-space derivatives for consistent results at any zoom level.
 - Ring shadows (Saturn) and cloud layers (Earth, Venus) apply shadow/lighting only to the diffuse component, naturally blending at the terminator without artificial cutoffs.
 - `StarField` renders real stars from the HYG v4.2 catalog as `Three.Points` under a shared camera-centered sky anchor. The shader uses spectral-type color tinting and the current linear brightness and point-size tuning. The catalog contains 8,920 naked-eye stars loaded from `public/stars/catalog.json`.
+- `MilkyWayLayer` renders a default-on inward-facing sky sphere under the same shared sky anchor, scaled to half the shared sky shell so it stays comfortably inside the camera far plane while catalog stars remain on the outer shell. It loads the generated `4096x2048` ETC1S KTX2 texture at `public/sky/milky-way.etc1s.ktx2` through Three.js `KTX2Loader` with Basis transcoder files served from `public/basis/`, uses sRGB color with reduced shader brightness, tests depth without writing depth so planets occlude it, and currently ships without mipmaps. The source is NASA SVS `milkyway_2020_8k_gal.exr`, a galactic-coordinate Milky Way background; an `8192x4096` test asset was rejected after browser memory testing. The shader samples by render-space direction, converting through J2000 equatorial space into galactic longitude/latitude before deriving NASA plate carree UVs, so the texture aligns with the RA/Dec-derived star layer instead of relying on sphere UV orientation.
 - `ConstellationLines` renders a single precomputed `THREE.LineSegments` geometry under the same shared sky anchor. The current `public/stars/constellations.json` dataset contains 34 curated constellation figures regenerated from d3-celestial source geometry.
 - Star and constellation coordinates use J2000 equatorial RA/Dec transformed to the ecliptic-aligned render frame via `raHoursDecDegreesToRenderFrame` in `starCatalog.ts`, then uploaded once and reused across frames.
 - `scripts/Convert-ConstellationLines.ps1` is the current deterministic path for regenerating the curated constellation dataset from d3-celestial while preserving the selected constellation ID set and display names.
-- `SkyLayer` keeps stars and constellations centered on the camera and scales the shared sky shell each frame from the active camera near/far clip planes so both layers remain visible across overview and focused zoom ranges.
+- `SkyLayer` keeps Milky Way, stars, and constellations centered on the camera and scales the shared sky shell each frame from the active camera near/far clip planes so sky layers remain visible across overview and focused zoom ranges.
 - Star and constellation vertex data remains static after upload; only the shared sky anchor transform is updated each frame.
 - The planned sky evolution still includes better visual tuning, possible star brightness controls, proper motion animation, star name labels, and constellation name overlays.
 - Orbital trails now render interpolated history from the active loaded chunk plus any contiguous ready previous chunks, clipped by body-specific default trail windows, resampled with per-body cadence multipliers from presentation metadata, and styled as constant-width opaque screen-space ribbons so sampled point joins do not create additive hot spots.

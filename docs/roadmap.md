@@ -10,6 +10,7 @@
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 - Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring.
+- Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -190,7 +191,7 @@ Delivered:
 - J2000 equatorial RA/Dec to ecliptic-aligned render frame coordinate transformation
 - shared camera-centered sky anchor with clip-plane-aware shell scaling so sky layers stay visible at large overview zoom distances
 - constellation line overlays for 34 curated constellations using a precomputed `THREE.LineSegments` geometry
-- layer visibility toggles for stars (default on) and constellations (default off) in existing LayerPanel
+- layer visibility toggles for stars and constellations in existing LayerPanel
 - removed legacy decorative star texture (8k_stars_milky_way.jpg) saving ~1.9MB
 - constellation data now regenerates deterministically from d3-celestial source geometry (BSD-3-Clause) for the curated 34-constellation set
 
@@ -221,3 +222,23 @@ Goals:
 - broaden the body catalog
 - add more educational context
 - support a richer exploration model
+
+## Milestone 12: Milky Way Sky Texture Layer
+
+Status: Complete
+
+Goals:
+
+- add a toggleable Milky Way texture layer behind the real star catalog
+- use a generated KTX2 ETC1S asset from the source EXR, defaulting to no mipmaps
+- keep the source EXR out of the repository unless explicitly approved
+- document attribution and conversion workflow for the generated sky asset
+
+Delivered:
+
+- default-on Milky Way layer toggle and KTX2 runtime loading path
+- default-on constellation layer
+- Basis transcoder files served from `public/basis/`
+- generated `4096x2048` ETC1S KTX2 texture at `public/sky/milky-way.etc1s.ktx2`
+- direction-based galactic texture sampling aligned to the RA/Dec-derived star layer
+- reduced Milky Way brightness, planet depth occlusion, and rejected `8192x4096` texture after browser memory testing

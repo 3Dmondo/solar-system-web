@@ -1,0 +1,29 @@
+# Milky Way Sky Texture
+
+Generated asset target:
+
+- `milky-way.etc1s.ktx2`
+
+Source:
+
+- NASA Scientific Visualization Studio, "Deep Star Maps 2020", ID 4851.
+- Source page: https://svs.gsfc.nasa.gov/4851/
+- Source file used locally: `C:\Users\Edmondo.Silvestri\Downloads\milkyway_2020_8k_gal.exr`
+- Published asset name: `milkyway_2020_8k_gal.exr`
+- Source resolution: 8192x4096.
+- Projection: galactic coordinates.
+- Description from source page: Milky Way background with bright Hipparcos and Tycho foreground stars omitted.
+
+License:
+
+- Credit requested by NASA SVS: NASA/Goddard Space Flight Center Scientific Visualization Studio.
+- Gaia DR2 credit: ESA/Gaia/DPAC.
+- Constellation figure credit from source page: figures based on those developed for the IAU by Alan MacRobert of Sky and Telescope magazine (Roger Sinnott and Rick Fienberg).
+
+Processing:
+
+- Converted from source EXR to tonemapped 8-bit sRGB.
+- Resized to 4096x2048 for the deployed asset.
+- An 8192x4096 test asset was rejected after browser memory use was too high.
+- Encoded as KTX2 Basis Universal ETC1S/BasisLZ.
+- Generated without mipmaps; add mipmaps only if manual rotation testing shows shimmer or aliasing.

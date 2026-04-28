@@ -16,7 +16,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - a minimal HUD with a help overlay, focused-mode overview return, pause or resume, and cycling playback-rate controls
 - per-frame simulation-time advancement for smoother orbital motion
 - chunk-derived orbital trails clipped by per-body default trail windows
-- a real star-catalog sky layer with optional constellation overlays and layer toggles
+- a real star-catalog sky layer with default-on constellation overlays, an aligned Milky Way texture background, and layer toggles
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
 

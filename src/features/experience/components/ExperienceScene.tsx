@@ -25,6 +25,7 @@ import {
   getFocusTransitionProfile
 } from '../../solar-system/domain/focus';
 import { ConstellationLines } from './ConstellationLines';
+import { MilkyWayLayer } from './MilkyWayLayer';
 import { SkyLayer } from './SkyLayer';
 import { StarField } from './StarField';
 
@@ -74,6 +75,7 @@ export function ExperienceScene({
     >
       <color attach="background" args={['#000000']} />
       <SkyLayer>
+        <MilkyWayLayer visible={layerVisibility.milkyWay} />
         <ConstellationLines visible={layerVisibility.constellations} />
         <StarField visible={layerVisibility.stars} />
       </SkyLayer>
