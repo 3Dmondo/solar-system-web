@@ -1,25 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
+import {
+  BODY_JUMP_GROUPS,
+  type BodyId,
+  type ViewTargetId
+} from '../../solar-system/domain/body';
 import {
   type ResolvedBodyCatalog
 } from '../../solar-system/data/bodyStateStore';
 import { type ResolvedBodyCatalogStatus } from '../state/useResolvedBodyCatalog';
 import './experience-hud.css';
-
-const jumpToGroups: Array<{ label: string; bodyIds: BodyId[] }> = [
-  {
-    label: 'Quick picks',
-    bodyIds: ['sun', 'earth', 'moon', 'saturn']
-  },
-  {
-    label: 'Inner planets',
-    bodyIds: ['mercury', 'venus', 'mars']
-  },
-  {
-    label: 'Outer planets',
-    bodyIds: ['jupiter', 'uranus', 'neptune']
-  }
-];
 
 type ExperienceHudProps = {
   catalog: ResolvedBodyCatalog;
@@ -213,7 +202,7 @@ export function ExperienceHud({
               Close
             </button>
           </div>
-          {jumpToGroups.map((group) => (
+          {BODY_JUMP_GROUPS.map((group) => (
             <div
               key={group.label}
               className="experience-hud__jump-group"

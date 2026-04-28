@@ -22,32 +22,31 @@ The repository currently ships an overview-first solar-system scene with real-da
 
 ## Current Constraints
 
-- Orbital trails currently use fixed per-body default windows, and the richer styling pass plus longer historical lookback for outer planets are deferred to the later trail UX milestone.
-- The app now starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
-- The smoother per-frame clock path is now the default, but its current runtime cost still needs a dedicated optimization pass.
-- Body axial orientation, self-rotation periods, and Earth-Sun seasonal orientation are not yet aligned as tightly as the real-data path should allow.
+- The app starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
+- The current deployed generated dataset covers the Sun, all 8 planets, and the Moon only.
+- The current web runtime still assumes a small fixed body set in several places, so the major-moon expansion starts with registry and generated-data contract work.
 - The experience uses a cinematic scale model only.
-- Discovery aids are limited to the HUD and direct body interaction.
-- The current rendering controls are limited to the layer panel and still need brightness tuning controls.
+- Discovery aids are tuned for the current small catalog and need crowded-system validation before major moons become default.
+- Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
+- The current rendering controls are limited to the layer panel and still need optional brightness tuning controls.
 - Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
 
-The next implementation slice focuses on finishing the real-data milestone after startup activation.
+The next implementation slice focuses on Milestone 11: broadening the catalog into a fuller solar-system explorer through a curated major natural satellite expansion.
 
 Focus areas:
 
-- optimize the now-default per-frame runtime path before milestone closeout
-- align body axial orientation, spin rates, Earth-Sun seasonal orientation, and other high-value physical characteristics with the rendered scene
-- add reverse playback on top of the landed pause and rate controls after the current performance, lighting, and physical-alignment follow-up
-- expand verification for startup, chunk-boundary loading, and focused-body recovery while keeping the current overview readability and focus behavior intact
-- defer frame-switching, deeper trail history, and final trail UX until the later reference-frame and trail milestone
+- keep the current Sun, planet, and Moon behavior stable while the catalog boundary expands
+- use the `SpiceNet` SSD catalog snapshot to choose candidate satellite kernels and benchmark generated web output
+- move fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, and future system views
+- add the curated major moons only after generated asset size, interpolation behavior, and overview readability are validated
+- keep educational context and richer exploration modes as lower-priority proposals until the major-moon path is validated
 
 ## Long-Term Direction
 
 - extend the current sky rendering controls with brightness tuning and optional readability presets
 - continue validating constellation readability across the curated overlays
-- introduce a stable body-state provider boundary
 - support date and time selection plus different time rates
 - expand the body catalog and educational context
 - keep the final site compatible with static GitHub Pages hosting
@@ -56,9 +55,9 @@ Focus areas:
 
 - live astronomy APIs or server-backed simulation
 - realistic distances and sizes as the default presentation
-- final reference-frame controls
-- production ephemerides integration
-- final trail UX for satellites and non-sun-centered views
+- every minor moon, asteroid, dwarf planet, or spacecraft trajectory in the first catalog expansion
+- generated ephemeris assets or upstream kernels committed to git
+- long-form encyclopedia pages, quizzes, or guided tours in the first major-moon pass
 
 ## Workflow Expectations
 

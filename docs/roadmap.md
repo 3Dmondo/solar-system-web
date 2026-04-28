@@ -10,6 +10,8 @@
 - Milestone 6 body discovery and UI controls work is complete, with body indicator billboards for sub-pixel bodies, Sun impostor with bloom, layer visibility panel, and fullscreen button.
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 - Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring.
+- Milestone 10 rendering and performance refinement is complete for the shipped trail-rendering scope, with pole-artifact audit and deeper `/debug` validation deferred to an optional unnumbered milestone.
+- Milestone 11 full solar system explorer work is now in progress, with the current-body registry introduced as the first step toward curated major moons.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 
 ## Milestone 1: Foundation And Planet Showcase
@@ -197,31 +199,60 @@ Delivered:
 
 ## Milestone 10: Rendering And Performance Refinement
 
-Status: In Progress
+Status: Complete
 
 Goals:
 
 - make orbital trails thicker and more stable while preserving existing trail data and reference-frame behavior
-- reduce visible pole artifacts across all spherical bodies after an audit confirms the affected material paths
-- evaluate cube-sphere or shader-based alternatives only if smaller targeted fixes are insufficient
-- review `/debug` performance and production bundle output after rendering changes
+- review production bundle output after rendering changes
 - keep stars, constellations, and new user-facing rendering controls out of this milestone
 
-Delivered so far:
+Delivered:
 
 - trail rendering now uses constant-width opaque screen-space ribbons with consistent overview and focused-view appearance
 - trail sampling now resamples from the existing Hermite interpolation path with per-body cadence multipliers
 - ready previous chunks are stitched into trail history so long trail windows are not capped by the active chunk start after prefetch warms the cache
+- production build output was reviewed for bundle-size regressions
 
-## Milestone 11: Full Solar System Explorer
+Deferred to optional rendering audit and validation milestone:
 
-Status: Backlog
+- manual overview and focused-view trail readability checks
+- pole-artifact audit and targeted mitigation
+- deeper `/debug` checks with updated trails visible
+
+## Optional Milestone: Rendering Audit And Validation
+
+Status: Optional Backlog
 
 Goals:
 
-- broaden the body catalog
-- add more educational context
-- support a richer exploration model
+- verify updated trail readability in overview and focused views
+- audit pole artifacts across the Sun, all planets, and the Moon
+- apply targeted pole-artifact fixes only after the affected bodies and material paths are confirmed
+- check `/debug` behavior with updated trails visible
+- add mobile fallbacks only if measured or manual validation shows a real issue
+
+## Milestone 11: Full Solar System Explorer
+
+Status: In Progress
+
+Goals:
+
+- broaden the body catalog through a curated major natural satellite expansion
+- use the `SpiceNet` SSD catalog snapshot to choose and benchmark candidate satellite kernels before changing the default deployed dataset
+- replace fixed body assumptions with a central registry that can drive IDs, hierarchy, discovery groups, trails, labels, and future system views
+- propose lightweight educational context and richer exploration modes as lower-priority follow-up tracks
+
+Started:
+
+- central current-body registry now drives `BodyId`, NAIF lookups, hierarchy, presentation metadata, and HUD jump-menu grouping
+
+Deferred until the major-moon path is validated:
+
+- Pluto and Charon
+- asteroid packs
+- spacecraft trajectories
+- long-tail minor moons
 
 ## Milestone 12: Milky Way Sky Texture Layer
 

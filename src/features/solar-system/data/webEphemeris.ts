@@ -1,4 +1,9 @@
-import { type BodyId } from '../domain/body'
+import {
+  getBodyIdForNaifBodyId,
+  type BodyId
+} from '../domain/body'
+
+export { getBodyIdForNaifBodyId, getNaifBodyId } from '../domain/body'
 
 const SECONDS_PER_DAY = 86_400
 const SAMPLE_COMPONENTS_PER_ENTRY = 6
@@ -69,31 +74,6 @@ export type WebEphemerisChunk = {
 export type WebEphemerisStateSample = {
   positionKm: [number, number, number]
   velocityKmPerSecond: [number, number, number]
-}
-
-const bodyNaifIdsByBodyId: Record<BodyId, number> = {
-  sun: 10,
-  mercury: 199,
-  venus: 299,
-  earth: 399,
-  moon: 301,
-  mars: 499,
-  jupiter: 599,
-  saturn: 699,
-  uranus: 799,
-  neptune: 899
-}
-
-const bodyIdsByNaifId = new Map<number, BodyId>(
-  Object.entries(bodyNaifIdsByBodyId).map(([bodyId, naifBodyId]) => [naifBodyId, bodyId as BodyId])
-)
-
-export function getNaifBodyId(bodyId: BodyId) {
-  return bodyNaifIdsByBodyId[bodyId]
-}
-
-export function getBodyIdForNaifBodyId(naifBodyId: number) {
-  return bodyIdsByNaifId.get(naifBodyId)
 }
 
 export function getManifestBodyById(manifest: WebEphemerisManifest, bodyId: BodyId) {

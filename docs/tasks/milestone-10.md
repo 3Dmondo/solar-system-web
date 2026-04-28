@@ -1,17 +1,23 @@
 # Milestone 10: Rendering And Performance Refinement
 
-Status: In Progress
+Status: Complete
 
 ## Goal
 
-Refine the rendering stack after the sky-catalog milestone by improving orbital trail presentation, reducing visible pole artifacts across all spherical bodies, and checking performance and bundle impact after those visual changes.
+Refine the rendering stack after the sky-catalog milestone by improving orbital trail presentation. The shipped scope focused on trail stability and build impact; the broader pole-artifact audit and deeper `/debug` visual validation are deferred to the optional rendering audit milestone.
 
 ## Scope
 
 - Make orbital trails thicker and more stable while preserving the existing sampled positions, trail windows, reference-frame behavior, and layer visibility.
-- Audit pole artifacts across the Sun, all 8 planets, and the Moon before choosing fixes.
-- Apply only confirmed pole-artifact mitigations, starting with the smallest material or geometry changes that solve the visible issue.
-- Use `/debug` and production build output to verify the updated rendering cost.
+- Defer pole-artifact audit and mitigation to the optional rendering audit milestone.
+- Defer deeper `/debug` visual validation to the optional rendering audit milestone.
+
+## Delivered
+
+- Trail rendering now uses constant-width opaque screen-space ribbons with consistent overview and focused-view appearance.
+- Trail sampling now resamples from the existing Hermite interpolation path with per-body cadence multipliers.
+- Ready previous chunks are stitched into trail history so long trail windows are not capped by the active chunk start after prefetch warms the cache.
+- Production build output was reviewed for bundle-size regressions.
 
 ## Out Of Scope
 
@@ -31,7 +37,7 @@ Refine the rendering stack after the sky-catalog milestone by improving orbital 
 - [x] Regenerate trails across ready previous chunks so long trail windows are not capped by the active chunk start.
 - [x] Keep the `trails` layer toggle behavior unchanged.
 - [x] Keep trail appearance consistent between overview and focused views.
-- [ ] Verify overview and focused views keep trails readable without overpowering bodies.
+- [ ] Verify overview and focused views keep trails readable without overpowering bodies. (Deferred to optional rendering audit milestone.)
 
 ### Phase 2: Pole Artifact Audit
 
@@ -40,12 +46,16 @@ Refine the rendering stack after the sky-catalog milestone by improving orbital 
 - [ ] Check whether artifacts are caused by geometry density, texture UV behavior, shader sampling, bump or normal mapping, cloud shells, or rings.
 - [ ] Prioritize fixes by visible impact.
 
+Deferred to optional rendering audit milestone.
+
 ### Phase 3: Pole Artifact Mitigation
 
 - [ ] Apply targeted fixes for confirmed high-impact artifacts.
 - [ ] Prefer local material, shader, texture-coordinate, or geometry-segment changes before larger geometry rewrites.
 - [ ] Re-evaluate cube-sphere or shader-only alternatives only if smaller fixes are not enough.
 - [ ] Confirm fixes do not introduce texture seams, lighting regressions, or mobile rendering inconsistencies.
+
+Deferred to optional rendering audit milestone.
 
 ### Phase 4: Performance And Bundle Check
 
@@ -54,11 +64,23 @@ Refine the rendering stack after the sky-catalog milestone by improving orbital 
 - [x] Review production build output for bundle-size regressions.
 - [ ] Add mobile fallbacks only if measured or manual testing shows a real issue.
 
+Remaining unchecked items are deferred to optional rendering audit milestone.
+
 ### Phase 5: Docs And Closeout
 
 - [x] Update `docs/architecture.md` if rendering behavior changes.
 - [x] Update `docs/roadmap.md` when the milestone status or delivered behavior changes.
-- [ ] Record any deferred rendering work explicitly instead of implying it is complete.
+- [x] Record any deferred rendering work explicitly instead of implying it is complete.
+
+## Deferred
+
+Tracked in `docs/tasks/optional-rendering-audit-and-validation.md`:
+
+- manual overview and focused-view trail readability checks
+- pole-artifact audit across the Sun, planets, and Moon
+- targeted pole-artifact mitigation if the audit confirms high-impact issues
+- deeper `/debug` behavior checks with updated trails visible
+- mobile rendering fallbacks only if measured or manual validation shows a real issue
 
 ## Verification
 

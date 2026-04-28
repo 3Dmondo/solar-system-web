@@ -57,7 +57,8 @@
 
 ## Data And Domain Boundaries
 
-- `bodyPresentation.ts` contains the shared display metadata that stays stable across data sources.
+- `BODY_REGISTRY` in `src/features/solar-system/domain/body.ts` is the central current-body registry for ids, NAIF mappings, hierarchy, display names, colors, default trail windows, and HUD jump-menu grouping.
+- `bodyPresentation.ts` derives the shared display metadata from `BODY_REGISTRY` so it stays stable across data sources while keeping the existing provider-facing metadata shape.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
 - `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, exposes one minimal playback-rate cycle across the current forward-speed presets, and emits a stable `simulationInitialUtcMs` used to anchor Earth's prime-meridian orientation.
@@ -66,7 +67,7 @@
 - `webEphemerisProvider.ts` now derives a first trail-history payload from the active loaded chunk using body-specific default windows before that data is mapped into scene space, and the current runtime caches per-chunk trail sampler state so stable interior trail segments can be reused across nearby frames.
 - `webBodyCatalogRuntime.ts` now resolves the generated data base URL and first-pass scene scale from defaults unless runtime env overrides are supplied, and it resolves physical body metadata from the committed `public/ephemeris/body-metadata.json` snapshot unless a dedicated metadata URL override is provided.
 - The physical alignment pass is now complete: `mapPhysicalMetadataToScaledBodyMetadata` transforms each body's `northPoleUnitVectorJ2000` through the J2000-to-render-frame matrix and computes a signed angular velocity from the sidereal rotation period and retrograde flag, emitting `poleDirectionRender` and `angularVelocityRadPerSec` on every `BodyMetadata` entry consumed by the scene.
-- `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`. `BodyMetadata` now carries `poleDirectionRender` (north-pole unit vector in render space) and `angularVelocityRadPerSec` (signed physical spin rate) alongside radius and focus offset.
+- `BodyId`, `ViewTargetId`, and `BodyDefinition` live in `src/features/solar-system/domain/body.ts`. `BodyId` is derived from `BODY_REGISTRY`, and `BodyMetadata` carries `poleDirectionRender` (north-pole unit vector in render space) and `angularVelocityRadPerSec` (signed physical spin rate) alongside radius and focus offset.
 - `focus.ts` contains the current camera target and position helpers.
 - `focus.ts` also contains directional transition profiles plus helpers that preserve the current view direction when deriving a focused camera position.
 - `scales.ts` currently contains only a small label helper for the planned scale-mode concept.
