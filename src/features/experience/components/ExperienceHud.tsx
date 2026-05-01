@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  BODY_JUMP_GROUPS,
+  getBodyDiscoveryGroups,
   type BodyId,
   type ViewTargetId
 } from '../../solar-system/domain/body';
@@ -48,7 +48,11 @@ export function ExperienceHud({
   const jumpButtonRef = useRef<HTMLButtonElement | null>(null);
   const jumpPanelRef = useRef<HTMLDivElement | null>(null);
   const showingOverview = focusedBodyId === 'overview';
-  const hasJumpTargets = catalog.metadata.length > 0;
+  const jumpGroups = useMemo(
+    () => getBodyDiscoveryGroups(catalog.metadata.map((metadata) => metadata.id)),
+    [catalog.metadata]
+  );
+  const hasJumpTargets = jumpGroups.length > 0;
   const statusMessage =
     catalogStatus === 'loading'
       ? 'Loading real positions for the requested time.'
@@ -202,7 +206,7 @@ export function ExperienceHud({
               Close
             </button>
           </div>
-          {BODY_JUMP_GROUPS.map((group) => (
+          {jumpGroups.map((group) => (
             <div
               key={group.label}
               className="experience-hud__jump-group"

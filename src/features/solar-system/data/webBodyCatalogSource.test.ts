@@ -53,7 +53,24 @@ const dataset = {
       velocityUnits: 'km/s',
       interpolationHint: 'cubic_hermite_position_velocity'
     },
-    bodies: [],
+    bodies: [
+      {
+        bodyId: 'earth',
+        naifBodyId: 399,
+        bodyName: 'Earth',
+        sourceNaifBodyId: 399,
+        sourceBodyName: 'Earth',
+        sampleDays: 1
+      },
+      {
+        bodyId: 'moon',
+        naifBodyId: 301,
+        bodyName: 'Moon',
+        sourceNaifBodyId: 301,
+        sourceBodyName: 'Moon',
+        sampleDays: 1
+      }
+    ],
     chunks: []
   },
   bodyMetadata: {
@@ -244,6 +261,43 @@ describe('webBodyCatalogSource', () => {
     expect(firstCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
     expect(secondCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:01.000Z')
   })
+
+  it('scales only metadata for bodies in the loaded manifest', async () => {
+    const earthOnlyDataset = {
+      ...dataset,
+      manifest: {
+        ...dataset.manifest,
+        bodies: dataset.manifest.bodies.filter((body) => body.bodyId === 'earth')
+      },
+      bodyMetadata: {
+        ...dataset.bodyMetadata,
+        bodies: dataset.bodyMetadata.bodies.filter((body) => body.id === 'earth')
+      }
+    } satisfies WebDataset
+    const datasetLoader = createDatasetLoaderStub(earthOnlyDataset)
+    const ephemerisProvider = createEphemerisProviderStub([
+      baseMetadata[0]!,
+      {
+        id: 'phobos',
+        displayName: 'Phobos',
+        color: '#8c7467',
+        material: 'basic',
+        radius: 0.055,
+        defaultTrailWindowDays: 1,
+        focusOffset: [0, 0.03, 0.55]
+      }
+    ])
+    const source = createWebBodyCatalogSource({
+      ephemerisProvider,
+      datasetLoader,
+      scale: createPhysicalSceneScale(0.001)
+    })
+
+    const catalog = await source.loadBodyCatalogAtUtc('2000-01-01T12:00:00Z')
+
+    expect(catalog.metadata.map((body) => body.id)).toEqual(['earth'])
+    expect(catalog.bodies.map((body) => body.id)).toEqual(['earth'])
+  })
 })
 
 function createDatasetLoaderStub(datasetValue: WebDataset): WebDatasetLoader & {
@@ -256,12 +310,14 @@ function createDatasetLoaderStub(datasetValue: WebDataset): WebDatasetLoader & {
   }
 }
 
-function createEphemerisProviderStub(): BodyEphemerisProvider & {
+function createEphemerisProviderStub(
+  metadata: BodyMetadata[] = baseMetadata
+): BodyEphemerisProvider & {
   loadSnapshotAtUtc: ReturnType<typeof vi.fn>
   prefetchAroundUtc: ReturnType<typeof vi.fn>
 } {
   return {
-    getBodyMetadata: () => baseMetadata,
+    getBodyMetadata: () => metadata,
     loadSnapshotAtUtc: vi.fn(async (utc: Date | string) => {
       const snapshot: BodyEphemerisSnapshot = {
         capturedAt: new Date(utc).toISOString(),

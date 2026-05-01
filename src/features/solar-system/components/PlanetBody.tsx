@@ -9,6 +9,7 @@ import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
 import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
 import { SaturnRings } from './SaturnRings';
 import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
+import { SolidBodyMaterial } from './SolidBodyMaterial'
 import { TexturedPlanetMaterial } from './TexturedPlanetMaterial'
 import { VenusCloudLayer } from './VenusCloudLayer';
 
@@ -20,7 +21,7 @@ type PlanetBodyProps = ThreeElements['mesh'] & {
   focused: boolean;
   onSelect: (bodyId: BodyId) => void;
   sunPosition: [number, number, number];
-  /** Earth's current scene position, provided only for the Moon to enable tidal locking. */
+  /** Current scene position for a satellite's parent, used for tidal locking. */
   tidalLockTargetPosition?: [number, number, number] | null;
 };
 
@@ -47,7 +48,7 @@ export function PlanetBody({
   }, [body.poleDirectionRender])
 
   // Reused per-frame objects: one quaternion for the spin component plus a
-  // helper vector for the Moon tidal-lock computation.
+  // helper vector for the satellite tidal-lock computation.
   const spinQuat = useMemo(() => new Quaternion(), [])
   const scratchVec = useMemo(() => new Vector3(), [])
   const spinAngleRef = useRef(0)
@@ -71,9 +72,9 @@ export function PlanetBody({
 
     const simDelta = isPaused ? 0 : delta * playbackRateMultiplier
 
-    if (body.id === 'moon' && tidalLockTargetPosition) {
-      // --- Tidal lock: Moon always faces Earth ---
-      // Compute the direction from Moon to Earth projected onto Moon's equatorial plane.
+    if (tidalLockTargetPosition) {
+      // --- Tidal lock: satellite always faces its parent ---
+      // Compute the direction from satellite to parent projected onto the satellite's equatorial plane.
       const poleVec = scratchVec.set(...body.poleDirectionRender).normalize()
       const moonToEarth = new Vector3(
         tidalLockTargetPosition[0] - body.position[0],
@@ -147,6 +148,12 @@ export function PlanetBody({
           <EarthSurfaceMaterial bodyPosition={body.position} poleDirectionRender={body.poleDirectionRender} sunPosition={sunPosition} />
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
+        ) : body.material === 'basic' ? (
+          <SolidBodyMaterial
+            bodyPosition={body.position}
+            color={body.color}
+            sunPosition={sunPosition}
+          />
         ) : (
           <TexturedPlanetMaterial
             bodyId={body.id}

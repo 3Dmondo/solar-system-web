@@ -3,6 +3,7 @@ import { transformCatalogToFrame } from './referenceFrameTransform';
 import {
   REFERENCE_FRAMES,
   getReferenceFrame,
+  getReferenceFramesForLoadedBodies,
   type ReferenceFrame
 } from '../domain/referenceFrame';
 import type { ResolvedBodyCatalog } from './bodyStateStore';
@@ -169,6 +170,7 @@ describe('transformCatalogToFrame', () => {
       // Create a frame with a body that doesn't exist in the catalog
       const fakeFrame: ReferenceFrame = {
         id: 'earth',
+        shortLabel: 'Earth',
         displayName: 'Earth',
         description: 'Test frame',
         originBodyId: 'jupiter'
@@ -202,7 +204,18 @@ describe('getReferenceFrame', () => {
   it('returns Earth frame', () => {
     const frame = getReferenceFrame('earth');
     expect(frame.id).toBe('earth');
+    expect(frame.shortLabel).toBe('Earth');
+    expect(frame.displayName).toBe('Earth-centered');
     expect(frame.originBodyId).toBe('earth');
+  });
+
+  it('returns body-centered frames from registry body ids', () => {
+    const frame = getReferenceFrame('jupiter');
+
+    expect(frame.id).toBe('jupiter');
+    expect(frame.shortLabel).toBe('Jupiter');
+    expect(frame.displayName).toBe('Jupiter-centered');
+    expect(frame.originBodyId).toBe('jupiter');
   });
 
   it('throws for unknown frame', () => {
@@ -216,5 +229,36 @@ describe('REFERENCE_FRAMES', () => {
     expect(REFERENCE_FRAMES.length).toBeGreaterThanOrEqual(2);
     expect(REFERENCE_FRAMES.map((f) => f.id)).toContain('ssb');
     expect(REFERENCE_FRAMES.map((f) => f.id)).toContain('earth');
+  });
+});
+
+describe('getReferenceFramesForLoadedBodies', () => {
+  it('keeps the current baseline menu to SSB and Earth-centered', () => {
+    expect(getReferenceFramesForLoadedBodies(['sun', 'earth', 'moon', 'mars']).map((frame) => frame.id))
+      .toEqual(['ssb', 'earth']);
+  });
+
+  it('adds loaded parent system centers for expanded moon catalogs', () => {
+    expect(
+      getReferenceFramesForLoadedBodies([
+        'sun',
+        'earth',
+        'moon',
+        'mars',
+        'phobos',
+        'jupiter',
+        'io',
+        'europa',
+        'saturn',
+        'titan',
+        'neptune',
+        'triton'
+      ]).map((frame) => frame.id)
+    ).toEqual(['ssb', 'earth', 'mars', 'jupiter', 'saturn', 'neptune']);
+  });
+
+  it('does not expose a parent frame until both parent and satellite are loaded', () => {
+    expect(getReferenceFramesForLoadedBodies(['sun', 'jupiter', 'saturn', 'titan']).map((frame) => frame.id))
+      .toEqual(['ssb', 'saturn']);
   });
 });

@@ -16,7 +16,12 @@ import {
 } from '../domain/focusTracking';
 import { type LayerVisibility } from '../state/useLayerVisibility';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
-import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
+import {
+  getTidalLockTargetBody,
+  isStar,
+  type BodyId,
+  type ViewTargetId
+} from '../../solar-system/domain/body';
 import {
   DEFAULT_CAMERA_FOV_DEGREES,
   getCameraClipPlanes,
@@ -58,9 +63,13 @@ export function ExperienceScene({
     isCoarsePointer
   );
   const bodies = catalog.bodies;
-  const sunBody = bodies.find((body) => body.id === 'sun');
+  const bodiesById = new Map(bodies.map((body) => [body.id, body]));
+  const sunBody = bodies.find((body) => isStar(body.id));
   const sunPosition = sunBody?.position ?? [0, 0, 0];
-  const earthPosition = bodies.find((body) => body.id === 'earth')?.position ?? null;
+  const getTidalLockTargetPosition = (bodyId: BodyId) => {
+    const targetBodyId = getTidalLockTargetBody(bodyId);
+    return targetBodyId ? bodiesById.get(targetBodyId)?.position ?? null : null;
+  };
   const initialAspect = getInitialCameraAspect();
 
   return (
@@ -112,7 +121,7 @@ export function ExperienceScene({
           focused={body.id === focusedBodyId}
           onSelect={onFocusBody}
           sunPosition={sunPosition}
-          tidalLockTargetPosition={body.id === 'moon' ? earthPosition : null}
+          tidalLockTargetPosition={getTidalLockTargetPosition(body.id)}
         />
       ))}
       <PostProcessing />

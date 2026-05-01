@@ -1,7 +1,7 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, useState } from 'react';
 import { Vector3 } from 'three';
-import { type BodyDefinition, type BodyId } from '../domain/body';
+import { isStar, type BodyDefinition, type BodyId } from '../domain/body';
 import { BodyIndicator, INDICATOR_THRESHOLDS } from './BodyIndicator';
 
 type BodyIndicatorsProps = {
@@ -16,7 +16,7 @@ const tempVec = new Vector3();
 /**
  * Manages all body indicators in the scene.
  * Computes screen-space radii and visibility per body.
- * Excludes the Sun since it has its own impostor handling.
+ * Excludes stars since they have their own impostor handling.
  */
 export function BodyIndicators({
   bodies,
@@ -27,9 +27,8 @@ export function BodyIndicators({
   const [visibilityMap, setVisibilityMap] = useState<Map<BodyId, boolean>>(new Map());
   const lastVisibilityRef = useRef<Map<BodyId, boolean>>(new Map());
 
-  // Filter out the Sun - it has its own impostor
   const indicatorBodies = useMemo(
-    () => bodies.filter((body) => body.id !== 'sun'),
+    () => bodies.filter((body) => !isStar(body.id)),
     [bodies]
   );
 

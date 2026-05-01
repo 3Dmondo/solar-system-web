@@ -48,13 +48,18 @@ export function createWebBodyCatalogSource({
 
     scaledMetadataPromise = datasetLoader
       .load()
-      .then((dataset) =>
-        mapPhysicalMetadataToScaledBodyMetadata(
+      .then((dataset) => {
+        const loadedBodyIds = new Set(dataset.manifest.bodies.map((body) => body.bodyId))
+        const loadedPresentationMetadata = ephemerisProvider
+          .getBodyMetadata()
+          .filter((metadata) => loadedBodyIds.has(metadata.id))
+
+        return mapPhysicalMetadataToScaledBodyMetadata(
           dataset.bodyMetadata.bodies,
           scale,
-          ephemerisProvider.getBodyMetadata()
+          loadedPresentationMetadata
         )
-      )
+      })
       .catch((error) => {
         scaledMetadataPromise = undefined
         throw error

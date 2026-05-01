@@ -16,6 +16,7 @@ import { useSimulationClock } from './state/useSimulationClock';
 import { SimulationClockContext } from './state/SimulationClockContext';
 import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
 import { transformCatalogToFrame } from '../solar-system/data/referenceFrameTransform';
+import { getReferenceFramesForLoadedBodies } from '../solar-system/domain/referenceFrame';
 
 type SolarSystemExperienceProps = {
   catalogSource?: BodyCatalogSource;
@@ -41,7 +42,7 @@ export function SolarSystemExperience({
   } = useSimulationClock({
     startAt: simulationClockStartAt
   });
-  const { selectedFrame, selectFrame, availableFrames } = useReferenceFrame();
+  const { selectedFrame, selectFrame } = useReferenceFrame();
   const { visibility, toggleLayer, layerConfigs } = useLayerVisibility();
 
   // Load catalog with trails computed relative to the selected reference frame's origin
@@ -56,6 +57,10 @@ export function SolarSystemExperience({
   const catalog = useMemo(
     () => transformCatalogToFrame(baseCatalog, selectedFrame),
     [baseCatalog, selectedFrame]
+  );
+  const availableFrames = useMemo(
+    () => getReferenceFramesForLoadedBodies(baseCatalog.metadata.map((metadata) => metadata.id)),
+    [baseCatalog.metadata]
   );
 
   return (

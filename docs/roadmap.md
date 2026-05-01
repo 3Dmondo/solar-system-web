@@ -246,6 +246,8 @@ Goals:
 Started:
 
 - central current-body registry now drives `BodyId`, NAIF lookups, hierarchy, presentation metadata, and HUD jump-menu grouping
+- curated major-moon registry entries are staged behind loaded-manifest filtering, preserving the current baseline generated-data profile while expanded output is benchmarked
+- reference-frame options now derive from loaded satellite systems, so expanded catalogs can expose parent-centered frames without hard-coding each system into the UI
 
 Deferred until the major-moon path is validated:
 

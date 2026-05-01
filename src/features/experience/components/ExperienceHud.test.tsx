@@ -96,6 +96,11 @@ describe('ExperienceHud', () => {
     );
 
     await user.click(screen.getByRole('button', { name: 'Open jump to bodies' }));
+
+    expect(screen.getByRole('group', { name: 'Quick picks' })).toBeInTheDocument();
+    expect(screen.getByRole('group', { name: 'Solar system' })).toBeInTheDocument();
+    expect(screen.queryByRole('group', { name: 'Earth system' })).not.toBeInTheDocument();
+
     await user.click(screen.getByRole('button', { name: 'Jump to Earth' }));
 
     expect(onFocusBody).toHaveBeenCalledWith('earth');

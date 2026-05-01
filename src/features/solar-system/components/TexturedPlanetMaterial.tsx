@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { type BodyId } from '../domain/body'
+import { isStar, type BodyId } from '../domain/body'
 import { useWorldSpaceLighting } from '../hooks/useWorldSpaceLighting'
 import { loadBodyTexture } from '../rendering/bodyTextures'
 import { setupBasicDiffuseMaterial, type ShaderType } from '../rendering/shaderInjection'
@@ -19,17 +19,17 @@ export function TexturedPlanetMaterial({
   sunPosition
 }: TexturedPlanetMaterialProps) {
   const texture = useMemo(() => loadBodyTexture(bodyId), [bodyId])
-  const isSun = bodyId === 'sun'
+  const isStellarBody = isStar(bodyId)
 
-  // For the Sun, we don't need lighting since it's emissive
+  // For stars, we don't need lighting since they are emissive.
   const { lightDirection, registerShader } = useWorldSpaceLighting({
     bodyPosition,
     sunPosition,
   })
 
-  // Sun uses meshBasicMaterial with emissive appearance (no lighting needed)
-  // Other planets use meshBasicMaterial with custom world-space lighting
-  if (isSun) {
+  // Stars use meshBasicMaterial with emissive appearance (no lighting needed).
+  // Other bodies use meshBasicMaterial with custom world-space lighting.
+  if (isStellarBody) {
     return (
       <meshBasicMaterial
         color="#ffffff"

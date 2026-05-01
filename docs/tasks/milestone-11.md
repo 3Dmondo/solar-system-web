@@ -14,6 +14,9 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Registry entries now carry body category and system-group metadata, with derived current system groups ready for dynamic discovery UI.
 - The HUD now uses a registry-driven discovery-group helper that keeps quick picks first and fills remaining loaded bodies from system groups.
 - Scene star handling, indicator exclusion, textured star material behavior, and satellite tidal-lock targeting now use registry category and hierarchy helpers instead of literal Sun or Moon checks.
+- Extended the registry with the curated major-moon target set, grouped by parent system, with conservative presentation metadata and a shared lit solid material path for bodies without texture assets.
+- The web catalog source now scales presentation metadata only for bodies present in the loaded generated-data manifest, so the current baseline profile remains compatible while the expanded registry is staged.
+- Reference-frame options now derive from loaded satellite systems, preserving the current SSB and Earth-centered baseline while allowing expanded catalogs to expose loaded parent-centered frames.
 - Recorded initial SSD catalog-backed kernel shortlist and download-size tradeoffs from the local `SpiceNet` snapshot.
 - Ran the first `Spice.SsdCatalog` kernel inspection and fallback pass and recorded `C:\Dev\repos\3Dmondo\SpiceNet\docs\SsdCatalog\kernel_inspection.json`.
 - Confirmed the inspected compact and sub-500 MB fallback satellite candidates are not enough for the full `1950-2050` major-moon target window.
@@ -57,7 +60,7 @@ Deferred until the major-moon path is validated:
 - [x] Derive current jump-menu groups from registry metadata instead of a separate component-local body list.
 - [x] Add registry-driven body category and system-group metadata for the current body set.
 - [x] Add a registry-driven discovery-group helper for loaded body ids.
-- [ ] Extend the central registry with the curated major-moon body set after expanded kernel coverage is chosen.
+- [x] Extend the central registry with the curated major-moon body set after expanded kernel coverage is chosen.
 - [ ] Replace hard-coded body assumptions in the web app with registry lookups where the larger catalog needs dynamic behavior.
 - [ ] Preserve schema-1 ephemeris parsing for the current generated dataset.
 - [ ] Add schema-2 parsing only if the expanded generated data needs repeated SPK provenance, parent body ids, body categories, or other manifest fields that do not fit the current schema.
@@ -105,7 +108,7 @@ Coverage and benchmark notes:
 ### Phase 3: Web Runtime Integration
 
 - [ ] Consume the expanded generated profile through the existing static asset flow after the benchmark passes.
-- [ ] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
+- [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
 - [ ] Update body labels and indicators so crowded planet systems remain readable on desktop and mobile.
 - [ ] Add optional moon visibility or filtering in the existing layer or control surface if the default overview becomes visually noisy.
@@ -128,7 +131,7 @@ Coverage and benchmark notes:
 ### Phase 6: Lower-Priority Richer Exploration Proposal
 
 - [ ] Add dynamic system views for loaded parent bodies with satellites, starting with Jupiter and Saturn.
-- [ ] Let the reference-frame selector offer relevant loaded body-centered frames instead of only SSB and Earth.
+- [x] Let the reference-frame selector offer relevant loaded body-centered frames instead of only SSB and Earth.
 - [ ] Add a local-system focus mode that makes moons, local trails, and parent-relative motion easier to inspect without changing the global overview default.
 
 ### Phase 7: Docs And Closeout

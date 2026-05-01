@@ -2,7 +2,6 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   DEFAULT_REFERENCE_FRAME_ID,
   getReferenceFrame,
-  REFERENCE_FRAMES,
   type ReferenceFrameId
 } from '../../solar-system/domain/referenceFrame';
 
@@ -34,8 +33,7 @@ export function useReferenceFrame(
     selectedFrameId,
     selectedFrame,
     selectFrame,
-    resetToDefault,
-    availableFrames: REFERENCE_FRAMES
+    resetToDefault
   };
 }
 

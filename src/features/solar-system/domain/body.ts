@@ -1,32 +1,124 @@
 export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon' | 'venus';
 
+export type BodyCategory = 'star' | 'planet' | 'natural-satellite';
+
+type BodyJumpGroupId = 'quick-picks' | 'inner-planets' | 'outer-planets';
+type BodySystemGroupId =
+  | 'solar-system'
+  | 'earth-system'
+  | 'mars-system'
+  | 'jupiter-system'
+  | 'saturn-system'
+  | 'uranus-system'
+  | 'neptune-system';
+
 type BodyRegistryEntry = {
   naifBodyId: number;
   parentId: string | null;
+  category: BodyCategory;
+  systemGroupId: BodySystemGroupId;
   displayName: string;
   color: string;
   material?: BodyMaterial;
   radius: number;
   defaultTrailWindowDays?: number;
   trailSampleRateMultiplier?: number;
+  jumpGroups?: BodyJumpGroupId[];
   focusOffset: [number, number, number];
   hasRings?: boolean;
 };
+
+const BODY_JUMP_GROUP_DEFINITIONS: Array<{ id: BodyJumpGroupId; label: string }> = [
+  {
+    id: 'quick-picks',
+    label: 'Quick picks'
+  }
+];
+
+const BODY_SYSTEM_GROUP_DEFINITIONS: Array<{ id: BodySystemGroupId; label: string }> = [
+  {
+    id: 'solar-system',
+    label: 'Solar system'
+  },
+  {
+    id: 'earth-system',
+    label: 'Earth system'
+  },
+  {
+    id: 'mars-system',
+    label: 'Mars system'
+  },
+  {
+    id: 'jupiter-system',
+    label: 'Jupiter system'
+  },
+  {
+    id: 'saturn-system',
+    label: 'Saturn system'
+  },
+  {
+    id: 'uranus-system',
+    label: 'Uranus system'
+  },
+  {
+    id: 'neptune-system',
+    label: 'Neptune system'
+  }
+];
+
+function majorMoonEntry({
+  naifBodyId,
+  parentId,
+  systemGroupId,
+  displayName,
+  color,
+  radius,
+  defaultTrailWindowDays,
+  trailSampleRateMultiplier = 6
+}: {
+  naifBodyId: number;
+  parentId: string;
+  systemGroupId: BodySystemGroupId;
+  displayName: string;
+  color: string;
+  radius: number;
+  defaultTrailWindowDays: number;
+  trailSampleRateMultiplier?: number;
+}): BodyRegistryEntry {
+  return {
+    naifBodyId,
+    parentId,
+    category: 'natural-satellite',
+    systemGroupId,
+    displayName,
+    color,
+    material: 'basic',
+    radius,
+    defaultTrailWindowDays,
+    trailSampleRateMultiplier,
+    focusOffset: [0, Math.max(0.03, radius * 0.5), Math.max(0.55, radius * 7.7)]
+  };
+}
 
 export const BODY_REGISTRY = {
   sun: {
     naifBodyId: 10,
     parentId: null,
+    category: 'star',
+    systemGroupId: 'solar-system',
     displayName: 'Sun',
     color: '#ffd27a',
     material: 'sun',
     radius: 2.6,
     defaultTrailWindowDays: 0,
+    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.7, 8.8]
   },
   mercury: {
     naifBodyId: 199,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Mercury',
     color: '#9f9183',
     radius: 0.25,
@@ -37,6 +129,8 @@ export const BODY_REGISTRY = {
   venus: {
     naifBodyId: 299,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Venus',
     color: '#d2a777',
     material: 'venus',
@@ -48,28 +142,36 @@ export const BODY_REGISTRY = {
   earth: {
     naifBodyId: 399,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Earth',
     color: '#3a7bd5',
     material: 'earth',
     radius: 0.72,
     defaultTrailWindowDays: 365,
     trailSampleRateMultiplier: 2,
+    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.25, 3.2]
   },
   moon: {
     naifBodyId: 301,
     parentId: 'earth',
+    category: 'natural-satellite',
+    systemGroupId: 'earth-system',
     displayName: 'Moon',
     color: '#b0b4be',
     material: 'moon',
     radius: 0.22,
     defaultTrailWindowDays: 27,
     trailSampleRateMultiplier: 5,
+    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.12, 1.7]
   },
   mars: {
     naifBodyId: 499,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Mars',
     color: '#bf6c4e',
     radius: 0.38,
@@ -77,44 +179,243 @@ export const BODY_REGISTRY = {
     trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.14, 2.2]
   },
+  phobos: majorMoonEntry({
+    naifBodyId: 401,
+    parentId: 'mars',
+    systemGroupId: 'mars-system',
+    displayName: 'Phobos',
+    color: '#8c7467',
+    radius: 0.055,
+    defaultTrailWindowDays: 1,
+    trailSampleRateMultiplier: 10
+  }),
+  deimos: majorMoonEntry({
+    naifBodyId: 402,
+    parentId: 'mars',
+    systemGroupId: 'mars-system',
+    displayName: 'Deimos',
+    color: '#9a8778',
+    radius: 0.045,
+    defaultTrailWindowDays: 2,
+    trailSampleRateMultiplier: 10
+  }),
   jupiter: {
     naifBodyId: 599,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Jupiter',
     color: '#c9a678',
     radius: 1.55,
     defaultTrailWindowDays: 4_332,
     focusOffset: [0, 0.52, 6.4]
   },
+  io: majorMoonEntry({
+    naifBodyId: 501,
+    parentId: 'jupiter',
+    systemGroupId: 'jupiter-system',
+    displayName: 'Io',
+    color: '#d6c76a',
+    radius: 0.18,
+    defaultTrailWindowDays: 2,
+    trailSampleRateMultiplier: 10
+  }),
+  europa: majorMoonEntry({
+    naifBodyId: 502,
+    parentId: 'jupiter',
+    systemGroupId: 'jupiter-system',
+    displayName: 'Europa',
+    color: '#d7c5ad',
+    radius: 0.16,
+    defaultTrailWindowDays: 4,
+    trailSampleRateMultiplier: 8
+  }),
+  ganymede: majorMoonEntry({
+    naifBodyId: 503,
+    parentId: 'jupiter',
+    systemGroupId: 'jupiter-system',
+    displayName: 'Ganymede',
+    color: '#a99078',
+    radius: 0.24,
+    defaultTrailWindowDays: 8,
+    trailSampleRateMultiplier: 8
+  }),
+  callisto: majorMoonEntry({
+    naifBodyId: 504,
+    parentId: 'jupiter',
+    systemGroupId: 'jupiter-system',
+    displayName: 'Callisto',
+    color: '#796b62',
+    radius: 0.22,
+    defaultTrailWindowDays: 17,
+    trailSampleRateMultiplier: 6
+  }),
   saturn: {
     naifBodyId: 699,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Saturn',
     color: '#cdb075',
     material: 'saturn',
     radius: 1.35,
     defaultTrailWindowDays: 8_000,
+    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.45, 5.8],
     hasRings: true
   },
+  mimas: majorMoonEntry({
+    naifBodyId: 601,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Mimas',
+    color: '#bdb7aa',
+    radius: 0.06,
+    defaultTrailWindowDays: 1,
+    trailSampleRateMultiplier: 10
+  }),
+  enceladus: majorMoonEntry({
+    naifBodyId: 602,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Enceladus',
+    color: '#dfe3e4',
+    radius: 0.075,
+    defaultTrailWindowDays: 2,
+    trailSampleRateMultiplier: 10
+  }),
+  tethys: majorMoonEntry({
+    naifBodyId: 603,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Tethys',
+    color: '#c9c3b9',
+    radius: 0.09,
+    defaultTrailWindowDays: 2,
+    trailSampleRateMultiplier: 10
+  }),
+  dione: majorMoonEntry({
+    naifBodyId: 604,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Dione',
+    color: '#beb8ae',
+    radius: 0.095,
+    defaultTrailWindowDays: 3,
+    trailSampleRateMultiplier: 8
+  }),
+  rhea: majorMoonEntry({
+    naifBodyId: 605,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Rhea',
+    color: '#b4afa5',
+    radius: 0.12,
+    defaultTrailWindowDays: 5,
+    trailSampleRateMultiplier: 8
+  }),
+  titan: majorMoonEntry({
+    naifBodyId: 606,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Titan',
+    color: '#c7934e',
+    radius: 0.24,
+    defaultTrailWindowDays: 16,
+    trailSampleRateMultiplier: 6
+  }),
+  iapetus: majorMoonEntry({
+    naifBodyId: 608,
+    parentId: 'saturn',
+    systemGroupId: 'saturn-system',
+    displayName: 'Iapetus',
+    color: '#9d9182',
+    radius: 0.115,
+    defaultTrailWindowDays: 79,
+    trailSampleRateMultiplier: 4
+  }),
   uranus: {
     naifBodyId: 799,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Uranus',
     color: '#92c9d6',
     radius: 0.92,
     defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.3, 4]
   },
+  ariel: majorMoonEntry({
+    naifBodyId: 701,
+    parentId: 'uranus',
+    systemGroupId: 'uranus-system',
+    displayName: 'Ariel',
+    color: '#bfc7ca',
+    radius: 0.095,
+    defaultTrailWindowDays: 3,
+    trailSampleRateMultiplier: 8
+  }),
+  umbriel: majorMoonEntry({
+    naifBodyId: 702,
+    parentId: 'uranus',
+    systemGroupId: 'uranus-system',
+    displayName: 'Umbriel',
+    color: '#777d82',
+    radius: 0.095,
+    defaultTrailWindowDays: 4,
+    trailSampleRateMultiplier: 8
+  }),
+  titania: majorMoonEntry({
+    naifBodyId: 703,
+    parentId: 'uranus',
+    systemGroupId: 'uranus-system',
+    displayName: 'Titania',
+    color: '#a5adb0',
+    radius: 0.13,
+    defaultTrailWindowDays: 9,
+    trailSampleRateMultiplier: 6
+  }),
+  oberon: majorMoonEntry({
+    naifBodyId: 704,
+    parentId: 'uranus',
+    systemGroupId: 'uranus-system',
+    displayName: 'Oberon',
+    color: '#928a83',
+    radius: 0.125,
+    defaultTrailWindowDays: 14,
+    trailSampleRateMultiplier: 6
+  }),
+  miranda: majorMoonEntry({
+    naifBodyId: 705,
+    parentId: 'uranus',
+    systemGroupId: 'uranus-system',
+    displayName: 'Miranda',
+    color: '#aeb6b8',
+    radius: 0.065,
+    defaultTrailWindowDays: 2,
+    trailSampleRateMultiplier: 10
+  }),
   neptune: {
     naifBodyId: 899,
     parentId: 'sun',
+    category: 'planet',
+    systemGroupId: 'solar-system',
     displayName: 'Neptune',
     color: '#557fda',
     radius: 0.88,
     defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.28, 3.8]
-  }
+  },
+  triton: majorMoonEntry({
+    naifBodyId: 801,
+    parentId: 'neptune',
+    systemGroupId: 'neptune-system',
+    displayName: 'Triton',
+    color: '#b9bec5',
+    radius: 0.16,
+    defaultTrailWindowDays: 6,
+    trailSampleRateMultiplier: 8
+  })
 } satisfies Record<string, BodyRegistryEntry>;
 
 export type BodyId = keyof typeof BODY_REGISTRY;
@@ -123,20 +424,57 @@ export type ViewTargetId = BodyId | 'overview';
 
 export const BODY_IDS = Object.keys(BODY_REGISTRY) as BodyId[];
 
-export const BODY_JUMP_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> = [
-  {
-    label: 'Quick picks',
-    bodyIds: ['sun', 'earth', 'moon', 'saturn']
-  },
-  {
-    label: 'Inner planets',
-    bodyIds: ['mercury', 'venus', 'mars']
-  },
-  {
-    label: 'Outer planets',
-    bodyIds: ['jupiter', 'uranus', 'neptune']
+export const BODY_JUMP_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> =
+  BODY_JUMP_GROUP_DEFINITIONS.map(({ id, label }) => ({
+    label,
+    bodyIds: BODY_IDS.filter((bodyId) =>
+      getBodyRegistryEntry(bodyId).jumpGroups?.includes(id)
+    )
+  })).filter((group) => group.bodyIds.length > 0);
+
+export const BODY_SYSTEM_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> =
+  BODY_SYSTEM_GROUP_DEFINITIONS.map(({ id, label }) => ({
+    label,
+    bodyIds: BODY_IDS.filter((bodyId) => getBodyRegistryEntry(bodyId).systemGroupId === id)
+  })).filter((group) => group.bodyIds.length > 0);
+
+export function getBodyDiscoveryGroups(availableBodyIds: Iterable<BodyId>) {
+  const availableBodyIdSet = new Set(availableBodyIds);
+  const groupedBodyIds = new Set<BodyId>();
+  const groups: Array<{ label: string; bodyIds: BodyId[] }> = [];
+
+  for (const group of BODY_JUMP_GROUPS) {
+    const bodyIds = group.bodyIds.filter((bodyId) => availableBodyIdSet.has(bodyId));
+
+    if (bodyIds.length === 0) {
+      continue;
+    }
+
+    groups.push({
+      label: group.label,
+      bodyIds
+    });
+    bodyIds.forEach((bodyId) => groupedBodyIds.add(bodyId));
   }
-];
+
+  for (const group of BODY_SYSTEM_GROUPS) {
+    const bodyIds = group.bodyIds.filter(
+      (bodyId) => availableBodyIdSet.has(bodyId) && !groupedBodyIds.has(bodyId)
+    );
+
+    if (bodyIds.length === 0) {
+      continue;
+    }
+
+    groups.push({
+      label: group.label,
+      bodyIds
+    });
+    bodyIds.forEach((bodyId) => groupedBodyIds.add(bodyId));
+  }
+
+  return groups;
+}
 
 const bodyIdsByNaifId = new Map<number, BodyId>(
   BODY_IDS.map((bodyId) => [BODY_REGISTRY[bodyId].naifBodyId, bodyId])
@@ -152,6 +490,14 @@ export function getNaifBodyId(bodyId: BodyId) {
 
 export function getBodyIdForNaifBodyId(naifBodyId: number) {
   return bodyIdsByNaifId.get(naifBodyId);
+}
+
+export function getBodyCategory(bodyId: BodyId) {
+  return getBodyRegistryEntry(bodyId).category;
+}
+
+export function isStar(bodyId: BodyId): boolean {
+  return getBodyCategory(bodyId) === 'star';
 }
 
 export type BodyMetadata = {
@@ -255,8 +601,7 @@ export const BODY_HIERARCHY = BODY_IDS.reduce(
  * Returns true if the body is a satellite (orbits a non-Sun body).
  */
 export function isSatellite(bodyId: BodyId): boolean {
-  const parent = BODY_HIERARCHY[bodyId];
-  return parent !== null && parent !== 'sun';
+  return getBodyCategory(bodyId) === 'natural-satellite';
 }
 
 /**
@@ -264,6 +609,10 @@ export function isSatellite(bodyId: BodyId): boolean {
  */
 export function getParentBody(bodyId: BodyId): BodyId | null {
   return BODY_HIERARCHY[bodyId];
+}
+
+export function getTidalLockTargetBody(bodyId: BodyId): BodyId | null {
+  return isSatellite(bodyId) ? getParentBody(bodyId) : null;
 }
 
 export type BodySnapshot = {

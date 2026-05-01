@@ -1,19 +1,26 @@
-import type { BodyId } from './body';
+import {
+  BODY_IDS,
+  getBodyRegistryEntry,
+  getParentBody,
+  isSatellite,
+  type BodyId
+} from './body';
 
 /**
  * Reference frame identifiers.
  * - 'ssb': Solar System Barycenter (true gravitational center)
- * - 'earth': Earth-centered frame
+ * - Body ids: centered on a loaded body, currently exposed for loaded parent systems
  *
- * Extensible to other body-centered frames in the future.
+ * `earth` remains the current baseline body-centered frame id.
  */
-export type ReferenceFrameId = 'ssb' | 'earth';
+export type ReferenceFrameId = 'ssb' | BodyId;
 
 /**
  * Reference frame definition.
  */
 export type ReferenceFrame = {
   id: ReferenceFrameId;
+  shortLabel: string;
   displayName: string;
   description: string;
   /**
@@ -26,19 +33,17 @@ export type ReferenceFrame = {
 /**
  * All available reference frames.
  */
+const SSB_REFERENCE_FRAME: ReferenceFrame = {
+  id: 'ssb',
+  shortLabel: 'SSB',
+  displayName: 'Solar System Barycenter',
+  description: 'View centered on the solar system center of mass',
+  originBodyId: null
+};
+
 export const REFERENCE_FRAMES: ReferenceFrame[] = [
-  {
-    id: 'ssb',
-    displayName: 'Solar System Barycenter',
-    description: 'View centered on the solar system center of mass',
-    originBodyId: null
-  },
-  {
-    id: 'earth',
-    displayName: 'Earth-centered',
-    description: 'View centered on Earth, showing apparent motion',
-    originBodyId: 'earth'
-  }
+  SSB_REFERENCE_FRAME,
+  createBodyCenteredReferenceFrame('earth')
 ];
 
 /**
@@ -50,11 +55,47 @@ export const DEFAULT_REFERENCE_FRAME_ID: ReferenceFrameId = 'ssb';
  * Look up a reference frame by ID.
  */
 export function getReferenceFrame(id: ReferenceFrameId): ReferenceFrame {
-  const frame = REFERENCE_FRAMES.find((f) => f.id === id);
-  if (!frame) {
+  if (id === 'ssb') {
+    return SSB_REFERENCE_FRAME;
+  }
+
+  if (!isBodyId(id)) {
     throw new Error(`Unknown reference frame: ${id}`);
   }
-  return frame;
+
+  return createBodyCenteredReferenceFrame(id);
+}
+
+/**
+ * Build the frame menu for the currently loaded catalog. The baseline catalog
+ * keeps Earth-centered available through the Moon, while expanded catalogs add
+ * parent system centers such as Mars, Jupiter, Saturn, Uranus, and Neptune when
+ * their satellites are loaded.
+ */
+export function getReferenceFramesForLoadedBodies(
+  availableBodyIds: Iterable<BodyId>
+): ReferenceFrame[] {
+  const availableBodyIdSet = new Set(availableBodyIds);
+  const centeredBodyIds = new Set<BodyId>();
+
+  for (const bodyId of availableBodyIdSet) {
+    if (!isSatellite(bodyId)) {
+      continue;
+    }
+
+    const parentId = getParentBody(bodyId);
+
+    if (parentId && availableBodyIdSet.has(parentId)) {
+      centeredBodyIds.add(parentId);
+    }
+  }
+
+  return [
+    SSB_REFERENCE_FRAME,
+    ...BODY_IDS.filter((bodyId) => centeredBodyIds.has(bodyId)).map((bodyId) =>
+      createBodyCenteredReferenceFrame(bodyId)
+    )
+  ];
 }
 
 /**
@@ -63,4 +104,20 @@ export function getReferenceFrame(id: ReferenceFrameId): ReferenceFrame {
  */
 export function frameRequiresTransformation(frame: ReferenceFrame): boolean {
   return frame.originBodyId !== null;
+}
+
+function createBodyCenteredReferenceFrame(bodyId: BodyId): ReferenceFrame {
+  const body = getBodyRegistryEntry(bodyId);
+
+  return {
+    id: bodyId,
+    shortLabel: body.displayName,
+    displayName: `${body.displayName}-centered`,
+    description: `View centered on ${body.displayName}`,
+    originBodyId: bodyId
+  };
+}
+
+function isBodyId(value: string): value is BodyId {
+  return (BODY_IDS as string[]).includes(value);
 }

@@ -26,7 +26,7 @@ export function ReferenceFrameSelector({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const selectedFrame = availableFrames.find((f) => f.id === selectedFrameId);
-  const shortLabel = selectedFrameId === 'ssb' ? 'SSB' : 'Earth';
+  const shortLabel = selectedFrame?.shortLabel ?? selectedFrameId;
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded((prev) => !prev);
