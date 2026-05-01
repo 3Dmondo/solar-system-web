@@ -1,5 +1,9 @@
 export const runtimeDebugMetricDefinitions = [
   { id: 'clockAdvancement', label: 'Clock' },
+  { id: 'ephemerisManifestLoad', label: 'Manifest' },
+  { id: 'ephemerisMetadataLoad', label: 'Metadata' },
+  { id: 'ephemerisChunkLoad', label: 'Chunk load' },
+  { id: 'ephemerisChunkParse', label: 'Chunk parse' },
   { id: 'catalogRefresh', label: 'Catalog' },
   { id: 'ephemerisSnapshotGeneration', label: 'Snapshot' },
   { id: 'trailGeneration', label: 'Trails' },

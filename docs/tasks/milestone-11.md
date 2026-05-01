@@ -36,6 +36,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Manual visual inspection of the retained reduced-preview moons passed: positions and orbiting animations looked acceptable, including the diagnostic-flagged Umbriel, Titania, and Rhea.
 - Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn still need runtime measurement.
 - Tuned runtime chunk prefetch and cache budgeting so reduced-profile previews can keep the active chunk, next chunk, and loaded-catalog trail-history chunks ready without relying on the old fixed two-previous-chunk assumption.
+- Added debug-only browser timing hooks for manifest load, metadata load, chunk JSON load, chunk parse, and JS heap display so the user-run reduced preview can record startup, prefetch, boundary, and memory observations without adopting generated assets.
+- The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.
 
 ## Goal
 
@@ -168,7 +170,7 @@ Reduced expanded configured-cadence benchmark:
 
 - Command source: direct `dotnet run --project C:\Dev\repos\3Dmondo\SpiceNet\Spice.WebDataGenerator\Spice.WebDataGenerator.csproj` configured-cadence run with the reduced body list and cached retained-system kernels: `de440s.bsp`, `jup365.bsp`, `sat427l.bsp`, `ura111.bsp`, and `Triton.nep097.30kyr.bsp`.
 - Report: `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons-reduced\configured-cadence-benchmark.json`
-- Staged preview: `public/ephemeris/generated-expanded-major-moons/` from `scripts/Stage-ExpandedMajorMoonsPreview.ps1 -SpiceNetOutputRoot ..\SpiceNet\artifacts\web-data\expanded-major-moons-reduced`
+- Staged preview: `public/ephemeris/generated-expanded-major-moons/` from `scripts/Stage-ExpandedMajorMoonsPreview.ps1`, which now defaults to `..\SpiceNet\artifacts\web-data\expanded-major-moons-reduced`
 - Generated output: `61,505,612` bytes raw, `29,410,904` bytes gzip, across `8` chunks and `19` bodies.
 - Largest generated chunk from the report: `chunk-1951-1976.json`, `7,753,817` bytes raw, `3,701,650` bytes gzip.
 - Local gzip recompression of the staged preview measured the same raw total and `29,608,359` bytes gzip total, with `chunk-1951-1976.json` largest at `3,728,872` gzip bytes.
@@ -196,6 +198,24 @@ Runtime chunk prefetch and cache budget:
 - The reduced `1` year chunk profile would budget roughly `27` chunks by default for `25` years of loaded trail history plus active and next chunks, avoiding unbounded growth while keeping long trails warm.
 - Reverse-direction prefetch remains a planned follow-up because the current simulation clock does not yet expose reverse playback direction to the catalog source.
 
+Reduced preview staging guard:
+
+- `scripts/Stage-ExpandedMajorMoonsPreview.ps1` now defaults to `..\SpiceNet\artifacts\web-data\expanded-major-moons-reduced`.
+- The script rejects staged manifests containing Milestone 13 fast-moon ids `401`, `402`, `501`, `502`, `601`, `602`, `603`, `604`, `701`, or `705` unless `-AllowMilestone13FastMoons` is passed.
+- This preserves the long-term registry entries while keeping Milestone 11 discovery groups, indicators, labels, focus targets, and adoption checks limited to the loaded reduced manifest.
+
+Reduced preview browser validation protocol:
+
+- User-run preview command: run `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1`, set `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`, then run the dev server; if using `pnpm preview`, set the env before `pnpm build` because Vite embeds `import.meta.env` at build time.
+- Keep `public/ephemeris/generated-expanded-major-moons/*.json` ignored unless adoption gates pass; browser validation should record observations, not version generated preview assets.
+- Use `/debug` for timing and heap sampling. The overlay reports FPS, JS heap when the browser exposes `performance.memory`, and average/max timing windows for manifest load, metadata load, chunk JSON load, chunk parse, catalog refresh, trail generation, scene-space mapping, and scene update.
+- Use browser DevTools Network alongside the overlay to record per-resource transfer details for `manifest.json`, `body-metadata.json`, the first active chunk, and adjacent chunk prefetches. Do one cold reload with cache disabled and one warm reload with cache enabled.
+- Startup timing pass: open `/debug` and record manifest, metadata, first chunk, adjacent prefetch, first ready scene, FPS, and JS heap. With the current debug default timestamp, the active expanded chunk should be `chunk-2026-2051.json`.
+- Previous-boundary playback pass: open `/debug?startAt=2000-12-31T11:59:30Z`, cross the `2001-01-01T12:00:00Z` boundary at `1x`, then repeat at `1m/s` and `1h/s` from nearby start times if the transition is too slow or too fast to inspect.
+- Next-boundary playback pass: open `/debug?startAt=2025-12-31T11:59:30Z`, cross the `2026-01-01T12:00:00Z` boundary at `1x`, then repeat at `1m/s` and `1h/s`.
+- Memory observation points: after initial ready scene, after first retained-moon focus, after opening Jupiter, Saturn, Uranus, and Neptune systems through the jump menu, after each chunk-boundary crossing, and after several minutes of playback.
+- UX observation points: jump menu fit on desktop and coarse-pointer layouts, labels and indicators in crowded moon systems, direct picking, focus transitions, parent-relative trails, trail continuity across boundaries, and recovery to overview.
+
 Expanded benchmark problem list:
 
 - Kilometer error is not directly a user-experience metric. The next reduced-profile benchmark must translate error into local orbit fraction and screen-space displacement for typical overview and focused camera distances.
@@ -209,8 +229,8 @@ Expanded benchmark problem list:
 ### Phase 3: Web Runtime Integration
 
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
-- [ ] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
-- [ ] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
+- [x] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
+- [x] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
 - [ ] Consume the reduced expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.

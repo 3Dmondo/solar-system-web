@@ -285,7 +285,9 @@ export function createWebEphemerisProvider({
       fetchImpl
     )
       .then((rawChunk) => {
-        const parsedChunk = parseWebEphemerisChunk(rawChunk, dataset.manifest)
+        const parsedChunk = measureRuntimeDebugMetric('ephemerisChunkParse', () =>
+          parseWebEphemerisChunk(rawChunk, dataset.manifest)
+        )
         if (chunkCache.get(cacheKey) === chunkPromise) {
           loadedChunkCache.set(cacheKey, parsedChunk)
         }
@@ -397,13 +399,15 @@ function getPrefetchChunkRanges(
 }
 
 async function loadJson(url: string, fetchImpl: typeof fetch) {
-  const response = await fetchImpl(url)
+  return measureRuntimeDebugMetricAsync('ephemerisChunkLoad', async () => {
+    const response = await fetchImpl(url)
 
-  if (!response.ok) {
-    throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`)
-  }
+    if (!response.ok) {
+      throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`)
+    }
 
-  return response.json()
+    return response.json()
+  })
 }
 
 function getRequiredChunkRange(dataset: WebDataset, approximateTdbSecondsFromJ2000: number) {

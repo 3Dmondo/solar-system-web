@@ -2,7 +2,6 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   getRuntimeDebugMetricsSnapshot,
   runtimeDebugMetricDefinitions,
-  setRuntimeDebugMetricsEnabled,
   subscribeRuntimeDebugMetrics
 } from '../debug/runtimeDebugMetrics'
 
@@ -14,19 +13,12 @@ type DebugFpsOverlayProps = {
 
 export function DebugFpsOverlay({ clockStartAt }: DebugFpsOverlayProps) {
   const [framesPerSecond, setFramesPerSecond] = useState<number | null>(null)
+  const [usedJsHeapSizeBytes, setUsedJsHeapSizeBytes] = useState<number | null>(null)
   const runtimeDebugMetrics = useSyncExternalStore(
     subscribeRuntimeDebugMetrics,
     getRuntimeDebugMetricsSnapshot,
     getRuntimeDebugMetricsSnapshot
   )
-
-  useEffect(() => {
-    setRuntimeDebugMetricsEnabled(true)
-
-    return () => {
-      setRuntimeDebugMetricsEnabled(false)
-    }
-  }, [])
 
   useEffect(() => {
     let animationFrameId = 0
@@ -40,6 +32,7 @@ export function DebugFpsOverlay({ clockStartAt }: DebugFpsOverlayProps) {
 
       if (elapsedMs >= sampleWindowMs) {
         setFramesPerSecond(Math.round((frameCount * 1000) / elapsedMs))
+        setUsedJsHeapSizeBytes(getUsedJsHeapSizeBytes())
         frameCount = 0
         sampleStartMs = now
       }
@@ -63,6 +56,9 @@ export function DebugFpsOverlay({ clockStartAt }: DebugFpsOverlayProps) {
       <div className="debug-fps-overlay__hint">Clock mode: per-frame</div>
       <div className="debug-fps-overlay__hint">
         Clock start: {normalizeClockStartAt(clockStartAt) ?? 'wall clock'}
+      </div>
+      <div className="debug-fps-overlay__hint">
+        JS heap: {formatMemorySize(usedJsHeapSizeBytes)}
       </div>
       <div className="debug-fps-overlay__metrics" aria-label="Runtime timing samples">
         {runtimeDebugMetricDefinitions.map(({ id, label }) => {
@@ -99,4 +95,22 @@ function normalizeClockStartAt(clockStartAt?: Date | string) {
 
 function formatMetricDuration(durationMs: number) {
   return `${durationMs.toFixed(durationMs >= 10 ? 0 : 1)}ms`
+}
+
+function getUsedJsHeapSizeBytes() {
+  const memory = (performance as Performance & {
+    memory?: { usedJSHeapSize?: number }
+  }).memory
+
+  return typeof memory?.usedJSHeapSize === 'number'
+    ? memory.usedJSHeapSize
+    : null
+}
+
+function formatMemorySize(bytes: number | null) {
+  if (bytes === null) {
+    return '--'
+  }
+
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }

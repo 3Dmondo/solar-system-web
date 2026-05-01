@@ -1,6 +1,7 @@
 param(
-  [string]$SpiceNetOutputRoot = (Join-Path $PSScriptRoot "..\..\SpiceNet\artifacts\web-data\expanded-major-moons"),
-  [string]$OutputRoot = (Join-Path $PSScriptRoot "..\public\ephemeris\generated-expanded-major-moons")
+  [string]$SpiceNetOutputRoot = (Join-Path $PSScriptRoot "..\..\SpiceNet\artifacts\web-data\expanded-major-moons-reduced"),
+  [string]$OutputRoot = (Join-Path $PSScriptRoot "..\public\ephemeris\generated-expanded-major-moons"),
+  [switch]$AllowMilestone13FastMoons
 )
 
 $ErrorActionPreference = "Stop"
@@ -32,6 +33,16 @@ if (-not (Test-Path -LiteralPath $manifestPath)) {
   throw "Expected expanded profile manifest at '$manifestPath'."
 }
 
+$manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+$deferredFastMoonIds = @(401, 402, 501, 502, 601, 602, 603, 604, 701, 705)
+$manifestBodyIds = @($manifest.Bodies | ForEach-Object { [int]$_.BodyId })
+$includedDeferredFastMoonIds = @($manifestBodyIds | Where-Object { $deferredFastMoonIds -contains $_ })
+
+if ($includedDeferredFastMoonIds.Count -gt 0 -and -not $AllowMilestone13FastMoons) {
+  $blockedIds = ($includedDeferredFastMoonIds | Sort-Object -Unique) -join ", "
+  throw "Refusing to stage expanded preview with Milestone 13 fast-moon ids: $blockedIds. Pass -AllowMilestone13FastMoons only for future sub-day cadence validation."
+}
+
 New-Item -ItemType Directory -Force -Path $outputRootPath | Out-Null
 
 Get-ChildItem -LiteralPath $outputRootPath -Filter "*.json" -File | ForEach-Object {
@@ -47,4 +58,5 @@ $chunkCount = @(Get-ChildItem -LiteralPath $outputRootPath -Filter "chunk-*.json
 
 Write-Host "Staged expanded major-moons preview assets into $outputRootPath"
 Write-Host "Copied manifest.json plus $chunkCount chunk files."
+Write-Host "Preview body count: $($manifestBodyIds.Count)."
 Write-Host "Run pnpm dev with VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons to inspect the preview."

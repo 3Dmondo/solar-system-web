@@ -57,4 +57,4 @@ pnpm preview -- --host
 - CI now downloads non-versioned ephemeris and supporting kernel files during deployment rather than storing them in git.
 - The default `pnpm build` flow remains focused on the web app build; ephemeris generation is still an explicit pre-build step in CI and a separate helper script locally.
 - Local ephemeris generation uses `scripts/Ensure-LocalWebEphemerisData.ps1`, which delegates to the external `SpiceNet` workflow and writes generated manifest or chunk assets into the ignored `public/ephemeris/generated/` folder.
-- Local expanded major-moons inspection uses `scripts/Stage-ExpandedMajorMoonsPreview.ps1` after the sibling `SpiceNet` profile has generated `artifacts/web-data/expanded-major-moons/`.
+- Local expanded major-moons inspection uses `scripts/Stage-ExpandedMajorMoonsPreview.ps1` after the sibling `SpiceNet` profile has generated `artifacts/web-data/expanded-major-moons-reduced/`; the helper rejects Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.

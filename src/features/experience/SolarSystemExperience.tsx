@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo } from 'react';
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
 import { DebugFpsOverlay } from './components/DebugFpsOverlay';
@@ -14,6 +14,7 @@ import {
 } from './state/useResolvedBodyCatalog';
 import { useSimulationClock } from './state/useSimulationClock';
 import { SimulationClockContext } from './state/SimulationClockContext';
+import { setRuntimeDebugMetricsEnabled } from './debug/runtimeDebugMetrics';
 import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
 import { transformCatalogToFrame } from '../solar-system/data/referenceFrameTransform';
 import { getReferenceFramesForLoadedBodies } from '../solar-system/domain/referenceFrame';
@@ -44,6 +45,16 @@ export function SolarSystemExperience({
   });
   const { selectedFrame, selectFrame } = useReferenceFrame();
   const { visibility, toggleLayer, layerConfigs } = useLayerVisibility();
+
+  useLayoutEffect(() => {
+    setRuntimeDebugMetricsEnabled(showDebugOverlay);
+
+    return () => {
+      if (showDebugOverlay) {
+        setRuntimeDebugMetricsEnabled(false);
+      }
+    };
+  }, [showDebugOverlay]);
 
   // Load catalog with trails computed relative to the selected reference frame's origin
   const { catalog: baseCatalog, status, error } = useResolvedBodyCatalog(

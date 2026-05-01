@@ -6,6 +6,10 @@ import {
   parseWebBodyMetadataFile,
   type WebBodyMetadataFile
 } from './webBodyMetadata'
+import {
+  measureRuntimeDebugMetricAsync,
+  type RuntimeDebugMetricId
+} from '../../experience/debug/runtimeDebugMetrics'
 
 export type WebDatasetUrls = {
   manifestUrl: string
@@ -50,8 +54,16 @@ async function loadWebDataset(
   fetchImpl: typeof fetch
 ): Promise<WebDataset> {
   const [manifest, bodyMetadata] = await Promise.all([
-    loadJson(urls.manifestUrl, fetchImpl).then(parseWebEphemerisManifest),
-    loadJson(urls.bodyMetadataUrl, fetchImpl).then(parseWebBodyMetadataFile)
+    loadJson(
+      urls.manifestUrl,
+      fetchImpl,
+      'ephemerisManifestLoad'
+    ).then(parseWebEphemerisManifest),
+    loadJson(
+      urls.bodyMetadataUrl,
+      fetchImpl,
+      'ephemerisMetadataLoad'
+    ).then(parseWebBodyMetadataFile)
   ])
 
   return {
@@ -60,12 +72,18 @@ async function loadWebDataset(
   }
 }
 
-async function loadJson(url: string, fetchImpl: typeof fetch) {
-  const response = await fetchImpl(url)
+async function loadJson(
+  url: string,
+  fetchImpl: typeof fetch,
+  metricId: RuntimeDebugMetricId
+) {
+  return measureRuntimeDebugMetricAsync(metricId, async () => {
+    const response = await fetchImpl(url)
 
-  if (!response.ok) {
-    throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`)
-  }
+    if (!response.ok) {
+      throw new Error(`Failed to load ${url}: ${response.status} ${response.statusText}`)
+    }
 
-  return response.json()
+    return response.json()
+  })
 }
