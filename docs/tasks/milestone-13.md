@@ -6,6 +6,8 @@ Status: Planned
 
 Milestone 13 starts after Milestone 11 validates a reduced expanded major-moon preview. Milestone 11 intentionally defers fast undersampled moons whose orbital periods are too short for the current integer-day cadence floor.
 
+Sub-day profiling, fast-moon tuning, truth-comparison diagnostics for those bodies, and reintroduction of the deferred fast moons belong here rather than in Milestone 11.
+
 ## Goal
 
 Reintroduce fast major moons with sampling dense enough to preserve local orbital motion, focused views, and trails without forcing the rest of the catalog into unnecessarily large assets.
@@ -44,9 +46,11 @@ Reintroduce fast major moons with sampling dense enough to preserve local orbita
 ### Phase 2: Fast Moon Benchmark
 
 - [ ] Define per-body cadence candidates for Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
-- [ ] Run at least three profile variants: conservative, balanced, and high-quality.
+- [ ] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
 - [ ] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
 - [ ] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
+- [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the deferred fast moons.
+- [ ] Inspect whether the original large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 
 ### Phase 3: Runtime And UX Validation
 

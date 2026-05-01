@@ -25,7 +25,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Confirmed the inspected compact and sub-500 MB fallback satellite candidates are not enough for the full `1950-2050` major-moon target window.
 - Ran the first `expanded-major-moons` configured-cadence benchmark from the local SSD cache and recorded generated web-output size plus interpolation error at `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons\configured-cadence-benchmark.json`.
 - The first expanded benchmark is not adoption-ready: output size looks plausible for inspection, but integer-day starter cadences undersample several fast inner moons.
-- Expanded-profile generated assets will not be versioned from the first benchmark output; versioning is deferred until a sub-day or equivalent fast-satellite sampling pass clears the visual-error and browser budget gates.
+- Expanded-profile generated assets will not be versioned from the first benchmark output; the reduced preview must be regenerated without fast moons and then clear visual-error and browser budget gates before any versioning or default-adoption decision.
 - The next Milestone 11 slice will temporarily remove the fast undersampled moons from the expanded preview and keep only slower major moons that are plausible with integer-day cadence. Sub-day support for the removed moons is deferred to Milestone 13.
 - Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
 - Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
@@ -42,7 +42,7 @@ Broaden the solar-system catalog into a fuller explorer, starting with a curated
 - Benchmark generated web output before making the expanded body set the default deployed dataset.
 - Keep the existing Sun, planets, and Moon behavior stable while expanding the catalog.
 - Keep upstream kernels out of git.
-- Do not version the first expanded generated manifest and chunk assets yet; revisit after the next cadence benchmark clears accuracy and browser budget gates.
+- Do not version the first expanded generated manifest and chunk assets yet; revisit only after the reduced generated dataset clears accuracy and browser budget gates.
 
 ## Body Catalog Target
 
@@ -99,23 +99,23 @@ Deferred until the major-moon path is validated:
 - [x] Benchmark expanded output size, largest chunk gzip size, and interpolation error before web runtime adoption.
 - [x] Decide not to version the first expanded-profile manifest and chunks yet; real file sizes are plausible for inspection, but the current cadence benchmark fails fast-moon accuracy gates.
 
-### Phase 2B: Expanded Benchmark And UX Validation
+### Phase 2B: Reduced Expanded Benchmark And UX Validation
 
-- [ ] Add generator support for sub-day cadence inputs or an equivalent fast-satellite sampling strategy before re-benchmarking the fast inner moons.
-- [ ] Run at least three expanded cadence profiles: current integer-day starter profile, targeted fast-moon sub-day profile, and a conservative high-quality profile for visual comparison.
-- [ ] Normalize interpolation error by local orbit scale and on-screen pixel displacement for the worst bodies instead of judging kilometer error alone.
-- [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the worst bodies.
-- [ ] Inspect whether current large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
+- [ ] Regenerate the expanded preview dataset without the Milestone 13 fast-moon set: Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
+- [ ] Record the reduced generated output size, largest chunk gzip size, chunk count, body count, and interpolation error before any web runtime adoption.
+- [ ] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
+- [ ] Build a lightweight truth-comparison or spot-check diagnostic for selected retained moons if reduced-profile interpolation error remains suspicious.
+- [ ] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 - [ ] Benchmark chunk durations separately from cadence: start with `25`, `10`, `5`, and `1` year chunks and record total gzip size, largest chunk gzip size, request count, parse time, and cache churn.
 - [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
 - [ ] Add or tune next and previous chunk preloading when simulation time approaches a chunk boundary, including direction-aware prefetch for reverse or future reverse playback.
 - [ ] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
 - [ ] Compare the current compact JSON plus gzip format against at least one binary numeric-array format before considering protobuf; include transfer size, decode time, parse allocations, implementation complexity, and numeric precision.
 - [ ] Test Float64, Float32, and any proposed quantized or delta-encoded representation against visual error and interpolation error before changing the runtime format.
-- [ ] Measure browser memory on desktop and mobile with the expanded dataset: initial load, after first focus, after opening a dense moon system, after crossing chunk boundaries, and after several minutes of playback.
+- [ ] Measure browser memory on desktop and mobile with the reduced expanded dataset: initial load, after first focus, after opening retained moon systems, after crossing chunk boundaries, and after several minutes of playback.
 - [ ] Track runtime metrics for manifest load, metadata load, first chunk load, adjacent chunk prefetch, catalog refresh, trail resampling, frame time, and JS heap use where browser APIs permit.
-- [ ] Validate expanded-catalog UX on desktop and coarse-pointer layouts: jump menu size, labels, indicators, picking, focus transitions, local-system readability, trail readability, and recovery to overview.
-- [ ] Decide adoption gates before enabling the expanded profile by default, including acceptable visual error, largest chunk gzip size, startup latency, chunk-transition smoothness, and memory budget.
+- [ ] Validate reduced expanded-catalog UX on desktop and coarse-pointer layouts: jump menu size, labels, indicators, picking, focus transitions, local-system readability, trail readability, and recovery to overview.
+- [ ] Decide adoption gates before enabling the reduced expanded profile by default, including acceptable visual error, largest chunk gzip size, startup latency, chunk-transition smoothness, and memory budget.
 
 Initial SSD catalog source:
 
@@ -143,8 +143,8 @@ Coverage and benchmark notes:
 - The common selected-kernel coverage is approximately `1900-01-03T23:58:55Z` through `2100-01-02T23:58:55Z`. With the current year-boundary generator CLI, the widest conservative whole-year expanded range is `--start-year 1901 --end-year 2100`, effectively covering years `1901-2099`.
 - Smaller inspected candidates were rejected because they either did not include the target ids or did not cover the full window: Jupiter compact candidates top out at `jup380s` with only roughly `2015-2030` Galilean coverage; `sat143.bsp` includes the requested Saturn moons but stops around `2019`; inspected Neptune kernels through `nep105.bsp` do not cover Triton `801`.
 - Compare total source download size separately from generated web output size because the upstream SPKs stay out of git and are not shipped directly.
-- Do not version the current expanded-profile `manifest.json` plus chunk files yet. The first measured size is plausible for inspection, but the current integer-day cadence profile fails fast-moon accuracy gates. Revisit versioning after a sub-day or equivalent fast-satellite sampling pass reports acceptable visual error, largest-chunk gzip size, startup latency, chunk-transition behavior, and memory budget.
-- Benchmark generated output size and interpolation error for each accepted candidate set before making the expanded profile the default deployed dataset.
+- Do not version the current expanded-profile `manifest.json` plus chunk files yet. The first measured size is plausible for inspection, but the current integer-day cadence profile fails fast-moon accuracy gates. Revisit versioning only after a reduced profile reports acceptable visual error, largest-chunk gzip size, startup latency, chunk-transition behavior, and memory budget.
+- Benchmark generated output size and interpolation error for the reduced candidate set before making the expanded profile the default deployed dataset.
 
 First expanded configured-cadence benchmark:
 
@@ -155,11 +155,11 @@ First expanded configured-cadence benchmark:
 - Largest chunk: `chunk-2051-2076.json`, `18,148,950` bytes raw, `8,679,876` bytes gzip.
 - The current output size is plausible for local inspection but should not be adopted yet because interpolation errors are too high for fast moons at the current integer-day cadence floor.
 - Worst max position errors in the first pass: Mimas `428,874 km`, Enceladus `192,527 km`, Io `143,310 km`, Miranda `94,262 km`, Tethys `78,103 km`, Phobos `37,518 km`, Dione `25,358 km`, Deimos `24,371 km`, Ariel `17,529 km`, Europa `17,372 km`.
-- Next Milestone 11 profile work should remove those fast undersampled moons from the preview so the remaining catalog can be inspected without known-bad local moon motion. Milestone 13 should add sub-day cadence support or another fast-satellite sampling strategy before reintroducing them.
+- Next Milestone 11 profile work should remove those fast undersampled moons from the generated preview dataset so the remaining catalog can be inspected without known-bad local moon motion. Milestone 13 owns sub-day profiling, fast-moon tuning, truth diagnostics for those bodies, and their reintroduction.
 
 Expanded benchmark problem list:
 
-- Kilometer error is not directly a user-experience metric. The next benchmark must translate error into local orbit fraction and screen-space displacement for typical overview and focused camera distances.
+- Kilometer error is not directly a user-experience metric. The next reduced-profile benchmark must translate error into local orbit fraction and screen-space displacement for typical overview and focused camera distances.
 - A large gzip total can still be acceptable if startup only needs the manifest plus one chunk, but largest chunk size, parse time, and adjacent prefetch cost are the user-facing constraints.
 - Smaller chunks may improve transition loading and RAM pressure but increase request count, manifest size, and edge-case frequency at chunk boundaries.
 - Browser memory must include decoded numeric arrays, parsed JSON objects before compaction or garbage collection, trail caches, generated trail geometry, metadata, textures, and Three.js scene objects.
@@ -170,9 +170,9 @@ Expanded benchmark problem list:
 ### Phase 3: Web Runtime Integration
 
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
-- [ ] Add a reduced Milestone 11 preview profile or filter that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
+- [ ] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
 - [ ] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
-- [ ] Consume the expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
+- [ ] Consume the reduced expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
 - [ ] Update body labels and indicators so crowded planet systems remain readable on desktop and mobile.
@@ -213,11 +213,11 @@ Expanded benchmark problem list:
 4. SpiceNet generator unit tests
 5. SpiceNet metadata export tests
 6. SpiceNet repeated-SPK generation smoke test
-7. SpiceNet configured-cadence benchmark for the expanded body set
+7. SpiceNet configured-cadence benchmark for the reduced expanded body set
 8. Manual visual checks:
    - default overview remains readable on desktop and mobile
    - existing Sun, planets, and Moon behavior is unchanged
-   - major moons appear, can be focused, and have parent-relative trails
+   - retained major moons appear, can be focused, and have parent-relative trails
    - jump menu remains usable with the larger catalog
    - expanded generated assets stay acceptable for static GitHub Pages delivery
 
@@ -231,3 +231,4 @@ Expanded benchmark problem list:
 - Educational context and richer exploration are lower-priority proposals for review, not blockers for the first catalog-expansion pass.
 - Upstream kernels remain non-versioned.
 - The first expanded-profile generated manifest and chunks will not be versioned yet because the measured output came from a cadence profile that failed fast-moon accuracy gates.
+- Milestone 11 no longer owns sub-day profiling, fast-moon tuning, or fast-moon reintroduction; that work belongs to Milestone 13.
