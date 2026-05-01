@@ -8,6 +8,8 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  EPHEMERIS_DATA_RELEASE_TAG: ephemeris-expanded-major-moons-reduced-v1
+  EPHEMERIS_DATA_ASSET_NAME: ephemeris-expanded-major-moons-reduced-v1.zip
 
 permissions:
   contents: read
@@ -26,13 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Checkout SpiceNet
-        uses: actions/checkout@v4
-        with:
-          repository: 3Dmondo/SpiceNet
-          ref: 5326eb028d2d3dde218dc6906cde85c38da3fded
-          path: .tmp/SpiceNet
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -42,11 +37,6 @@ jobs:
           node-version: lts/*
           cache: pnpm
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 10.0.x
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
@@ -55,13 +45,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate ephemeris assets
-        shell: pwsh
+      - name: Download ephemeris assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          ./scripts/Generate-ReducedMajorMoonsDeploymentData.ps1 `
-            -SpiceNetRepoRoot ./\.tmp/SpiceNet `
-            -OutputRoot ./public/ephemeris/generated `
-            -ForceDownload
+          set -euo pipefail
+          mkdir -p .tmp/ephemeris-release public/ephemeris/generated
+          gh release download "$EPHEMERIS_DATA_RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "$EPHEMERIS_DATA_ASSET_NAME" \
+            --dir .tmp/ephemeris-release
+          find public/ephemeris/generated -maxdepth 1 -type f -name '*.json' -delete
+          unzip -q ".tmp/ephemeris-release/$EPHEMERIS_DATA_ASSET_NAME" -d public/ephemeris/generated
+          test -f public/ephemeris/generated/manifest.json
+          node -e "const fs=require('fs'); const manifest=JSON.parse(fs.readFileSync('public/ephemeris/generated/manifest.json','utf8')); const blocked=new Set([401,402,501,502,601,602,603,604,701,705]); const bad=(manifest.Bodies||[]).map((body)=>Number(body.BodyId)).filter((id)=>blocked.has(id)); if (bad.length) { throw new Error('Release ephemeris asset includes deferred fast moon ids: '+bad.join(', ')); } console.log('Loaded release ephemeris body count:', (manifest.Bodies||[]).length);"
 
       - name: Build site
         run: pnpm build
