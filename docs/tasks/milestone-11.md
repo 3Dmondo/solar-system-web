@@ -30,6 +30,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
 - Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
 - Added an opt-in Phase 3 preview path: `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` points at ignored local assets staged by `scripts/Stage-ExpandedMajorMoonsPreview.ps1`, while the default app remains on the baseline generated profile.
+- Ran the reduced `expanded-major-moons` configured-cadence benchmark without the Milestone 13 fast-moon set and staged the ignored local preview assets for browser inspection.
+- The reduced preview is smaller and no longer has the known fast-moon hundred-thousand-kilometer errors, but browser UX, chunk-duration, chunk-boundary, memory, and data-format gates remain open before adoption.
 
 ## Goal
 
@@ -101,9 +103,9 @@ Deferred until the major-moon path is validated:
 
 ### Phase 2B: Reduced Expanded Benchmark And UX Validation
 
-- [ ] Regenerate the expanded preview dataset without the Milestone 13 fast-moon set: Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
-- [ ] Record the reduced generated output size, largest chunk gzip size, chunk count, body count, and interpolation error before any web runtime adoption.
-- [ ] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
+- [x] Regenerate the expanded preview dataset without the Milestone 13 fast-moon set: Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
+- [x] Record the reduced generated output size, largest chunk gzip size, chunk count, body count, and interpolation error before any web runtime adoption.
+- [x] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
 - [ ] Build a lightweight truth-comparison or spot-check diagnostic for selected retained moons if reduced-profile interpolation error remains suspicious.
 - [ ] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 - [ ] Benchmark chunk durations separately from cadence: start with `25`, `10`, `5`, and `1` year chunks and record total gzip size, largest chunk gzip size, request count, parse time, and cache churn.
@@ -156,6 +158,18 @@ First expanded configured-cadence benchmark:
 - The current output size is plausible for local inspection but should not be adopted yet because interpolation errors are too high for fast moons at the current integer-day cadence floor.
 - Worst max position errors in the first pass: Mimas `428,874 km`, Enceladus `192,527 km`, Io `143,310 km`, Miranda `94,262 km`, Tethys `78,103 km`, Phobos `37,518 km`, Dione `25,358 km`, Deimos `24,371 km`, Ariel `17,529 km`, Europa `17,372 km`.
 - Next Milestone 11 profile work should remove those fast undersampled moons from the generated preview dataset so the remaining catalog can be inspected without known-bad local moon motion. Milestone 13 owns sub-day profiling, fast-moon tuning, truth diagnostics for those bodies, and their reintroduction.
+
+Reduced expanded configured-cadence benchmark:
+
+- Command source: direct `dotnet run --project C:\Dev\repos\3Dmondo\SpiceNet\Spice.WebDataGenerator\Spice.WebDataGenerator.csproj` configured-cadence run with the reduced body list and cached retained-system kernels: `de440s.bsp`, `jup365.bsp`, `sat427l.bsp`, `ura111.bsp`, and `Triton.nep097.30kyr.bsp`.
+- Report: `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons-reduced\configured-cadence-benchmark.json`
+- Staged preview: `public/ephemeris/generated-expanded-major-moons/` from `scripts/Stage-ExpandedMajorMoonsPreview.ps1 -SpiceNetOutputRoot ..\SpiceNet\artifacts\web-data\expanded-major-moons-reduced`
+- Generated output: `61,505,612` bytes raw, `29,410,904` bytes gzip, across `8` chunks and `19` bodies.
+- Largest generated chunk from the report: `chunk-1951-1976.json`, `7,753,817` bytes raw, `3,701,650` bytes gzip.
+- Local gzip recompression of the staged preview measured the same raw total and `29,608,359` bytes gzip total, with `chunk-1951-1976.json` largest at `3,728,872` gzip bytes.
+- Retained moon worst max position errors: Rhea `5,017 km`, Titania `4,867 km`, Umbriel `3,654 km`, Ganymede `1,676 km`, Callisto `1,657 km`, Titan `1,519 km`, Triton `1,184 km`, Oberon `1,164 km`, Iapetus `118 km`.
+- Local-orbit normalization from the staged `chunk-2001-2026.json`, using parent-relative mean distance and a `300 px` focused-orbit-radius proxy: Umbriel `1.363%` / `4.1 px`, Titania `1.111%` / `3.3 px`, Rhea `0.946%` / `2.8 px`, Triton `0.333%` / `1.0 px`, Oberon `0.199%` / `0.6 px`, Ganymede `0.155%` / `0.5 px`, Titan `0.124%` / `0.4 px`, Callisto `0.088%` / `0.3 px`, Iapetus `0.003%` / `<0.1 px`.
+- This reduced benchmark clears the first known-bad fast-moon blocker for inspection only. It is not adoption-ready until the remaining browser, chunking, memory, and format gates pass.
 
 Expanded benchmark problem list:
 
