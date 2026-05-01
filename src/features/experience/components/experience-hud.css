@@ -6,196 +6,63 @@
 
 .experience-hud {
   position: absolute;
-  inset: auto 1rem 1rem 1rem;
-  display: flex;
+  inset: auto auto 1rem 1rem;
   z-index: 10;
+  display: flex;
+  max-width: min(18rem, calc(100vw - 2rem));
   flex-direction: column;
   gap: 0.25rem;
-  padding: 0.9rem 1rem;
+  padding: 0.8rem 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
+  border-radius: 0.8rem;
   background: var(--panel);
   backdrop-filter: blur(12px);
   pointer-events: none;
 }
 
-.experience-hud__help-button {
-  position: absolute;
-  top: 0.65rem;
-  right: 0.7rem;
-  width: 1.9rem;
-  height: 1.9rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.experience-hud__overview-button {
-  align-self: flex-start;
-  margin-right: 2.5rem;
-  padding: 0.3rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--text);
-  cursor: pointer;
-  pointer-events: auto;
-  font-size: 0.76rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .experience-hud__title {
-  font-size: 1rem;
+  padding-right: 0;
+  font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding-right: 2.25rem;
+}
+
+.experience-hud__subtitle,
+.experience-hud__status,
+.experience-hud__range-warning {
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .experience-hud__subtitle {
   color: var(--text-muted);
-  font-size: 0.85rem;
-}
-
-.experience-hud__clock {
-  display: grid;
-  gap: 0.1rem;
-  margin-top: 0.2rem;
-  color: var(--text);
-  font-size: 0.76rem;
-}
-
-.experience-hud__clock-label {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.experience-hud__clock-state {
-  color: var(--text-muted);
-  font-size: 0.72rem;
 }
 
 .experience-hud__status {
   color: rgba(255, 214, 153, 0.9);
-  font-size: 0.76rem;
-  line-height: 1.4;
 }
 
-.experience-hud__action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  margin-top: 0.45rem;
-}
-
-.experience-hud__control-button,
-.experience-hud__jump-button,
-.experience-hud__jump-close-button,
-.experience-hud__jump-target-button {
-  padding: 0.3rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 0.76rem;
-  letter-spacing: 0.04em;
-  pointer-events: auto;
-  text-transform: uppercase;
-}
-
-.experience-hud__control-button,
-.experience-hud__jump-button {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.experience-hud__jump-panel {
-  pointer-events: auto;
-  z-index: 12;
-}
-
-.experience-hud__jump-panel--popover {
-  position: absolute;
-  top: calc(100% + 0.55rem);
-  left: 0;
-  width: min(19rem, calc(100vw - 2rem));
-  padding: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1rem;
-  background: rgba(9, 13, 31, 0.96);
-  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.28);
-}
-
-.experience-hud__jump-panel--sheet {
-  position: fixed;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 4.9rem;
-  padding: 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.2rem;
-  background: rgba(9, 13, 31, 0.98);
-  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.35);
-}
-
-.experience-hud__jump-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.experience-hud__jump-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.experience-hud__jump-close-button {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.experience-hud__jump-group {
-  margin-top: 0.9rem;
-}
-
-.experience-hud__jump-group-label {
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.45rem;
-  text-transform: uppercase;
-}
-
-.experience-hud__jump-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.experience-hud__jump-target-button {
-  white-space: nowrap;
-}
-
-.experience-hud__instructions {
-  margin-top: 0.55rem;
+.experience-hud__range-warning {
   display: grid;
-  gap: 0.45rem;
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  line-height: 1.45;
+  gap: 0.18rem;
+  margin-top: 0.2rem;
+  color: rgba(255, 214, 153, 0.96);
+}
+
+.experience-hud__range-title {
+  color: rgba(255, 235, 194, 0.98);
+  font-weight: 700;
 }
 
 @media (min-width: 768px) {
   .experience-hud {
     inset: 1.25rem auto auto 1.25rem;
-    max-width: 18rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .experience-hud {
+    max-width: min(16rem, calc(100vw - 2rem));
   }
 }

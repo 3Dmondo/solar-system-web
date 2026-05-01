@@ -1,8 +1,20 @@
-.layer-panel-container {
+.experience-control-rail {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 16;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.experience-control-rail__item {
   position: relative;
 }
 
-.layer-panel__toggle {
+.experience-control-rail__button,
+.experience-control-rail .fullscreen-button {
+  position: static;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,28 +26,32 @@
   backdrop-filter: blur(12px);
   color: var(--text);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition: background 0.15s, border-color 0.15s;
 }
 
-.layer-panel__toggle:hover,
-.layer-panel__toggle[aria-expanded="true"] {
+.experience-control-rail__button:hover,
+.experience-control-rail__button[aria-expanded="true"],
+.experience-control-rail .fullscreen-button:hover {
   background: rgba(9, 13, 31, 0.95);
   border-color: rgba(255, 255, 255, 0.22);
 }
 
-.layer-panel__toggle:focus-visible {
+.experience-control-rail__button:focus-visible,
+.experience-control-rail .fullscreen-button:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.5);
   outline-offset: 2px;
 }
 
-.layer-panel {
+.experience-control-rail__help-panel {
   position: absolute;
   top: calc(100% + 0.55rem);
   right: 0;
-  width: min(14rem, calc(100vw - 1.5rem));
+  width: min(18rem, calc(100vw - 1.5rem));
   max-height: min(28rem, calc(100vh - 6.25rem));
   overflow-y: auto;
-  padding: 0.75rem;
+  padding: 0.8rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.85rem;
   background: rgba(9, 13, 31, 0.96);
@@ -43,7 +59,7 @@
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
 }
 
-.layer-panel__header {
+.experience-control-rail__panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -53,7 +69,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.layer-panel__title {
+.experience-control-rail__panel-title {
   color: var(--text);
   font-size: 0.74rem;
   font-weight: 700;
@@ -61,7 +77,7 @@
   text-transform: uppercase;
 }
 
-.layer-panel__close {
+.experience-control-rail__panel-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,77 +90,45 @@
   cursor: pointer;
 }
 
-.layer-panel__close:hover {
+.experience-control-rail__panel-close:hover {
   color: var(--text);
   background: rgba(255, 255, 255, 0.09);
 }
 
-.layer-panel__list {
+.experience-control-rail__help-copy {
   display: grid;
-  gap: 0.25rem;
-}
-
-.layer-panel__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.4rem 0.45rem 0.6rem;
-  border: 1px solid transparent;
-  border-radius: 0.55rem;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  text-align: left;
-}
-
-.layer-panel__item:hover,
-.layer-panel__item[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.layer-panel__item:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
-  outline-offset: 2px;
-}
-
-.layer-panel__label {
+  gap: 0.45rem;
+  color: var(--text-muted);
   font-size: 0.82rem;
-}
-
-.layer-panel__check {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 0.4rem;
-  color: var(--text);
-}
-
-.layer-panel__check--on {
-  border-color: rgba(97, 194, 132, 0.75);
-  background: rgba(97, 194, 132, 0.28);
+  line-height: 1.45;
 }
 
 @media (max-width: 767px) {
-  .layer-panel__toggle {
+  .experience-control-rail {
+    top: 0.75rem;
+    right: 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .experience-control-rail__button,
+  .experience-control-rail .fullscreen-button {
     width: 2.75rem;
     height: 2.75rem;
   }
 
-  .layer-panel {
+  .experience-control-rail__help-panel {
     max-height: min(22rem, calc(100vh - 5.5rem));
   }
 }
 
+@media (max-width: 420px) {
+  .experience-control-rail {
+    gap: 0.25rem;
+  }
+}
+
 @media (max-height: 460px) {
-  .layer-panel {
+  .experience-control-rail__help-panel {
     max-height: calc(100vh - 4.75rem);
   }
 }

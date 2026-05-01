@@ -1,84 +1,40 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  type ReferenceFrame,
-  type ReferenceFrameId
-} from '../../solar-system/domain/referenceFrame';
+import { type ReferenceFrame, type ReferenceFrameId } from '../../solar-system/domain/referenceFrame';
 import './reference-frame-selector.css';
 
 type ReferenceFrameSelectorProps = {
+  isExpanded: boolean;
   selectedFrameId: ReferenceFrameId;
   availableFrames: ReferenceFrame[];
+  onClose: () => void;
   onSelectFrame: (frameId: ReferenceFrameId) => void;
+  onToggleExpanded: () => void;
 };
 
-/**
- * Floating selector for choosing the reference frame.
- * Shows a compact button that expands to reveal frame options.
- * Positioned near the layer panel.
- */
 export function ReferenceFrameSelector({
+  isExpanded,
   selectedFrameId,
   availableFrames,
-  onSelectFrame
+  onClose,
+  onSelectFrame,
+  onToggleExpanded
 }: ReferenceFrameSelectorProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const selectedFrame = availableFrames.find((f) => f.id === selectedFrameId);
+  const selectedFrame = availableFrames.find((frame) => frame.id === selectedFrameId);
   const shortLabel = selectedFrame?.shortLabel ?? selectedFrameId;
 
-  const toggleExpanded = useCallback(() => {
-    setIsExpanded((prev) => !prev);
-  }, []);
-
-  const handleSelectFrame = useCallback(
-    (frameId: ReferenceFrameId) => {
-      onSelectFrame(frameId);
-      setIsExpanded(false);
-    },
-    [onSelectFrame]
-  );
-
-  // Close panel when clicking outside
-  useEffect(() => {
-    if (!isExpanded) return;
-
-    const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node | null;
-      if (
-        panelRef.current?.contains(target) ||
-        buttonRef.current?.contains(target)
-      ) {
-        return;
-      }
-      setIsExpanded(false);
-    };
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsExpanded(false);
-      }
-    };
-
-    window.addEventListener('pointerdown', handlePointerDown);
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isExpanded]);
+  const handleSelectFrame = (frameId: ReferenceFrameId) => {
+    onSelectFrame(frameId);
+    onClose();
+  };
 
   return (
     <div className="reference-frame-selector-container">
       <button
-        ref={buttonRef}
         className="reference-frame-selector__toggle"
-        onClick={toggleExpanded}
+        onClick={onToggleExpanded}
         aria-expanded={isExpanded}
         aria-label={`Reference frame: ${selectedFrame?.displayName ?? selectedFrameId}. Click to change.`}
         title={`Frame: ${selectedFrame?.displayName ?? selectedFrameId}`}
+        type="button"
       >
         <FrameIcon />
         <span className="reference-frame-selector__label">{shortLabel}</span>
@@ -86,13 +42,20 @@ export function ReferenceFrameSelector({
 
       {isExpanded ? (
         <div
-          ref={panelRef}
           className="reference-frame-selector__panel"
           role="dialog"
           aria-label="Select reference frame"
         >
           <div className="reference-frame-selector__header">
             <span className="reference-frame-selector__title">Reference Frame</span>
+            <button
+              className="reference-frame-selector__close"
+              onClick={onClose}
+              aria-label="Close reference frame selector"
+              type="button"
+            >
+              <CloseIcon />
+            </button>
           </div>
           <div className="reference-frame-selector__options">
             {availableFrames.map((frame) => (
@@ -103,13 +66,16 @@ export function ReferenceFrameSelector({
                 }`}
                 onClick={() => handleSelectFrame(frame.id)}
                 aria-pressed={frame.id === selectedFrameId}
+                type="button"
               >
                 <span className="reference-frame-selector__option-name">
-                  {frame.displayName}
+                  {frame.shortLabel}
                 </span>
-                <span className="reference-frame-selector__option-desc">
-                  {frame.description}
-                </span>
+                {frame.id === selectedFrameId ? (
+                  <span className="reference-frame-selector__selected-mark" aria-hidden="true">
+                    <CheckIcon />
+                  </span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -133,13 +99,49 @@ function FrameIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {/* Crosshair / target icon representing frame center */}
       <circle cx="12" cy="12" r="10" />
       <circle cx="12" cy="12" r="3" />
       <line x1="12" y1="2" x2="12" y2="6" />
       <line x1="12" y1="18" x2="12" y2="22" />
       <line x1="2" y1="12" x2="6" y2="12" />
       <line x1="18" y1="12" x2="22" y2="12" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }

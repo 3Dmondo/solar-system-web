@@ -5,7 +5,7 @@ import {
   mapEphemerisSnapshotToSceneSnapshot,
   mapPhysicalMetadataToScaledBodyMetadata
 } from './ephemerisSceneMapping'
-import { resolveBodyCatalog, type BodyCatalogSource } from './bodyStateStore'
+import { resolveBodyCatalog, type BodyCatalogSource, type SupportedTimeRange } from './bodyStateStore'
 import { type WebDatasetLoader } from './webDatasetLoader'
 
 export type WebBodyCatalogSourceOptions = {
@@ -38,6 +38,11 @@ export function createWebBodyCatalogSource({
     },
     prefetchAroundUtc: async (utc) => {
       await Promise.all([loadScaledMetadata(), ephemerisProvider.prefetchAroundUtc(utc)])
+    },
+    getSupportedTimeRange: async () => {
+      const dataset = await datasetLoader.load()
+
+      return getSupportedTimeRangeFromManifest(dataset)
     }
   }
 
@@ -66,5 +71,23 @@ export function createWebBodyCatalogSource({
       })
 
     return scaledMetadataPromise
+  }
+}
+
+function getSupportedTimeRangeFromManifest(
+  dataset: Awaited<ReturnType<WebDatasetLoader['load']>>
+): SupportedTimeRange {
+  const firstChunk = dataset.manifest.chunks[0]
+  const lastChunk = dataset.manifest.chunks[dataset.manifest.chunks.length - 1]
+
+  if (!firstChunk || !lastChunk) {
+    throw new Error('Generated ephemeris manifest does not define a supported time range')
+  }
+
+  return {
+    startUtc: firstChunk.startUtc,
+    endUtc: lastChunk.endUtc,
+    startTdbSecondsFromJ2000: firstChunk.startTdbSecondsFromJ2000,
+    endTdbSecondsFromJ2000: lastChunk.endTdbSecondsFromJ2000
   }
 }

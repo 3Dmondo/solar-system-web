@@ -1,21 +1,24 @@
 import { useLayoutEffect, useMemo } from 'react';
+import { type BodyId } from '../solar-system/domain/body';
+import { type ReferenceFrameId } from '../solar-system/domain/referenceFrame';
+import { type LayerId } from './state/useLayerVisibility';
+import { ExperienceControlRail } from './components/ExperienceControlRail';
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
 import { DebugFpsOverlay } from './components/DebugFpsOverlay';
-import { FullscreenButton } from './components/FullscreenButton';
-import { LayerPanel } from './components/LayerPanel';
-import { ReferenceFrameSelector } from './components/ReferenceFrameSelector';
+import { PlaybackControls } from './components/PlaybackControls';
 import { useCoarsePointer } from './hooks/useCoarsePointer';
 import { useFocusedBody } from './state/useFocusedBody';
 import { useLayerVisibility } from './state/useLayerVisibility';
 import { useReferenceFrame } from './state/useReferenceFrame';
+import { useCatalogTimeRange } from './state/useCatalogTimeRange';
 import {
   useResolvedBodyCatalog
 } from './state/useResolvedBodyCatalog';
 import { useSimulationClock } from './state/useSimulationClock';
 import { SimulationClockContext } from './state/SimulationClockContext';
 import { setRuntimeDebugMetricsEnabled } from './debug/runtimeDebugMetrics';
-import { type BodyCatalogSource } from '../solar-system/data/bodyStateStore';
+import { type BodyCatalogSource, type SupportedTimeRange } from '../solar-system/data/bodyStateStore';
 import { transformCatalogToFrame } from '../solar-system/data/referenceFrameTransform';
 import { getReferenceFramesForLoadedBodies } from '../solar-system/domain/referenceFrame';
 
@@ -32,15 +35,27 @@ export function SolarSystemExperience({
 }: SolarSystemExperienceProps) {
   const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
+  const { range: supportedTimeRange } = useCatalogTimeRange(catalogSource);
+  const minUtcMs = supportedTimeRange ? Date.parse(supportedTimeRange.startUtc) : undefined;
+  const maxUtcMs = supportedTimeRange ? Date.parse(supportedTimeRange.endUtc) : undefined;
   const {
-    cyclePlaybackRate,
+    boundaryState,
+    canDecreaseSpeed,
+    canIncreaseSpeed,
+    decreaseSpeed,
+    direction,
+    increaseSpeed,
     isPaused,
+    isPlaybackBlocked,
     playbackRateLabel,
     playbackRateMultiplier,
     requestedUtc,
+    selectDirection,
     simulationInitialUtcMs,
     togglePaused
   } = useSimulationClock({
+    maxUtcMs,
+    minUtcMs,
     startAt: simulationClockStartAt
   });
   const { selectedFrame, selectFrame } = useReferenceFrame();
@@ -73,6 +88,26 @@ export function SolarSystemExperience({
     () => getReferenceFramesForLoadedBodies(baseCatalog.metadata.map((metadata) => metadata.id)),
     [baseCatalog.metadata]
   );
+  const focusedBodyDisplayName =
+    focusedBodyId === 'overview'
+      ? null
+      : catalog.metadata.find((metadata) => metadata.id === focusedBodyId)?.displayName ?? null;
+  const rangeWarning =
+    boundaryState && supportedTimeRange
+      ? createRangeWarning(boundaryState, supportedTimeRange)
+      : null;
+
+  const handleFocusBody = (bodyId: BodyId) => {
+    setFocusedBodyId(bodyId);
+  };
+
+  const handleSelectFrame = (frameId: ReferenceFrameId) => {
+    selectFrame(frameId);
+  };
+
+  const handleToggleLayer = (layerId: LayerId) => {
+    toggleLayer(layerId);
+  };
 
   return (
     <SimulationClockContext.Provider value={{ playbackRateMultiplier, isPaused, simulationInitialUtcMs }}>
@@ -85,32 +120,68 @@ export function SolarSystemExperience({
           onFocusBody={setFocusedBodyId}
         />
         <ExperienceHud
-          catalog={catalog}
           catalogError={error}
           catalogStatus={status}
           focusedBodyId={focusedBodyId}
-          isCoarsePointer={isCoarsePointer}
-          isSimulationPaused={isPaused}
-          playbackRateLabel={playbackRateLabel}
-          requestedUtc={requestedUtc}
-          onFocusBody={setFocusedBodyId}
-          onReturnToOverview={() => setFocusedBodyId('overview')}
-          onCyclePlaybackRate={cyclePlaybackRate}
-          onToggleSimulationPaused={togglePaused}
+          focusedBodyDisplayName={focusedBodyDisplayName}
+          rangeWarning={rangeWarning}
         />
-        <FullscreenButton />
-        <ReferenceFrameSelector
+        <ExperienceControlRail
+          catalog={catalog}
+          focusedBodyId={focusedBodyId}
           selectedFrameId={selectedFrame.id}
           availableFrames={availableFrames}
-          onSelectFrame={selectFrame}
-        />
-        <LayerPanel
           visibility={visibility}
           layerConfigs={layerConfigs}
-          onToggleLayer={toggleLayer}
+          onFocusBody={handleFocusBody}
+          onReturnToOverview={() => setFocusedBodyId('overview')}
+          onSelectFrame={handleSelectFrame}
+          onToggleLayer={handleToggleLayer}
+        />
+        <PlaybackControls
+          canDecreaseSpeed={canDecreaseSpeed}
+          canIncreaseSpeed={canIncreaseSpeed}
+          direction={direction}
+          isPaused={isPaused}
+          isPlaybackBlocked={isPlaybackBlocked}
+          playbackRateLabel={playbackRateLabel}
+          requestedUtc={requestedUtc}
+          onDecreaseSpeed={decreaseSpeed}
+          onIncreaseSpeed={increaseSpeed}
+          onSelectDirection={selectDirection}
+          onTogglePaused={togglePaused}
         />
         {showDebugOverlay ? <DebugFpsOverlay clockStartAt={simulationClockStartAt} /> : null}
       </main>
     </SimulationClockContext.Provider>
   );
+}
+
+function createRangeWarning(
+  boundaryState: 'start' | 'end',
+  range: SupportedTimeRange
+) {
+  const pausedAt = boundaryState === 'start' ? range.startUtc : range.endUtc;
+
+  return {
+    title: 'Ephemeris range reached.',
+    detail: `Paused at ${formatUtcTimestamp(pausedAt)}.`,
+    hint: `Valid range: ${formatUtcTimestamp(range.startUtc)} to ${formatUtcTimestamp(range.endUtc)}. Switch direction to continue.`
+  };
+}
+
+function formatUtcTimestamp(utc: string) {
+  const utcDate = new Date(utc);
+
+  if (Number.isNaN(utcDate.getTime())) {
+    return 'Invalid UTC time';
+  }
+
+  const year = utcDate.getUTCFullYear();
+  const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(utcDate.getUTCDate()).padStart(2, '0');
+  const hours = String(utcDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day} ${hours}:${minutes} UTC`;
 }

@@ -71,7 +71,15 @@ const dataset = {
         sampleDays: 1
       }
     ],
-    chunks: []
+    chunks: [
+      {
+        fileName: 'chunk-2000-2001.json',
+        startUtc: '2000-01-01T11:58:55.816Z',
+        endUtc: '2001-01-01T11:58:55.816Z',
+        startTdbSecondsFromJ2000: 0,
+        endTdbSecondsFromJ2000: 31_622_400
+      }
+    ]
   },
   bodyMetadata: {
     schemaVersion: 1,
@@ -260,6 +268,23 @@ describe('webBodyCatalogSource', () => {
     expect(firstCatalog.metadata).toBe(secondCatalog.metadata)
     expect(firstCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:00.000Z')
     expect(secondCatalog.snapshot.capturedAt).toBe('2000-01-01T12:00:01.000Z')
+  })
+
+  it('exposes the manifest-derived supported time range', async () => {
+    const datasetLoader = createDatasetLoaderStub(dataset)
+    const ephemerisProvider = createEphemerisProviderStub()
+    const source = createWebBodyCatalogSource({
+      ephemerisProvider,
+      datasetLoader,
+      scale: createPhysicalSceneScale(0.001)
+    })
+
+    await expect(source.getSupportedTimeRange?.()).resolves.toEqual({
+      startUtc: '2000-01-01T11:58:55.816Z',
+      endUtc: '2001-01-01T11:58:55.816Z',
+      startTdbSecondsFromJ2000: 0,
+      endTdbSecondsFromJ2000: 31_622_400
+    })
   })
 
   it('scales only metadata for bodies in the loaded manifest', async () => {

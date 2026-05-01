@@ -54,7 +54,7 @@ describe('body registry', () => {
     expect(isSatellite('moon')).toBe(true);
   });
 
-  it('keeps jump groups aligned with registered bodies', () => {
+  it('keeps jump groups removed for the Phase 4 selector model', () => {
     const groupedBodyIds = new Set<string>();
 
     for (const group of BODY_JUMP_GROUPS) {
@@ -62,18 +62,12 @@ describe('body registry', () => {
 
       for (const bodyId of group.bodyIds) {
         expect(BODY_REGISTRY[bodyId]).toBeDefined();
-        expect(getBodyRegistryEntry(bodyId).jumpGroups).toBeDefined();
         expect(groupedBodyIds.has(`${group.label}:${bodyId}`)).toBe(false);
         groupedBodyIds.add(`${group.label}:${bodyId}`);
       }
     }
 
-    expect(BODY_JUMP_GROUPS).toEqual([
-      {
-        label: 'Quick picks',
-        bodyIds: ['sun', 'earth', 'moon', 'saturn']
-      }
-    ]);
+    expect(BODY_JUMP_GROUPS).toEqual([]);
   });
 
   it('derives body categories and system groups from the registry', () => {
@@ -124,15 +118,15 @@ describe('body registry', () => {
     ]);
   });
 
-  it('builds discovery groups from quick picks and available system bodies', () => {
+  it('builds discovery groups from available system bodies', () => {
     expect(getBodyDiscoveryGroups(BODY_IDS)).toEqual([
       {
-        label: 'Quick picks',
-        bodyIds: ['sun', 'earth', 'moon', 'saturn']
+        label: 'Solar system',
+        bodyIds: ['sun', 'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']
       },
       {
-        label: 'Solar system',
-        bodyIds: ['mercury', 'venus', 'mars', 'jupiter', 'uranus', 'neptune']
+        label: 'Earth system',
+        bodyIds: ['moon']
       },
       {
         label: 'Mars system',

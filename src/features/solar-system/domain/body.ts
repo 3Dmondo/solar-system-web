@@ -3,7 +3,6 @@ export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon' | 'venu
 export type BodyCategory = 'star' | 'planet' | 'natural-satellite';
 export type BodySpinInitialPhaseStrategy = 'prime-meridian-solar-noon';
 
-type BodyJumpGroupId = 'quick-picks' | 'inner-planets' | 'outer-planets';
 type BodySystemGroupId =
   | 'solar-system'
   | 'earth-system'
@@ -24,18 +23,10 @@ type BodyRegistryEntry = {
   radius: number;
   defaultTrailWindowDays?: number;
   trailSampleRateMultiplier?: number;
-  jumpGroups?: BodyJumpGroupId[];
   focusOffset: [number, number, number];
   hasRings?: boolean;
   spinInitialPhaseStrategy?: BodySpinInitialPhaseStrategy;
 };
-
-const BODY_JUMP_GROUP_DEFINITIONS: Array<{ id: BodyJumpGroupId; label: string }> = [
-  {
-    id: 'quick-picks',
-    label: 'Quick picks'
-  }
-];
 
 const BODY_SYSTEM_GROUP_DEFINITIONS: Array<{ id: BodySystemGroupId; label: string }> = [
   {
@@ -113,7 +104,6 @@ export const BODY_REGISTRY = {
     material: 'sun',
     radius: 2.6,
     defaultTrailWindowDays: 0,
-    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.7, 8.8]
   },
   mercury: {
@@ -152,7 +142,6 @@ export const BODY_REGISTRY = {
     radius: 0.72,
     defaultTrailWindowDays: 365,
     trailSampleRateMultiplier: 2,
-    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.25, 3.2],
     spinInitialPhaseStrategy: 'prime-meridian-solar-noon'
   },
@@ -167,7 +156,6 @@ export const BODY_REGISTRY = {
     radius: 0.22,
     defaultTrailWindowDays: 27,
     trailSampleRateMultiplier: 5,
-    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.12, 1.7]
   },
   mars: {
@@ -263,7 +251,6 @@ export const BODY_REGISTRY = {
     material: 'saturn',
     radius: 1.35,
     defaultTrailWindowDays: 8_000,
-    jumpGroups: ['quick-picks'],
     focusOffset: [0, 0.45, 5.8],
     hasRings: true
   },
@@ -427,13 +414,7 @@ export type ViewTargetId = BodyId | 'overview';
 
 export const BODY_IDS = Object.keys(BODY_REGISTRY) as BodyId[];
 
-export const BODY_JUMP_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> =
-  BODY_JUMP_GROUP_DEFINITIONS.map(({ id, label }) => ({
-    label,
-    bodyIds: BODY_IDS.filter((bodyId) =>
-      getBodyRegistryEntry(bodyId).jumpGroups?.includes(id)
-    )
-  })).filter((group) => group.bodyIds.length > 0);
+export const BODY_JUMP_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> = [];
 
 export const BODY_SYSTEM_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> =
   BODY_SYSTEM_GROUP_DEFINITIONS.map(({ id, label }) => ({
@@ -443,10 +424,9 @@ export const BODY_SYSTEM_GROUPS: Array<{ label: string; bodyIds: BodyId[] }> =
 
 export function getBodyDiscoveryGroups(availableBodyIds: Iterable<BodyId>) {
   const availableBodyIdSet = new Set(availableBodyIds);
-  const groupedBodyIds = new Set<BodyId>();
   const groups: Array<{ label: string; bodyIds: BodyId[] }> = [];
 
-  for (const group of BODY_JUMP_GROUPS) {
+  for (const group of BODY_SYSTEM_GROUPS) {
     const bodyIds = group.bodyIds.filter((bodyId) => availableBodyIdSet.has(bodyId));
 
     if (bodyIds.length === 0) {
@@ -457,23 +437,6 @@ export function getBodyDiscoveryGroups(availableBodyIds: Iterable<BodyId>) {
       label: group.label,
       bodyIds
     });
-    bodyIds.forEach((bodyId) => groupedBodyIds.add(bodyId));
-  }
-
-  for (const group of BODY_SYSTEM_GROUPS) {
-    const bodyIds = group.bodyIds.filter(
-      (bodyId) => availableBodyIdSet.has(bodyId) && !groupedBodyIds.has(bodyId)
-    );
-
-    if (bodyIds.length === 0) {
-      continue;
-    }
-
-    groups.push({
-      label: group.label,
-      bodyIds
-    });
-    bodyIds.forEach((bodyId) => groupedBodyIds.add(bodyId));
   }
 
   return groups;

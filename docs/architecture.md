@@ -19,7 +19,7 @@
 - Basis Universal transcoder runtime files for KTX2 sky textures: `public/basis/`
 - Local ephemeris helper: `scripts/Ensure-LocalWebEphemerisData.ps1`
 - Expanded major-moons preview helper: `scripts/Stage-ExpandedMajorMoonsPreview.ps1`
-- Experience shell and HUD: `src/features/experience`
+- Experience shell, HUD, selector rail, and playback controls: `src/features/experience`
 - Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
 - Static textures: `assets/textures`
 - Browser smoke tests: `tests/e2e`
@@ -42,29 +42,32 @@
 - Overview mode now keeps the broad scene framing but allows a much closer minimum zoom distance in the physically scaled runtime so planets can be inspected manually without leaving overview.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction.
 - Focused-body tracking now uses a split update path: live ephemeris refreshes keep the target snapped to the live body center while the camera eases into the authored focused framing, and the transition path is translated with live body motion before the settled translated-follow path takes over so manual orbit and zoom adjustments are preserved, with those focused follow updates applied in a layout-synchronized pass before paint rather than after paint.
-- `ExperienceHud` shows the current target label, a grouped `Jump to` chooser whenever real bodies are loaded, short instructions, the current simulation time, pause or resume plus playback-rate controls, the help overlay, focused-mode overview recovery, and runtime loading or error messages.
+- `ExperienceHud` is now informational: it shows the current target label, overview or focused-view state, and runtime loading or error messages. Selector and playback controls live in dedicated floating surfaces.
 - The app still starts in the `overview` target, and smaller scenes keep the legacy `[0, 14, 46]` overview framing.
 
 ## Interaction Model
 
 - Desktop: drag to orbit, wheel to zoom, double click a body to focus it.
 - Mobile: drag to orbit, pinch to zoom, double tap a body to focus it.
-- The HUD exposes a `Jump to` button whenever real bodies are loaded, so you can switch directly between bodies without returning to overview first.
+- The top-right selector rail exposes Help, Fullscreen, `Jump to`, reference-frame, and layer controls. Only one selector panel opens at a time, panels are height-constrained and scrollable, and their compact row styling is shared.
+- The `Jump to` selector is grouped by parent system, removes the old Quick picks section, and keeps `Overview` as the first row for focused-mode recovery.
 - Focus transitions are eased, can be interrupted by user input, and use directional profiles so body-to-overview moves pull back faster.
 - Focus transitions now keep the selected body centered from the start of the move by snapping the controls target to the selected body before the camera eases into its authored focused distance.
-- The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
+- Zooming back out still works as a secondary overview recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 - The fullscreen button toggles immersive mode using the browser Fullscreen API with graceful degradation on unsupported browsers.
-- The layer panel provides toggles for orbital trails, body indicators, labels, satellites, stars, constellations, and the Milky Way texture layer, collapsible to save screen space. Satellites, Milky Way, stars, and constellations are visible by default; turning satellites off hides natural-satellite bodies and their trails, labels, and indicators while keeping planets available.
-- The reference-frame selector derives its menu from loaded satellite systems. The deployed reduced catalog exposes SSB plus loaded parent-centered frames such as Earth, Jupiter, Saturn, Uranus, and Neptune when their moons are present.
+- The layer panel provides check-row controls for orbital trails, body indicators, labels, satellites, stars, constellations, and the Milky Way texture layer. Satellites, Milky Way, stars, and constellations are visible by default; turning satellites off hides natural-satellite bodies and their trails, labels, and indicators while keeping planets available.
+- The reference-frame selector derives its names-only menu from loaded satellite systems. The deployed reduced catalog exposes SSB plus loaded parent-centered frames such as Earth, Jupiter, Saturn, Uranus, and Neptune when their moons are present.
+- The bottom-center playback bar shows the simulation time, a single play or pause action, a reverse or forward direction segmented control, and bounded speed stepper buttons. Speed presets saturate between `1x` and `1y/s` instead of cycling.
 
 ## Data And Domain Boundaries
 
-- `BODY_REGISTRY` in `src/features/solar-system/domain/body.ts` is the central registry for ids, NAIF mappings, hierarchy, body category, system grouping, display names, colors, default trail windows, special spin-initialization strategy, and HUD jump-menu grouping. It includes the deployed Sun, planet, Moon, and reduced major-moon set plus long-term entries for Milestone 13 fast moons that remain filtered out until their generated data is restored. Jump-menu membership lives on registry entries, `BODY_JUMP_GROUPS` and `BODY_SYSTEM_GROUPS` are derived from that metadata, and `getBodyDiscoveryGroups` combines quick picks with non-duplicated loaded system bodies for the HUD. Registry category and hierarchy helpers also drive scene star handling, body-indicator exclusion, textured star material behavior, and satellite tidal-lock parent targeting.
+- `BODY_REGISTRY` in `src/features/solar-system/domain/body.ts` is the central registry for ids, NAIF mappings, hierarchy, body category, system grouping, display names, colors, default trail windows, special spin-initialization strategy, and selector grouping. It includes the deployed Sun, planet, Moon, and reduced major-moon set plus long-term entries for Milestone 13 fast moons that remain filtered out until their generated data is restored. `BODY_SYSTEM_GROUPS` is derived from that metadata, and `getBodyDiscoveryGroups` builds loaded system groups for the `Jump to` selector without the old Quick picks section. Registry category and hierarchy helpers also drive scene star handling, body-indicator exclusion, textured star material behavior, and satellite tidal-lock parent targeting.
 - `bodyPresentation.ts` derives the shared display metadata from `BODY_REGISTRY` so it stays stable across data sources while keeping the existing provider-facing metadata shape.
 - `bodyStateStore.ts` is the current selector layer and shared resolved-catalog shape used by async loaders and scene consumers.
 - `useResolvedBodyCatalog` in `src/features/experience/state` is the current runtime seam that now surfaces an explicit empty loading or error catalog before the first real dataset load and keeps the last successfully loaded real catalog visible during later refresh failures.
-- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, exposes one minimal playback-rate cycle across the current forward-speed presets, and emits a stable `simulationInitialUtcMs` used to anchor Earth's prime-meridian orientation.
+- `useSimulationClock` in `src/features/experience/state` currently starts from the current datetime, advances the requested UTC time on every animation frame by default, supports pause or resume, signed forward or reverse playback, bounded speed presets through `1y/s`, optional UTC min/max bounds, and emits a stable `simulationInitialUtcMs` used to anchor Earth's prime-meridian orientation. When catalog bounds are available and playback reaches the generated ephemeris edge, the clock clamps to the nearest valid UTC, pauses, and exposes a boundary state for the HUD.
+- `BodyCatalogSource` can expose a manifest-derived supported time range. The web catalog source derives it from the first and last generated chunk, allowing the experience shell to prevent repeated out-of-range catalog requests and display user-readable UTC range messages instead of raw TDB seconds.
 - `SimulationClockContext` in `src/features/experience/state` exposes `playbackRateMultiplier`, `isPaused`, and `simulationInitialUtcMs` via React context so all rotation consumers share one source of truth without prop drilling.
 - `referenceFrame.ts` keeps SSB plus registry-derived body-centered frame definitions and builds the active frame menu from loaded parent-satellite systems.
 - `webBodyCatalogSource.ts` composes the cached dataset loader, async ephemeris provider, the shared J2000-to-scene frame transform, and uniform physical scaling into the resolved-catalog shape, including focus offsets that scale with the physically derived radii inside that same scene frame when generated radius metadata is available. It filters presentation metadata to the body ids present in the loaded generated-data manifest before physical scaling, so future registry entries do not require the current deployed manifest or metadata snapshot to contain them, tolerates partial or missing generated physical metadata for expanded bodies by preserving presentation fallback values, and reuses the scaled metadata across clock-driven refreshes instead of rebuilding that static layer every tick.

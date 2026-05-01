@@ -1,204 +1,49 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ExperienceHud } from './ExperienceHud';
-import {
-  createEmptyResolvedBodyCatalog,
-  resolveBodyCatalog
-} from '../../solar-system/data/bodyStateStore';
-import { presentationBodyMetadata } from '../../solar-system/data/bodyPresentation'
 
 describe('ExperienceHud', () => {
   afterEach(() => {
     cleanup();
   });
 
-  const catalog = resolveBodyCatalog(
-    presentationBodyMetadata,
-    {
-      capturedAt: '2000-01-01T12:00:00.000Z',
-      bodies: presentationBodyMetadata.map((body, index) => ({
-        id: body.id,
-        position: [index * 10, 0, 0] as [number, number, number]
-      })),
-      trails: []
-    }
-  )
-
-  const renderHud = (focusedBodyId: 'overview' | 'saturn' = 'overview') =>
+  it('shows overview state as informational HUD content', () => {
     render(
       <ExperienceHud
-        catalog={catalog}
         catalogError={null}
         catalogStatus="ready"
-        focusedBodyId={focusedBodyId}
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={vi.fn()}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={vi.fn()}
-        onToggleSimulationPaused={vi.fn()}
+        focusedBodyId="overview"
+        focusedBodyDisplayName={null}
       />
     );
 
-  it('shows the focused body name and lets the user return to the overview', async () => {
-    const user = userEvent.setup();
-    const onFocusBody = vi.fn();
-    const onReturnToOverview = vi.fn();
+    expect(screen.getByText('Solar System')).toBeInTheDocument();
+    expect(screen.getByText(/interactive solar system overview/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
 
+  it('shows the focused body state without owning overview recovery', () => {
     render(
       <ExperienceHud
-        catalog={catalog}
         catalogError={null}
         catalogStatus="ready"
         focusedBodyId="saturn"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={onFocusBody}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={onReturnToOverview}
-        onToggleSimulationPaused={vi.fn()}
+        focusedBodyDisplayName="Saturn"
       />
     );
 
     expect(screen.getByText('Saturn')).toBeInTheDocument();
     expect(screen.getByText(/focused body view/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Return to solar system overview' }));
-
-    expect(onFocusBody).not.toHaveBeenCalled();
-    expect(onReturnToOverview).toHaveBeenCalledTimes(1);
-  });
-
-  it('opens jump to and focuses a selected body', async () => {
-    const user = userEvent.setup();
-    const onFocusBody = vi.fn();
-
-    render(
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={null}
-        catalogStatus="ready"
-        focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={onFocusBody}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
-      />
-    );
-
-    await user.click(screen.getByRole('button', { name: 'Open jump to bodies' }));
-
-    expect(screen.getByRole('group', { name: 'Quick picks' })).toBeInTheDocument();
-    expect(screen.getByRole('group', { name: 'Solar system' })).toBeInTheDocument();
-    expect(screen.queryByRole('group', { name: 'Earth system' })).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Jump to Earth' }));
-
-    expect(onFocusBody).toHaveBeenCalledWith('earth');
-  });
-
-  it('keeps jump to available while focused so another body can be selected directly', async () => {
-    const user = userEvent.setup();
-    const onFocusBody = vi.fn();
-
-    render(
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={null}
-        catalogStatus="ready"
-        focusedBodyId="saturn"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={onFocusBody}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
-      />
-    );
-
-    await user.click(screen.getByRole('button', { name: 'Open jump to bodies' }));
-    await user.click(screen.getByRole('button', { name: 'Jump to Earth' }));
-
-    expect(onFocusBody).toHaveBeenCalledWith('earth');
-  });
-
-  it('closes jump to when escape is pressed', async () => {
-    const user = userEvent.setup();
-
-    renderHud();
-
-    await user.click(screen.getByRole('button', { name: 'Open jump to bodies' }));
-
-    expect(screen.getByRole('dialog', { name: 'Jump to bodies' })).toBeInTheDocument();
-
-    await user.keyboard('{Escape}');
-
-    expect(screen.queryByRole('dialog', { name: 'Jump to bodies' })).not.toBeInTheDocument();
-  });
-
-  it('toggles interaction instructions', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={null}
-        catalogStatus="ready"
-        focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:34:56Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
-      />
-    );
-
-    const helpButton = screen.getAllByRole('button', { name: 'Show interaction help' })[0]!;
-
-    expect(screen.getByText(/interactive solar system overview/i)).toBeInTheDocument();
-    expect(
-      screen.queryByText(/Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus/i)
-    ).not.toBeInTheDocument();
-
-    await user.click(helpButton);
-
-    expect(screen.getByText(/Desktop: drag to orbit, wheel to zoom, double click a body, or use Jump to focus/i)).toBeInTheDocument();
-    expect(screen.getByText(/Mobile: drag to orbit, pinch to zoom, double tap a body, or use Jump to focus/i)).toBeInTheDocument();
-    expect(screen.getByText(/Use Rate to step through the current playback speeds/i)).toBeInTheDocument();
-    expect(screen.getByText(/Use Overview while focused/i)).toBeInTheDocument();
-    expect(screen.getByText('2000-01-01 12:34:56 UTC')).toBeInTheDocument();
-    expect(screen.getByText(/running at 1x/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /overview/i })).not.toBeInTheDocument();
   });
 
   it('shows an explicit error status message when real ephemeris loading fails', () => {
     render(
       <ExperienceHud
-        catalog={catalog}
         catalogError={new Error('Network exploded')}
         catalogStatus="error"
         focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
+        focusedBodyDisplayName={null}
       />
     );
 
@@ -206,101 +51,39 @@ describe('ExperienceHud', () => {
     expect(screen.getByText(/network exploded/i)).toBeInTheDocument();
   });
 
+  it('shows a range warning separately from catalog failures', () => {
+    render(
+      <ExperienceHud
+        catalogError={new Error('Requested time 999999 is outside the supported ephemeris range')}
+        catalogStatus="error"
+        focusedBodyId="overview"
+        focusedBodyDisplayName={null}
+        rangeWarning={{
+          title: 'Ephemeris range reached.',
+          detail: 'Paused at 2100-01-02 23:58 UTC.',
+          hint: 'Valid range: 1901-01-03 23:58 UTC to 2100-01-02 23:58 UTC. Switch direction to continue.'
+        }}
+      />
+    );
+
+    expect(screen.getByText('Ephemeris range reached.')).toBeInTheDocument();
+    expect(screen.getByText('Paused at 2100-01-02 23:58 UTC.')).toBeInTheDocument();
+    expect(screen.getByText(/valid range: 1901-01-03 23:58 UTC to 2100-01-02 23:58 UTC/i))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/999999/)).not.toBeInTheDocument();
+  });
+
   it('shows a loading message without claiming a fallback snapshot is active', () => {
     render(
       <ExperienceHud
-        catalog={catalog}
         catalogError={null}
         catalogStatus="loading"
         focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
+        focusedBodyDisplayName={null}
       />
     );
 
     expect(screen.getByText(/loading real positions for the requested time/i)).toBeInTheDocument();
     expect(screen.queryByText(/showing the fallback snapshot/i)).not.toBeInTheDocument();
-  });
-
-  it('hides jump to while the real catalog is still empty', () => {
-    render(
-      <ExperienceHud
-        catalog={createEmptyResolvedBodyCatalog('2000-01-01T12:00:00.000Z')}
-        catalogError={null}
-        catalogStatus="loading"
-        focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
-      />
-    );
-
-    expect(screen.queryByRole('button', { name: 'Open jump to bodies' })).not.toBeInTheDocument();
-  });
-
-  it('toggles the pause or resume simulation control', async () => {
-    const user = userEvent.setup();
-    const onToggleSimulationPaused = vi.fn();
-
-    render(
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={null}
-        catalogStatus="ready"
-        focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused
-        playbackRateLabel="1h/s"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={vi.fn()}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={onToggleSimulationPaused}
-      />
-    );
-
-    expect(screen.getByText(/paused at 1h\/s/i)).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Resume simulation' }));
-
-    expect(onToggleSimulationPaused).toHaveBeenCalledTimes(1);
-  });
-
-  it('cycles the simulation playback rate from the HUD', async () => {
-    const user = userEvent.setup();
-    const onCyclePlaybackRate = vi.fn();
-
-    render(
-      <ExperienceHud
-        catalog={catalog}
-        catalogError={null}
-        catalogStatus="ready"
-        focusedBodyId="overview"
-        isCoarsePointer={false}
-        isSimulationPaused={false}
-        playbackRateLabel="1x"
-        requestedUtc="2000-01-01T12:00:00Z"
-        onFocusBody={() => undefined}
-        onCyclePlaybackRate={onCyclePlaybackRate}
-        onReturnToOverview={() => undefined}
-        onToggleSimulationPaused={vi.fn()}
-      />
-    );
-
-    await user.click(screen.getByRole('button', { name: 'Change simulation playback rate' }));
-
-    expect(onCyclePlaybackRate).toHaveBeenCalledTimes(1);
-    expect(screen.getByText(/rate 1x/i)).toBeInTheDocument();
   });
 });

@@ -6,6 +6,13 @@ export type ResolvedBodyCatalog = {
   bodies: BodyDefinition[]
 }
 
+export type SupportedTimeRange = {
+  startUtc: string
+  endUtc: string
+  startTdbSecondsFromJ2000: number
+  endTdbSecondsFromJ2000: number
+}
+
 export type LoadCatalogOptions = {
   /**
    * Body ID to use as the origin for trail positions.
@@ -17,6 +24,7 @@ export type LoadCatalogOptions = {
 export type BodyCatalogSource = {
   loadBodyCatalogAtUtc: (utc: Date | string, options?: LoadCatalogOptions) => Promise<ResolvedBodyCatalog>
   prefetchAroundUtc: (utc: Date | string) => Promise<void>
+  getSupportedTimeRange?: () => Promise<SupportedTimeRange>
 }
 
 export function resolveBodyCatalog(
