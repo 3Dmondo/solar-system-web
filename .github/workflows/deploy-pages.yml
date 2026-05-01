@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 3Dmondo/SpiceNet
-          ref: v0.0.1
+          ref: 5326eb028d2d3dde218dc6906cde85c38da3fded
           path: .tmp/SpiceNet
 
       - name: Setup pnpm
@@ -58,11 +58,9 @@ jobs:
       - name: Generate ephemeris assets
         shell: pwsh
         run: |
-          ./scripts/Ensure-LocalWebEphemerisData.ps1 `
+          ./scripts/Generate-ReducedMajorMoonsDeploymentData.ps1 `
             -SpiceNetRepoRoot ./\.tmp/SpiceNet `
             -OutputRoot ./public/ephemeris/generated `
-            -SpkUrl "https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp" `
-            -ForceRegenerate `
             -ForceDownload
 
       - name: Build site

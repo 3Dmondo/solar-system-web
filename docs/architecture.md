@@ -124,7 +124,7 @@ Additional notes:
 
 - GitHub Pages deployment is defined in `.github/workflows/deploy-pages.yml`.
 - The workflow builds on pushes to `master` and on manual dispatch.
-- The workflow now checks out `3Dmondo/SpiceNet` at tag `v0.0.1`, generates `public/ephemeris/generated/` from the JPL SSD `de440s.bsp` URL before the web build, and publishes those generated assets through the normal `dist/` artifact without committing them to git.
+- The workflow checks out `3Dmondo/SpiceNet` at commit `5326eb028d2d3dde218dc6906cde85c38da3fded`, generates the reduced expanded-major-moons profile into `public/ephemeris/generated/` before the web build, and publishes those generated assets through the normal `dist/` artifact without committing them to git.
 - `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
 - Static texture imports are bundled through Vite so they work from the project-site base path.
 

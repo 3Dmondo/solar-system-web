@@ -41,6 +41,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Added provider-level coverage that verifies satellite trails are sampled relative to their parent body by default, which covers the retained reduced-preview moons through the registry hierarchy.
 - Added a satellite layer toggle and distance-gated satellite indicators and labels so the reduced-preview moons stay out of the global overview clutter while remaining visible in parent or satellite focused views.
 - Docked the mobile reference-frame selector above the layer selector to avoid the previous overlapping touch targets during reduced-preview validation.
+- Wired the GitHub Pages workflow to generate the reduced expanded-major-moons profile into the deployed static asset path from pinned `SpiceNet` generator commit `5326eb028d2d3dde218dc6906cde85c38da3fded`.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, and chunk-size or file-format optimization is deferred to `docs/tasks/optional-expanded-data-optimization-after-deploy.md` after the Phase 3 GitHub Pages deployment.
 
 ## Goal
@@ -239,7 +240,7 @@ Status: Next. Phase 3 should prioritize the reduced major-moon deployment path p
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
 - [x] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
 - [x] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
-- [ ] Deploy the reduced expanded generated profile through GitHub Pages after Phase 3 UI gates pass, then repeat debug timing and memory observations on the deployed site.
+- [ ] Deploy the reduced expanded generated profile through GitHub Pages after Phase 3 UI gates pass, then repeat debug timing and memory observations on the deployed site. Deployment workflow is wired; final status depends on the next Pages run.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [x] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
 - [x] Suppress satellite indicators and labels when the camera is far enough that they overlap their parent planet or clutter the global overview, while keeping them visible in near-parent and focused local-system views.
