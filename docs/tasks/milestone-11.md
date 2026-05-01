@@ -38,6 +38,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Tuned runtime chunk prefetch and cache budgeting so reduced-profile previews can keep the active chunk, next chunk, and loaded-catalog trail-history chunks ready without relying on the old fixed two-previous-chunk assumption.
 - Added debug-only browser timing hooks for manifest load, metadata load, chunk JSON load, chunk parse, and JS heap display so the user-run reduced preview can record startup, prefetch, boundary, and memory observations without adopting generated assets.
 - The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.
+- Added provider-level coverage that verifies satellite trails are sampled relative to their parent body by default, which covers the retained reduced-preview moons through the registry hierarchy.
 
 ## Goal
 
@@ -233,7 +234,7 @@ Expanded benchmark problem list:
 - [x] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
 - [ ] Consume the reduced expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
-- [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
+- [x] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
 - [ ] Update body labels and indicators so crowded planet systems remain readable on desktop and mobile.
 - [ ] Add optional moon visibility or filtering in the existing layer or control surface if the default overview becomes visually noisy.
 - [ ] Keep the deployed app compatible with static GitHub Pages hosting.

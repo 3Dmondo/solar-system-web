@@ -106,6 +106,27 @@ const dataset = {
   bodyMetadata
 } satisfies WebDataset
 
+const satelliteManifest: WebEphemerisManifest = {
+  ...manifest,
+  bodies: [
+    ...manifest.bodies,
+    {
+      bodyId: 'moon',
+      naifBodyId: 301,
+      bodyName: 'Moon',
+      sourceNaifBodyId: 301,
+      sourceBodyName: 'Moon',
+      sampleDays: 1
+    }
+  ],
+  chunks: [manifest.chunks[0]!]
+}
+
+const satelliteDataset = {
+  manifest: satelliteManifest,
+  bodyMetadata
+} satisfies WebDataset
+
 const chunkByFileName = {
   'chunk-0.json': {
     SchemaVersion: 1,
@@ -183,6 +204,33 @@ const chunkByFileName = {
           691200, 0, 0, 1, 0, 0,
           777600, 0, 0, 1, 0, 0,
           864000, 0, 0, 1, 0, 0
+        ]
+      }
+    ]
+  }
+} as const
+
+const satelliteChunkByFileName = {
+  'chunk-0.json': {
+    SchemaVersion: 1,
+    CenterBodyId: 0,
+    StartTdbSecondsFromJ2000: 0,
+    EndTdbSecondsFromJ2000: 172800,
+    Bodies: [
+      {
+        BodyId: 399,
+        Samples: [
+          0, 0, 0, 1, 0, 0,
+          86400, 0, 0, 1, 0, 0,
+          172800, 0, 0, 1, 0, 0
+        ]
+      },
+      {
+        BodyId: 301,
+        Samples: [
+          10, 0, 0, 1, 0, 0,
+          86410, 0, 0, 1, 0, 0,
+          172810, 0, 0, 1, 0, 0
         ]
       }
     ]
@@ -276,6 +324,26 @@ describe('webEphemerisProvider', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3)
   })
 
+  it('samples satellite trails relative to their parent body by default', async () => {
+    const datasetLoader = createDatasetLoaderStub(satelliteDataset)
+    const fetchMock = createChunkFetchMock(satelliteChunkByFileName)
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock
+    })
+    const requestUtc = new Date(Date.parse(approximateJ2000UtcIso) + 86400 * 1000)
+    const snapshot = await provider.loadSnapshotAtUtc(requestUtc)
+    const moonTrail = snapshot.trails.find((trail) => trail.id === 'moon')
+
+    expect(moonTrail?.positionsKm.length).toBeGreaterThan(1)
+    moonTrail?.positionsKm.forEach((positionKm) => {
+      expect(positionKm[0]).toBeCloseTo(10, 9)
+      expect(positionKm[1]).toBeCloseTo(0, 9)
+      expect(positionKm[2]).toBeCloseTo(0, 9)
+    })
+  })
+
   it('prefetches the loaded catalog trail window instead of a fixed previous-chunk count', async () => {
     const datasetLoader = createDatasetLoaderStub(dataset)
     const fetchMock = createChunkFetchMock()
@@ -320,15 +388,15 @@ function createDatasetLoaderStub(dataset: WebDataset): WebDatasetLoader & { clea
   }
 }
 
-function createChunkFetchMock() {
+function createChunkFetchMock(chunks: Record<string, unknown> = chunkByFileName) {
   return vi.fn<typeof fetch>(async (url: string | URL | Request) => {
     const fileName = url.toString().split('/').at(-1)
 
-    if (!fileName || !(fileName in chunkByFileName)) {
+    if (!fileName || !(fileName in chunks)) {
       return new Response('Not found', { status: 404, statusText: 'Not Found' })
     }
 
-    return new Response(JSON.stringify(chunkByFileName[fileName as keyof typeof chunkByFileName]), {
+    return new Response(JSON.stringify(chunks[fileName as keyof typeof chunks]), {
       status: 200
     })
   })
