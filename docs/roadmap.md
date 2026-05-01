@@ -13,6 +13,7 @@
 - Milestone 10 rendering and performance refinement is complete for the shipped trail-rendering scope, with pole-artifact audit and deeper `/debug` validation deferred to an optional unnumbered milestone.
 - Milestone 11 full solar system explorer work is now in progress, with the current-body registry introduced as the first step toward curated major moons.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
+- Milestone 13 fast moon cadence work is planned to reintroduce major moons whose orbital periods are too short for Milestone 11's current integer-day sampling.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -254,6 +255,7 @@ Started:
 - the first expanded configured-cadence benchmark ran from the local SSD cache; output size is plausible for inspection, but fast-moon interpolation errors require sub-day cadence or another sampling strategy before adoption
 - the current expanded generated manifest and chunks will not be versioned yet; that decision is deferred until an improved cadence profile clears accuracy and browser budget gates
 - Phase 3 has an opt-in local preview path for `expanded-major-moons` staged under ignored static assets; the deployed default remains the baseline profile until Phase 2B gates pass
+- the next Milestone 11 slice will reduce the preview target by temporarily removing fast undersampled moons, keeping the slower major moons for inspection while Milestone 13 handles sub-day cadence
 - the expanded-data evaluation now has an explicit browser validation plan covering visual error, chunk-transition preload behavior, data-format tradeoffs, RAM budget, and desktop/mobile UX gates
 
 Deferred until the major-moon path is validated:
@@ -282,3 +284,14 @@ Delivered:
 - generated `4096x2048` ETC1S KTX2 texture at `public/sky/milky-way.etc1s.ktx2`
 - direction-based galactic texture sampling aligned to the RA/Dec-derived star layer
 - reduced Milky Way brightness, planet depth occlusion, and rejected `8192x4096` texture after browser memory testing
+
+## Milestone 13: Fast Moon Cadence
+
+Status: Planned
+
+Goals:
+
+- add sub-day or equivalent fast-satellite sampling support for deferred major moons
+- reintroduce Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda after cadence validation
+- benchmark restored fast-moon output size, interpolation error, parse cost, and browser memory
+- validate dense local-system views, parent-relative trails, jump-menu behavior, and focused playback before default adoption

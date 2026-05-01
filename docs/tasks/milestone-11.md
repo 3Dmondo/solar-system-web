@@ -26,6 +26,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Ran the first `expanded-major-moons` configured-cadence benchmark from the local SSD cache and recorded generated web-output size plus interpolation error at `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons\configured-cadence-benchmark.json`.
 - The first expanded benchmark is not adoption-ready: output size looks plausible for inspection, but integer-day starter cadences undersample several fast inner moons.
 - Expanded-profile generated assets will not be versioned from the first benchmark output; versioning is deferred until a sub-day or equivalent fast-satellite sampling pass clears the visual-error and browser budget gates.
+- The next Milestone 11 slice will temporarily remove the fast undersampled moons from the expanded preview and keep only slower major moons that are plausible with integer-day cadence. Sub-day support for the removed moons is deferred to Milestone 13.
 - Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
 - Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
 - Added an opt-in Phase 3 preview path: `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` points at ignored local assets staged by `scripts/Stage-ExpandedMajorMoonsPreview.ps1`, while the default app remains on the baseline generated profile.
@@ -45,13 +46,27 @@ Broaden the solar-system catalog into a fuller explorer, starting with a curated
 
 ## Body Catalog Target
 
-First curated expansion:
+Original curated expansion:
 
 - Mars: Phobos `401`, Deimos `402`
 - Jupiter: Io `501`, Europa `502`, Ganymede `503`, Callisto `504`
 - Saturn: Mimas `601`, Enceladus `602`, Tethys `603`, Dione `604`, Rhea `605`, Titan `606`, Iapetus `608`
 - Uranus: Ariel `701`, Umbriel `702`, Titania `703`, Oberon `704`, Miranda `705`
 - Neptune: Triton `801`
+
+Temporary Milestone 11 reduced preview target:
+
+- Jupiter: Ganymede `503`, Callisto `504`
+- Saturn: Rhea `605`, Titan `606`, Iapetus `608`
+- Uranus: Umbriel `702`, Titania `703`, Oberon `704`
+- Neptune: Triton `801`
+
+Deferred to Milestone 13 for sub-day sampling:
+
+- Mars: Phobos `401`, Deimos `402`
+- Jupiter: Io `501`, Europa `502`
+- Saturn: Mimas `601`, Enceladus `602`, Tethys `603`, Dione `604`
+- Uranus: Ariel `701`, Miranda `705`
 
 Deferred until the major-moon path is validated:
 
@@ -140,7 +155,7 @@ First expanded configured-cadence benchmark:
 - Largest chunk: `chunk-2051-2076.json`, `18,148,950` bytes raw, `8,679,876` bytes gzip.
 - The current output size is plausible for local inspection but should not be adopted yet because interpolation errors are too high for fast moons at the current integer-day cadence floor.
 - Worst max position errors in the first pass: Mimas `428,874 km`, Enceladus `192,527 km`, Io `143,310 km`, Miranda `94,262 km`, Tethys `78,103 km`, Phobos `37,518 km`, Dione `25,358 km`, Deimos `24,371 km`, Ariel `17,529 km`, Europa `17,372 km`.
-- Next profile work should add sub-day cadence support or another fast-satellite sampling strategy before repeating the benchmark and considering generated asset versioning.
+- Next Milestone 11 profile work should remove those fast undersampled moons from the preview so the remaining catalog can be inspected without known-bad local moon motion. Milestone 13 should add sub-day cadence support or another fast-satellite sampling strategy before reintroducing them.
 
 Expanded benchmark problem list:
 
@@ -155,6 +170,8 @@ Expanded benchmark problem list:
 ### Phase 3: Web Runtime Integration
 
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
+- [ ] Add a reduced Milestone 11 preview profile or filter that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
+- [ ] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
 - [ ] Consume the expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
@@ -208,6 +225,8 @@ Expanded benchmark problem list:
 
 - Milestone 11 starts after Milestone 10 trail-rendering closeout.
 - The first catalog expansion prioritizes recognizable major moons over completeness.
+- The Milestone 11 preview may temporarily ship a reduced major-moon subset to avoid known-bad fast moon interpolation.
+- Fast undersampled moons are deferred to Milestone 13 rather than forced into Milestone 11 with one-day cadence.
 - The existing baseline generated-data profile remains available while the expanded profile is benchmarked.
 - Educational context and richer exploration are lower-priority proposals for review, not blockers for the first catalog-expansion pass.
 - Upstream kernels remain non-versioned.

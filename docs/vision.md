@@ -40,7 +40,8 @@ Focus areas:
 - keep the current Sun, planet, and Moon behavior stable while the catalog boundary expands
 - use the `SpiceNet` SSD catalog snapshot to choose candidate satellite kernels and benchmark generated web output
 - keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
-- add the curated major moons only after generated asset size, interpolation behavior, and overview readability are validated
+- add a reduced major-moon preview first, deferring fast undersampled moons to Milestone 13 sub-day cadence work
+- add the full curated major-moon set only after generated asset size, interpolation behavior, and overview readability are validated
 - keep educational context and richer exploration modes as lower-priority proposals until the major-moon path is validated
 
 ## Long-Term Direction
