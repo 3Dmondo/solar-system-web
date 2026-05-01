@@ -34,6 +34,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - The reduced preview is smaller and no longer has the known fast-moon hundred-thousand-kilometer errors, but browser UX, chunk-duration, chunk-boundary, memory, and data-format gates remain open before adoption.
 - Added `scripts/Measure-ReducedMajorMoonPreview.ps1` as a repeatable retained-moon spot-check diagnostic that combines the SpiceNet truth report with staged preview orbit scale.
 - Manual visual inspection of the retained reduced-preview moons passed: positions and orbiting animations looked acceptable, including the diagnostic-flagged Umbriel, Titania, and Rhea.
+- Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn still need runtime measurement.
 
 ## Goal
 
@@ -110,7 +111,7 @@ Deferred until the major-moon path is validated:
 - [x] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
 - [x] Build a lightweight truth-comparison or spot-check diagnostic for selected retained moons if reduced-profile interpolation error remains suspicious.
 - [x] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
-- [ ] Benchmark chunk durations separately from cadence: start with `25`, `10`, `5`, and `1` year chunks and record total gzip size, largest chunk gzip size, request count, parse time, and cache churn.
+- [ ] Benchmark chunk durations separately from cadence: generator-side total gzip size, largest chunk gzip size, and request count are recorded for `25`, `10`, `5`, and `1` year chunks; browser parse time and cache churn remain open.
 - [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
 - [ ] Add or tune next and previous chunk preloading when simulation time approaches a chunk boundary, including direction-aware prefetch for reverse or future reverse playback.
 - [ ] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
@@ -174,6 +175,16 @@ Reduced expanded configured-cadence benchmark:
 - Repeatable diagnostic: `scripts/Measure-ReducedMajorMoonPreview.ps1` reads the reduced benchmark report plus the staged preview chunk and uses Hermite interpolation for parent positions when normalizing moon error by local orbit scale. With default thresholds of `0.5%` orbit error or `2 px` at a `300 px` focused-orbit proxy, it flags Umbriel, Titania, and Rhea for manual visual spot-checking.
 - Manual focused-view inspection passed for all retained reduced-preview moons. The diagnostic-flagged moons did not show unacceptable position or orbit-animation artifacts, so the current thresholds should be treated as conservative review triggers rather than automatic rejection gates.
 - This reduced benchmark clears the first known-bad fast-moon blocker for inspection only. It is not adoption-ready until the remaining browser, chunking, memory, and format gates pass.
+
+Reduced expanded chunk-duration size benchmark:
+
+- Command source: direct `dotnet run --project C:\Dev\repos\3Dmondo\SpiceNet\Spice.WebDataGenerator\Spice.WebDataGenerator.csproj` configured-chunk-year run with the reduced body list and cached retained-system kernels.
+- Report: `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons-reduced-chunk-years\configured-chunk-year-benchmark.json`
+- `25` year chunks: `8` chunks, `61,505,612` bytes raw, `29,410,904` bytes gzip, largest chunk `3,701,650` bytes gzip.
+- `10` year chunks: `20` chunks, `61,544,167` bytes raw, `29,449,927` bytes gzip, largest chunk `1,484,610` bytes gzip.
+- `5` year chunks: `40` chunks, `61,606,997` bytes raw, `29,506,707` bytes gzip, largest chunk `744,507` bytes gzip.
+- `1` year chunks: `199` chunks, `62,280,991` bytes raw, `29,954,948` bytes gzip, largest chunk `151,523` bytes gzip.
+- Size-only read: smaller chunks drastically reduce largest-chunk transfer and parse risk, while total gzip grows modestly; `1` year chunks add about `544 KB` gzip over `25` year chunks but multiply request count by about `25x`. Runtime parse time, boundary behavior, and cache churn still need browser measurement before choosing a default.
 
 Expanded benchmark problem list:
 
