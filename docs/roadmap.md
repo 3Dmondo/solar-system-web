@@ -253,6 +253,7 @@ Started:
 - a separate `SpiceNet` `expanded-major-moons` generation script now records the selected SSD kernels, body ids, parent ids, and starter cadence defaults without changing the baseline profile
 - the first expanded configured-cadence benchmark ran from the local SSD cache; output size is plausible for inspection, but fast-moon interpolation errors require sub-day cadence or another sampling strategy before adoption
 - the current expanded generated manifest and chunks will not be versioned yet; that decision is deferred until an improved cadence profile clears accuracy and browser budget gates
+- Phase 3 has an opt-in local preview path for `expanded-major-moons` staged under ignored static assets; the deployed default remains the baseline profile until Phase 2B gates pass
 - the expanded-data evaluation now has an explicit browser validation plan covering visual error, chunk-transition preload behavior, data-format tradeoffs, RAM budget, and desktop/mobile UX gates
 
 Deferred until the major-moon path is validated:

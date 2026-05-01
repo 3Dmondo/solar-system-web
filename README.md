@@ -43,9 +43,12 @@ pnpm lint
 pnpm test
 pnpm build
 .\scripts\Ensure-LocalWebEphemerisData.ps1
+.\scripts\Stage-ExpandedMajorMoonsPreview.ps1
 ```
 
 The local ephemeris helper reuses the pinned external `SpiceNet` workflow and defaults to a sibling checkout at `../SpiceNet`. It now defaults `de440s.bsp` to the JPL SSD URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`; pass `-SpiceNetRepoRoot`, `-SpkUrl`, or `-SpkFileName` if your local setup differs. If `public/ephemeris/generated/` is still missing when you run the app locally, the HUD now surfaces an explicit real-data error instead of a placeholder scene.
+
+Milestone 11 includes an opt-in expanded major-moons preview. After generating the `expanded-major-moons` profile in the sibling `SpiceNet` repo, run `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1` to copy the ignored preview assets into `public/ephemeris/generated-expanded-major-moons/`, then start Vite with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`. The default app remains on the baseline generated profile.
 
 For Playwright:
 

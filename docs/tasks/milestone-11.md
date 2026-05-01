@@ -28,6 +28,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Expanded-profile generated assets will not be versioned from the first benchmark output; versioning is deferred until a sub-day or equivalent fast-satellite sampling pass clears the visual-error and browser budget gates.
 - Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
 - Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
+- Added an opt-in Phase 3 preview path: `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` points at ignored local assets staged by `scripts/Stage-ExpandedMajorMoonsPreview.ps1`, while the default app remains on the baseline generated profile.
 
 ## Goal
 
@@ -153,7 +154,8 @@ Expanded benchmark problem list:
 
 ### Phase 3: Web Runtime Integration
 
-- [ ] Consume the expanded generated profile through the existing static asset flow after the benchmark passes.
+- [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
+- [ ] Consume the expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [ ] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
 - [ ] Update body labels and indicators so crowded planet systems remain readable on desktop and mobile.

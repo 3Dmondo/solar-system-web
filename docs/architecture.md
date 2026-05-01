@@ -18,6 +18,7 @@
 - Generated Milky Way sky texture target: `public/sky/milky-way.etc1s.ktx2`
 - Basis Universal transcoder runtime files for KTX2 sky textures: `public/basis/`
 - Local ephemeris helper: `scripts/Ensure-LocalWebEphemerisData.ps1`
+- Expanded major-moons preview helper: `scripts/Stage-ExpandedMajorMoonsPreview.ps1`
 - Experience shell and HUD: `src/features/experience`
 - Solar-system domain, data, components, and rendering helpers: `src/features/solar-system`
 - Static textures: `assets/textures`
@@ -26,10 +27,11 @@
 
 ## Current Runtime Shape
 
-- `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides.
+- `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides. `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` is an opt-in local preview path that points at ignored assets staged under `./ephemeris/generated-expanded-major-moons`; it does not change the deployed baseline profile.
 - Visiting `/debug` on the current host enables a lightweight FPS overlay for local performance sampling, starts the clock from the Milestone 5.1 benchmark timestamp by default, and adds debug-only timing samples across the main runtime phases without changing the normal route behavior.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
+- The expanded major-moons preview convention is `public/ephemeris/generated-expanded-major-moons/`, staged from the sibling `SpiceNet` output by `scripts/Stage-ExpandedMajorMoonsPreview.ps1` and kept out of git except for `.gitkeep`.
 - The first real-data activation pass uses a default physical scale of `0.001` scene units per kilometer unless `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` overrides it.
 - Real positions and kernel-derived mean radii still share that one explicit km-to-scene factor; the runtime does not apply a second hidden scale to body positions.
 - The scene now presents real positions through one explicit frame transform: raw J2000 ephemeris vectors are rotated into a J2000-ecliptic-aligned render frame and then mapped into the app's `x/z` orbital plane with `y` up before focus, controls, and rendering consume them.

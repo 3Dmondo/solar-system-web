@@ -149,6 +149,21 @@ describe('webBodyCatalogRuntime', () => {
     ).toBeDefined()
   })
 
+  it('can opt into the local expanded major-moons preview profile', () => {
+    expect(
+      getConfiguredWebEphemerisDataBaseUrl({
+        VITE_WEB_EPHEMERIS_PROFILE: 'expanded-major-moons'
+      })
+    ).toBe('./ephemeris/generated-expanded-major-moons')
+
+    expect(
+      getConfiguredWebEphemerisDataBaseUrl({
+        BASE_URL: '/solar-system-web/',
+        VITE_WEB_EPHEMERIS_PROFILE: 'expanded-major-moons'
+      })
+    ).toBe('/solar-system-web/ephemeris/generated-expanded-major-moons')
+  })
+
   it('returns undefined when the configured scene scale is invalid', () => {
     expect(
       getConfiguredSceneUnitsPerKilometer({

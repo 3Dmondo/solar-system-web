@@ -6,12 +6,15 @@ import { createWebDatasetLoader } from './webDatasetLoader'
 import { createWebEphemerisProvider } from './webEphemerisProvider'
 
 const DEFAULT_WEB_EPHEMERIS_DATA_BASE_PATH = 'ephemeris/generated'
+const EXPANDED_MAJOR_MOONS_WEB_EPHEMERIS_DATA_BASE_PATH =
+  'ephemeris/generated-expanded-major-moons'
 const DEFAULT_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER = 0.001
 
 export type WebBodyCatalogRuntimeEnv = {
   readonly BASE_URL?: string
   readonly VITE_WEB_EPHEMERIS_BODY_METADATA_URL?: string
   readonly VITE_WEB_EPHEMERIS_DATA_BASE_URL?: string
+  readonly VITE_WEB_EPHEMERIS_PROFILE?: string
   readonly VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER?: string
 }
 
@@ -59,7 +62,7 @@ export function getConfiguredWebEphemerisDataBaseUrl(
   const value = env.VITE_WEB_EPHEMERIS_DATA_BASE_URL?.trim()
 
   if (!value) {
-    return `${getConfiguredBaseUrl(env)}${DEFAULT_WEB_EPHEMERIS_DATA_BASE_PATH}`
+    return `${getConfiguredBaseUrl(env)}${getConfiguredDataBasePath(env)}`
   }
 
   return value.replace(/[\\/]+$/, '')
@@ -93,6 +96,16 @@ export function getConfiguredSceneUnitsPerKilometer(
   }
 
   return parsed
+}
+
+function getConfiguredDataBasePath(env: WebBodyCatalogRuntimeEnv) {
+  const profile = env.VITE_WEB_EPHEMERIS_PROFILE?.trim()
+
+  if (profile === 'expanded-major-moons') {
+    return EXPANDED_MAJOR_MOONS_WEB_EPHEMERIS_DATA_BASE_PATH
+  }
+
+  return DEFAULT_WEB_EPHEMERIS_DATA_BASE_PATH
 }
 
 function getConfiguredBaseUrl(env: WebBodyCatalogRuntimeEnv) {

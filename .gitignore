@@ -12,3 +12,5 @@ _tmp_*
 .tmp/
 public/ephemeris/generated/*
 !public/ephemeris/generated/.gitkeep
+public/ephemeris/generated-expanded-major-moons/*
+!public/ephemeris/generated-expanded-major-moons/.gitkeep

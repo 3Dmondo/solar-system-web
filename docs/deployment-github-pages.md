@@ -49,6 +49,7 @@ pnpm preview -- --host
 - If the default branch changes from `master`, update the workflow trigger.
 - Large assets are bundled into the static build, so deployment size is driven mostly by textures and the main JavaScript bundle.
 - Local generated Milestone 5 ephemeris assets belong under the ignored `public/ephemeris/generated/` folder so Vite can serve and bundle them without versioning them in git.
+- The Milestone 11 expanded major-moons preview uses ignored local assets under `public/ephemeris/generated-expanded-major-moons/` and is selected only with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`; it is not part of the GitHub Pages deployment default.
 - The deployment workflow pins `SpiceNet` to tag `v0.0.1` and currently downloads `de440s.bsp` from the JPL SSD catalog URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`, which matches the `de440s.bsp` entry in `SpiceNet/docs/SsdCatalog/ssd_catalog.json`.
 
 ## Milestone 5 Data Delivery
@@ -56,3 +57,4 @@ pnpm preview -- --host
 - CI now downloads non-versioned ephemeris and supporting kernel files during deployment rather than storing them in git.
 - The default `pnpm build` flow remains focused on the web app build; ephemeris generation is still an explicit pre-build step in CI and a separate helper script locally.
 - Local ephemeris generation uses `scripts/Ensure-LocalWebEphemerisData.ps1`, which delegates to the external `SpiceNet` workflow and writes generated manifest or chunk assets into the ignored `public/ephemeris/generated/` folder.
+- Local expanded major-moons inspection uses `scripts/Stage-ExpandedMajorMoonsPreview.ps1` after the sibling `SpiceNet` profile has generated `artifacts/web-data/expanded-major-moons/`.
