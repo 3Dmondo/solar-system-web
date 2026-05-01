@@ -31,14 +31,15 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
 - Added an opt-in Phase 3 preview path: `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` points at ignored local assets staged by `scripts/Stage-ExpandedMajorMoonsPreview.ps1`, while the default app remains on the baseline generated profile.
 - Ran the reduced `expanded-major-moons` configured-cadence benchmark without the Milestone 13 fast-moon set and staged the ignored local preview assets for browser inspection.
-- The reduced preview is smaller and no longer has the known fast-moon hundred-thousand-kilometer errors, but browser UX, chunk-duration, chunk-boundary, memory, and data-format gates remain open before adoption.
+- The reduced preview is smaller and no longer has the known fast-moon hundred-thousand-kilometer errors; Phase 2B local data and runtime validation is closed for Phase 3 handoff, while UX work moves to Phase 3 and data optimization moves to the optional post-deploy follow-up.
 - Added `scripts/Measure-ReducedMajorMoonPreview.ps1` as a repeatable retained-moon spot-check diagnostic that combines the SpiceNet truth report with staged preview orbit scale.
 - Manual visual inspection of the retained reduced-preview moons passed: positions and orbiting animations looked acceptable, including the diagnostic-flagged Umbriel, Titania, and Rhea.
-- Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn still need runtime measurement.
+- Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn are postponed to optional post-deploy optimization.
 - Tuned runtime chunk prefetch and cache budgeting so reduced-profile previews can keep the active chunk, next chunk, and loaded-catalog trail-history chunks ready without relying on the old fixed two-previous-chunk assumption.
 - Added debug-only browser timing hooks for manifest load, metadata load, chunk JSON load, chunk parse, and JS heap display so the user-run reduced preview can record startup, prefetch, boundary, and memory observations without adopting generated assets.
 - The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.
 - Added provider-level coverage that verifies satellite trails are sampled relative to their parent body by default, which covers the retained reduced-preview moons through the registry hierarchy.
+- Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, and chunk-size or file-format optimization is deferred to `docs/tasks/optional-expanded-data-optimization-after-deploy.md` after the Phase 3 GitHub Pages deployment.
 
 ## Goal
 
@@ -52,6 +53,7 @@ Broaden the solar-system catalog into a fuller explorer, starting with a curated
 - Keep the existing Sun, planets, and Moon behavior stable while expanding the catalog.
 - Keep upstream kernels out of git.
 - Do not version the first expanded generated manifest and chunk assets yet; revisit only after the reduced generated dataset clears accuracy and browser budget gates.
+- Postpone chunk-size and file-format optimization until after the reduced Phase 3 deployment is measured on GitHub Pages.
 
 ## Body Catalog Target
 
@@ -110,22 +112,23 @@ Deferred until the major-moon path is validated:
 
 ### Phase 2B: Reduced Expanded Benchmark And UX Validation
 
+Status: Closed for Phase 3 handoff. The remaining optimization questions are postponed to `docs/tasks/optional-expanded-data-optimization-after-deploy.md`, and the remaining UX issues now belong to Phase 3.
+
 - [x] Regenerate the expanded preview dataset without the Milestone 13 fast-moon set: Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
 - [x] Record the reduced generated output size, largest chunk gzip size, chunk count, body count, and interpolation error before any web runtime adoption.
 - [x] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
 - [x] Build a lightweight truth-comparison or spot-check diagnostic for selected retained moons if reduced-profile interpolation error remains suspicious.
 - [x] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
-- [ ] Benchmark chunk durations separately from cadence: generator-side total gzip size, largest chunk gzip size, and request count are recorded for `25`, `10`, `5`, and `1` year chunks; browser parse time and cache churn remain open.
-- [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
+- [x] Record generator-side chunk-duration size data for `25`, `10`, `5`, and `1` year chunks; browser parse-time and cache-churn optimization is deferred to the optional post-deploy task.
+- [x] Test chunk-boundary playback locally with debug timings; final confidence moves to the deployed Phase 3 GitHub Pages pass.
 - [x] Tune next and previous chunk preloading for current forward playback so the runtime warms the active chunk, next chunk, and loaded-catalog trail-history previous chunks.
-- [ ] Add direction-aware reverse prefetch when reverse or future reverse playback is introduced.
+- [x] Defer direction-aware reverse prefetch until reverse or future reverse playback is introduced.
 - [x] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
-- [ ] Compare the current compact JSON plus gzip format against at least one binary numeric-array format before considering protobuf; include transfer size, decode time, parse allocations, implementation complexity, and numeric precision.
-- [ ] Test Float64, Float32, and any proposed quantized or delta-encoded representation against visual error and interpolation error before changing the runtime format.
-- [ ] Measure browser memory on desktop and mobile with the reduced expanded dataset: initial load, after first focus, after opening retained moon systems, after crossing chunk boundaries, and after several minutes of playback.
-- [ ] Track runtime metrics for manifest load, metadata load, first chunk load, adjacent chunk prefetch, catalog refresh, trail resampling, frame time, and JS heap use where browser APIs permit.
-- [ ] Validate reduced expanded-catalog UX on desktop and coarse-pointer layouts: jump menu size, labels, indicators, picking, focus transitions, local-system readability, trail readability, and recovery to overview.
-- [ ] Decide adoption gates before enabling the reduced expanded profile by default, including acceptable visual error, largest chunk gzip size, startup latency, chunk-transition smoothness, and memory budget.
+- [x] Defer compact JSON plus gzip versus binary numeric-array format comparison to the optional post-deploy optimization task.
+- [x] Defer Float64, Float32, quantized, or delta-encoded representation testing to the optional post-deploy optimization task.
+- [x] Measure local browser memory and runtime metrics well enough to proceed to Phase 3; repeat final measurements after the GitHub Pages deployment.
+- [x] Move reduced expanded-catalog UX fixes to Phase 3.
+- [x] Decide Phase 2B gates: proceed to Phase 3 with the reduced profile, keep generated preview assets ignored until deployment adoption, and postpone data optimization until deployed measurements justify it.
 
 Initial SSD catalog source:
 
@@ -179,7 +182,7 @@ Reduced expanded configured-cadence benchmark:
 - Local-orbit normalization from the staged `chunk-2001-2026.json`, using parent-relative mean distance and a `300 px` focused-orbit-radius proxy: Umbriel `1.363%` / `4.1 px`, Titania `1.111%` / `3.3 px`, Rhea `0.946%` / `2.8 px`, Triton `0.333%` / `1.0 px`, Oberon `0.199%` / `0.6 px`, Ganymede `0.155%` / `0.5 px`, Titan `0.124%` / `0.4 px`, Callisto `0.088%` / `0.3 px`, Iapetus `0.003%` / `<0.1 px`.
 - Repeatable diagnostic: `scripts/Measure-ReducedMajorMoonPreview.ps1` reads the reduced benchmark report plus the staged preview chunk and uses Hermite interpolation for parent positions when normalizing moon error by local orbit scale. With default thresholds of `0.5%` orbit error or `2 px` at a `300 px` focused-orbit proxy, it flags Umbriel, Titania, and Rhea for manual visual spot-checking.
 - Manual focused-view inspection passed for all retained reduced-preview moons. The diagnostic-flagged moons did not show unacceptable position or orbit-animation artifacts, so the current thresholds should be treated as conservative review triggers rather than automatic rejection gates.
-- This reduced benchmark clears the first known-bad fast-moon blocker for inspection only. It is not adoption-ready until the remaining browser, chunking, memory, and format gates pass.
+- This reduced benchmark clears the first known-bad fast-moon blocker and is ready for Phase 3 UI and deployment validation. Chunk-size and file-format optimization is postponed until after deployed measurements exist.
 
 Reduced expanded chunk-duration size benchmark:
 
@@ -189,7 +192,7 @@ Reduced expanded chunk-duration size benchmark:
 - `10` year chunks: `20` chunks, `61,544,167` bytes raw, `29,449,927` bytes gzip, largest chunk `1,484,610` bytes gzip.
 - `5` year chunks: `40` chunks, `61,606,997` bytes raw, `29,506,707` bytes gzip, largest chunk `744,507` bytes gzip.
 - `1` year chunks: `199` chunks, `62,280,991` bytes raw, `29,954,948` bytes gzip, largest chunk `151,523` bytes gzip.
-- Size-only read: smaller chunks drastically reduce largest-chunk transfer and parse risk, while total gzip grows modestly; `1` year chunks add about `544 KB` gzip over `25` year chunks but multiply request count by about `25x`. Runtime parse time, boundary behavior, and cache churn still need browser measurement before choosing a default.
+- Size-only read: smaller chunks drastically reduce largest-chunk transfer and parse risk, while total gzip grows modestly; `1` year chunks add about `544 KB` gzip over `25` year chunks but multiply request count by about `25x`. Runtime chunk-size optimization is postponed until after the Phase 3 GitHub Pages deployment is measured.
 
 Runtime chunk prefetch and cache budget:
 
@@ -221,30 +224,35 @@ Expanded benchmark problem list:
 
 - Kilometer error is not directly a user-experience metric. The next reduced-profile benchmark must translate error into local orbit fraction and screen-space displacement for typical overview and focused camera distances.
 - A large gzip total can still be acceptable if startup only needs the manifest plus one chunk, but largest chunk size, parse time, and adjacent prefetch cost are the user-facing constraints.
-- Smaller chunks may improve transition loading and RAM pressure but increase request count, manifest size, and edge-case frequency at chunk boundaries.
+- Smaller chunks may improve transition loading and RAM pressure but increase request count, manifest size, and edge-case frequency at chunk boundaries; this is now optional post-deploy optimization work.
 - Browser memory must include decoded numeric arrays, parsed JSON objects before compaction or garbage collection, trail caches, generated trail geometry, metadata, textures, and Three.js scene objects.
-- Protobuf is not automatically better for large numeric arrays. A custom binary layout with typed arrays may be smaller and faster, but only after precision and implementation-cost checks.
+- Protobuf is not automatically better for large numeric arrays. A custom binary layout with typed arrays may be smaller and faster, but only after deployed measurements justify precision and implementation-cost checks.
 - Chunk transitions need explicit validation because interpolation, trail stitching, and focused-body tracking can expose discontinuities even when raw samples are accurate.
 - Expanded major-moon UX may need local-system scale/readability controls even if the data format and cadence pass.
 
 ### Phase 3: Web Runtime Integration
 
+Status: Next. Phase 3 should prioritize the reduced major-moon deployment path plus UI/readability fixes surfaced by local screenshots such as `.tmp/expanded-mobile-startup.png` and `.tmp/expanded-desktop-next-boundary-1h.png`.
+
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
 - [x] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
 - [x] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
-- [ ] Consume the reduced expanded generated profile as the default only after the Phase 2B benchmark and UX gates pass.
+- [ ] Deploy the reduced expanded generated profile through GitHub Pages after Phase 3 UI gates pass, then repeat debug timing and memory observations on the deployed site.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [x] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
-- [ ] Update body labels and indicators so crowded planet systems remain readable on desktop and mobile.
-- [ ] Add optional moon visibility or filtering in the existing layer or control surface if the default overview becomes visually noisy.
+- [ ] Suppress satellite indicators and labels when the camera is far enough that they overlap their parent planet or clutter the global overview, while keeping them visible in near-parent and focused local-system views.
+- [ ] Add a satellite visibility layer toggle so retained moons, their indicators, and their labels can be enabled or disabled independently from planets and existing labels.
+- [ ] Prevent the reference-frame selector and layer selector from overlapping on mobile; stack or dock them predictably with touch-sized targets.
 - [ ] Keep the deployed app compatible with static GitHub Pages hosting.
+- [ ] Recheck local and deployed `/debug` overlays after UI changes so debug panels do not hide critical mobile controls during validation.
 
 ### Phase 4: Discovery UI
 
 - [x] Replace the fixed `Jump to` groups with registry-driven quick-pick and system groups for the current loaded catalog.
-- [ ] Keep quick access to the Sun, Earth, Moon, Saturn, and other high-value bodies.
-- [ ] Make the jump menu usable with the expanded catalog on coarse-pointer layouts.
+- [ ] Redesign desktop `Jump to` for the expanded catalog without the current Quick picks section; prefer compact parent-system grouping and reduce button density.
+- [ ] Redesign mobile `Jump to` as a usable coarse-pointer surface, likely a scrollable sheet with clear parent-system sections and less overlap with the HUD/debug overlay.
 - [ ] Verify direct body picking, labels, indicators, and jump-menu focus all work for major moons.
+- [ ] Consider a focused-system affordance that exposes a parent planet plus its retained moons without forcing users through the full global list.
 
 ### Phase 5: Lower-Priority Educational Context Proposal
 
