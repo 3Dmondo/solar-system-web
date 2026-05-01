@@ -8,6 +8,7 @@ export type LayerId =
   | 'trails'
   | 'bodyIndicators'
   | 'labels'
+  | 'satellites'
   | 'milkyWay'
   | 'stars'
   | 'constellations';
@@ -49,6 +50,12 @@ export const LAYER_CONFIGS: LayerConfig[] = [
     defaultVisible: true
   },
   {
+    id: 'satellites',
+    label: 'Satellites',
+    description: 'Show natural satellites and their related markers',
+    defaultVisible: true
+  },
+  {
     id: 'milkyWay',
     label: 'Milky Way',
     description: 'Show the compressed Milky Way sky texture',
@@ -75,6 +82,7 @@ const DEFAULT_VISIBILITY: LayerVisibility = {
   trails: true,
   bodyIndicators: true,
   labels: true,
+  satellites: true,
   milkyWay: true,
   stars: true,
   constellations: true

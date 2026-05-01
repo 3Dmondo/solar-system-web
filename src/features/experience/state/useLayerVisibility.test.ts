@@ -9,6 +9,7 @@ describe('useLayerVisibility', () => {
     expect(result.current.visibility.trails).toBe(true);
     expect(result.current.visibility.bodyIndicators).toBe(true);
     expect(result.current.visibility.labels).toBe(true);
+    expect(result.current.visibility.satellites).toBe(true);
     expect(result.current.visibility.milkyWay).toBe(true);
     expect(result.current.visibility.stars).toBe(true);
     expect(result.current.visibility.constellations).toBe(true);
@@ -73,6 +74,7 @@ describe('useLayerVisibility', () => {
     expect(result.current.visibility.trails).toBe(true);
     expect(result.current.visibility.bodyIndicators).toBe(true);
     expect(result.current.visibility.labels).toBe(true);
+    expect(result.current.visibility.satellites).toBe(true);
     expect(result.current.visibility.milkyWay).toBe(true);
     expect(result.current.visibility.stars).toBe(true);
     expect(result.current.visibility.constellations).toBe(true);
@@ -82,13 +84,14 @@ describe('useLayerVisibility', () => {
     const { result } = renderHook(() => useLayerVisibility());
 
     expect(result.current.layerConfigs).toBe(LAYER_CONFIGS);
-    expect(result.current.layerConfigs).toHaveLength(6);
+    expect(result.current.layerConfigs).toHaveLength(7);
 
-    const [trails, bodyIndicators, labels, milkyWay, stars, constellations] =
+    const [trails, bodyIndicators, labels, satellites, milkyWay, stars, constellations] =
       result.current.layerConfigs;
     expect(trails?.id).toBe('trails');
     expect(bodyIndicators?.id).toBe('bodyIndicators');
     expect(labels?.id).toBe('labels');
+    expect(satellites?.id).toBe('satellites');
     expect(milkyWay?.id).toBe('milkyWay');
     expect(stars?.id).toBe('stars');
     expect(constellations?.id).toBe('constellations');

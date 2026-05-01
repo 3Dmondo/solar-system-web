@@ -55,7 +55,7 @@
 - The HUD exposes an `Overview` button while a body is focused, and zooming back out still works as a secondary recovery path.
 - Orbit control tuning differs for coarse and fine pointers through `getControlProfile`.
 - The fullscreen button toggles immersive mode using the browser Fullscreen API with graceful degradation on unsupported browsers.
-- The layer panel provides toggles for orbital trails, body indicators, labels, stars, constellations, and the Milky Way texture layer, collapsible to save screen space. Milky Way, stars, and constellations are visible by default.
+- The layer panel provides toggles for orbital trails, body indicators, labels, satellites, stars, constellations, and the Milky Way texture layer, collapsible to save screen space. Satellites, Milky Way, stars, and constellations are visible by default; turning satellites off hides natural-satellite bodies and their trails, labels, and indicators while keeping planets available.
 - The reference-frame selector derives its menu from loaded satellite systems. The current baseline exposes SSB plus Earth-centered views; expanded catalogs can add loaded parent-centered frames such as Mars, Jupiter, Saturn, Uranus, and Neptune when their moons are present.
 
 ## Data And Domain Boundaries
@@ -78,8 +78,8 @@
 
 ## Rendering Model
 
-- Body indicators render camera-facing ring billboards for bodies whose screen-space radius is below the visibility threshold (4 px). The indicators use a custom GLSL ring shader and smooth opacity transitions during zoom.
-- Body labels render as HTML overlays using drei's `Html` component, positioned above each body. Labels auto-hide when the body is large on screen (> 80 px radius) and are clickable to focus the body.
+- Body indicators render camera-facing ring billboards for bodies whose screen-space radius is below the visibility threshold (4 px). The indicators use a custom GLSL ring shader and smooth opacity transitions during zoom. Satellite indicators are additionally hidden in distant overview contexts when their projected separation from the parent planet is too small, but remain available in parent or satellite focused views.
+- Body labels render as HTML overlays using drei's `Html` component, positioned above each body. Labels auto-hide when the body is large on screen (> 80 px radius) and are clickable to focus the body. Satellite labels share the same parent-separation gate as indicators so global overviews stay readable while focused local-system views can still expose moon labels.
 - The Sun impostor is a camera-facing billboard with a radial-gradient shader that remains visible when the Sun sphere is too small to see. It blends opacity based on screen-space radius thresholds (appears below 15 px, full opacity below 3 px).
 - Post-processing uses `@react-three/postprocessing` for a subtle bloom effect on the Sun impostor.
 - Lighting uses custom world-space shaders on all planet materials. The scene has only a small ambient light for non-custom materials (e.g., orbit trails); there is no PointLight.

@@ -1,11 +1,18 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import { useMemo, useRef, useState } from 'react';
 import { Vector3 } from 'three';
-import { isStar, type BodyDefinition, type BodyId } from '../domain/body';
+import {
+  isStar,
+  type BodyDefinition,
+  type BodyId,
+  type ViewTargetId
+} from '../domain/body';
+import { shouldShowBodySatelliteAdornment } from '../domain/satelliteAdornmentVisibility';
 import { BodyIndicator, INDICATOR_THRESHOLDS } from './BodyIndicator';
 
 type BodyIndicatorsProps = {
   bodies: BodyDefinition[];
+  focusedBodyId: ViewTargetId;
   onSelect: (bodyId: BodyId) => void;
   visible?: boolean;
 };
@@ -20,6 +27,7 @@ const tempVec = new Vector3();
  */
 export function BodyIndicators({
   bodies,
+  focusedBodyId,
   onSelect,
   visible = true
 }: BodyIndicatorsProps) {
@@ -29,6 +37,10 @@ export function BodyIndicators({
 
   const indicatorBodies = useMemo(
     () => bodies.filter((body) => !isStar(body.id)),
+    [bodies]
+  );
+  const bodiesById = useMemo(
+    () => new Map(bodies.map((body) => [body.id, body])),
     [bodies]
   );
 
@@ -46,6 +58,9 @@ export function BodyIndicators({
 
       if (distance <= body.radius) {
         newVisibility.set(body.id, false);
+        if (lastVisibilityRef.current.get(body.id) !== false) {
+          hasChanged = true;
+        }
         continue;
       }
 
@@ -54,9 +69,18 @@ export function BodyIndicators({
       const screenRadius = (angularRadius / fovRad) * size.height;
 
       const shouldShow = screenRadius < INDICATOR_THRESHOLDS.showBelowPx;
-      newVisibility.set(body.id, shouldShow);
+      const shouldShowAdornment = shouldShowBodySatelliteAdornment(
+        body,
+        bodiesById,
+        camera,
+        size.width,
+        size.height,
+        fov,
+        focusedBodyId
+      );
+      newVisibility.set(body.id, shouldShow && shouldShowAdornment);
 
-      if (lastVisibilityRef.current.get(body.id) !== shouldShow) {
+      if (lastVisibilityRef.current.get(body.id) !== (shouldShow && shouldShowAdornment)) {
         hasChanged = true;
       }
     }

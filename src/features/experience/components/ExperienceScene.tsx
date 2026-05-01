@@ -18,6 +18,7 @@ import { type LayerVisibility } from '../state/useLayerVisibility';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import {
   getTidalLockTargetBody,
+  isSatellite,
   isStar,
   type BodyId,
   type ViewTargetId
@@ -64,6 +65,12 @@ export function ExperienceScene({
   );
   const bodies = catalog.bodies;
   const bodiesById = new Map(bodies.map((body) => [body.id, body]));
+  const visibleBodies = layerVisibility.satellites
+    ? bodies
+    : bodies.filter((body) => !isSatellite(body.id));
+  const visibleTrails = layerVisibility.satellites
+    ? catalog.snapshot.trails
+    : catalog.snapshot.trails.filter((trail) => !isSatellite(trail.id));
   const sunBody = bodies.find((body) => isStar(body.id));
   const sunPosition = sunBody?.position ?? [0, 0, 0];
   const getTidalLockTargetPosition = (bodyId: BodyId) => {
@@ -100,21 +107,22 @@ export function ExperienceScene({
       {layerVisibility.trails ? (
         <OrbitTrails
           metadata={catalog.metadata}
-          trails={catalog.snapshot.trails}
+          trails={visibleTrails}
         />
       ) : null}
       {layerVisibility.bodyIndicators ? (
         <BodyIndicators
-          bodies={bodies}
+          bodies={visibleBodies}
+          focusedBodyId={focusedBodyId}
           onSelect={onFocusBody}
         />
       ) : null}
       {layerVisibility.labels ? (
-        <BodyLabels bodies={bodies} onSelect={onFocusBody} />
+        <BodyLabels bodies={visibleBodies} focusedBodyId={focusedBodyId} onSelect={onFocusBody} />
       ) : null}
       {sunBody ? <SunImpostorWrapper sunBody={sunBody} /> : null}
 
-      {bodies.map((body) => (
+      {visibleBodies.map((body) => (
         <PlanetBody
           key={body.id}
           body={body}

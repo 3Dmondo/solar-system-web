@@ -39,6 +39,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Added debug-only browser timing hooks for manifest load, metadata load, chunk JSON load, chunk parse, and JS heap display so the user-run reduced preview can record startup, prefetch, boundary, and memory observations without adopting generated assets.
 - The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.
 - Added provider-level coverage that verifies satellite trails are sampled relative to their parent body by default, which covers the retained reduced-preview moons through the registry hierarchy.
+- Added a satellite layer toggle and distance-gated satellite indicators and labels so the reduced-preview moons stay out of the global overview clutter while remaining visible in parent or satellite focused views.
+- Docked the mobile reference-frame selector above the layer selector to avoid the previous overlapping touch targets during reduced-preview validation.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, and chunk-size or file-format optimization is deferred to `docs/tasks/optional-expanded-data-optimization-after-deploy.md` after the Phase 3 GitHub Pages deployment.
 
 ## Goal
@@ -240,9 +242,9 @@ Status: Next. Phase 3 should prioritize the reduced major-moon deployment path p
 - [ ] Deploy the reduced expanded generated profile through GitHub Pages after Phase 3 UI gates pass, then repeat debug timing and memory observations on the deployed site.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
 - [x] Keep parent-relative trails for all satellites through the existing hierarchy behavior.
-- [ ] Suppress satellite indicators and labels when the camera is far enough that they overlap their parent planet or clutter the global overview, while keeping them visible in near-parent and focused local-system views.
-- [ ] Add a satellite visibility layer toggle so retained moons, their indicators, and their labels can be enabled or disabled independently from planets and existing labels.
-- [ ] Prevent the reference-frame selector and layer selector from overlapping on mobile; stack or dock them predictably with touch-sized targets.
+- [x] Suppress satellite indicators and labels when the camera is far enough that they overlap their parent planet or clutter the global overview, while keeping them visible in near-parent and focused local-system views.
+- [x] Add a satellite visibility layer toggle so retained moons, their indicators, and their labels can be enabled or disabled independently from planets and existing labels.
+- [x] Prevent the reference-frame selector and layer selector from overlapping on mobile; stack or dock them predictably with touch-sized targets.
 - [ ] Keep the deployed app compatible with static GitHub Pages hosting.
 - [ ] Recheck local and deployed `/debug` overlays after UI changes so debug panels do not hide critical mobile controls during validation.
 
