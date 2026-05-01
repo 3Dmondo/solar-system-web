@@ -59,11 +59,12 @@ export function PlanetBody({
       return;
     }
 
-    // One-time initialization: set Earth's initial spin angle so the prime
-    // meridian faces the correct direction relative to the Sun at simulation start.
-    if (!isSpinInitializedRef.current && body.id === 'earth') {
+    if (
+      !isSpinInitializedRef.current &&
+      body.spinInitialPhaseStrategy === 'prime-meridian-solar-noon'
+    ) {
       isSpinInitializedRef.current = true
-      spinAngleRef.current = computeEarthInitialSpinAngle(
+      spinAngleRef.current = computePrimeMeridianSolarNoonSpinAngle(
         body.position, sunPosition, poleAlignQuat, simulationInitialUtcMs
       )
     } else if (!isSpinInitializedRef.current) {
@@ -195,8 +196,8 @@ export function PlanetBody({
 }
 
 /**
- * Computes Earth's initial spin angle so the prime meridian faces the Sun at
- * solar noon (12:00 UTC) and is correctly offset at any other UTC start time.
+ * Computes an initial spin angle so the prime meridian faces the Sun at solar
+ * noon (12:00 UTC) and is correctly offset at any other UTC start time.
  *
  * Three.js SphereGeometry maps texture u=0.5 (prime meridian for standard Earth
  * textures) to local +X.  After poleAlignQuat, local +X stays at world +X.
@@ -206,7 +207,7 @@ export function PlanetBody({
  * The UTC correction adds (secondsFromNoon × 2π/86400) so the prime meridian
  * has already rotated the right amount past solar noon at the start time.
  */
-function computeEarthInitialSpinAngle(
+function computePrimeMeridianSolarNoonSpinAngle(
   earthPos: [number, number, number],
   sunPos: [number, number, number],
   poleAlignQuat: Quaternion,

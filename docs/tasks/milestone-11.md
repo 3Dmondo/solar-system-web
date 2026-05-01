@@ -18,14 +18,16 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - The web catalog source now scales presentation metadata only for bodies present in the loaded generated-data manifest, so the current baseline profile remains compatible while the expanded registry is staged.
 - Reference-frame options now derive from loaded satellite systems, preserving the current SSB and Earth-centered baseline while allowing expanded catalogs to expose loaded parent-centered frames.
 - Schema-1 metadata parsing now tolerates partial or unavailable generated physical metadata for staged bodies, while preserving full physical radius and rotation mapping for bodies that still have complete metadata.
+- The remaining runtime hard-coded behavior needed for the larger catalog is registry-driven in this phase; Earth prime-meridian spin initialization now comes from presentation metadata instead of a renderer body-id literal.
 - Added a sibling `SpiceNet` generation script for the `expanded-major-moons` profile that keeps the existing baseline profile unchanged and records the selected SPKs, expanded body ids, parent ids, and starter cadence defaults in one profile entry point.
 - Recorded initial SSD catalog-backed kernel shortlist and download-size tradeoffs from the local `SpiceNet` snapshot.
 - Ran the first `Spice.SsdCatalog` kernel inspection and fallback pass and recorded `C:\Dev\repos\3Dmondo\SpiceNet\docs\SsdCatalog\kernel_inspection.json`.
 - Confirmed the inspected compact and sub-500 MB fallback satellite candidates are not enough for the full `1950-2050` major-moon target window.
 - Ran the first `expanded-major-moons` configured-cadence benchmark from the local SSD cache and recorded generated web-output size plus interpolation error at `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons\configured-cadence-benchmark.json`.
 - The first expanded benchmark is not adoption-ready: output size looks plausible for inspection, but integer-day starter cadences undersample several fast inner moons.
+- Expanded-profile generated assets will not be versioned from the first benchmark output; versioning is deferred until a sub-day or equivalent fast-satellite sampling pass clears the visual-error and browser budget gates.
 - Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
-- Existing schema-1 generated-data parsing remains the web runtime contract for this step.
+- Existing schema-1 generated-data parsing remains the web runtime contract for this step; schema 2 is not needed until generated data must carry runtime-required fields that the registry cannot already supply.
 
 ## Goal
 
@@ -38,7 +40,7 @@ Broaden the solar-system catalog into a fuller explorer, starting with a curated
 - Benchmark generated web output before making the expanded body set the default deployed dataset.
 - Keep the existing Sun, planets, and Moon behavior stable while expanding the catalog.
 - Keep upstream kernels out of git.
-- Defer the decision on versioning generated manifest and chunk assets until expanded output sizes are measured.
+- Do not version the first expanded generated manifest and chunk assets yet; revisit after the next cadence benchmark clears accuracy and browser budget gates.
 
 ## Body Catalog Target
 
@@ -66,9 +68,9 @@ Deferred until the major-moon path is validated:
 - [x] Add registry-driven body category and system-group metadata for the current body set.
 - [x] Add a registry-driven discovery-group helper for loaded body ids.
 - [x] Extend the central registry with the curated major-moon body set after expanded kernel coverage is chosen.
-- [ ] Replace hard-coded body assumptions in the web app with registry lookups where the larger catalog needs dynamic behavior.
+- [x] Replace hard-coded body assumptions in the web app with registry lookups where the larger catalog needs dynamic behavior.
 - [x] Preserve schema-1 ephemeris parsing for the current generated dataset.
-- [ ] Add schema-2 parsing only if the expanded generated data needs repeated SPK provenance, parent body ids, body categories, or other manifest fields that do not fit the current schema.
+- [x] Decide schema-2 parsing is not needed for this phase because parent body ids, body categories, display grouping, and staged presentation behavior are already registry-driven.
 
 ### Phase 2: SpiceNet Expanded Profile
 
@@ -79,7 +81,7 @@ Deferred until the major-moon path is validated:
 - [x] Preserve complete metadata output for the existing Sun, planets, and Moon.
 - [x] Record initial SSD catalog-backed candidate kernel sizes before coverage and output benchmarking.
 - [x] Benchmark expanded output size, largest chunk gzip size, and interpolation error before web runtime adoption.
-- [ ] Decide whether to version the generated expanded-profile manifest and chunks after real file sizes are known.
+- [x] Decide not to version the first expanded-profile manifest and chunks yet; real file sizes are plausible for inspection, but the current cadence benchmark fails fast-moon accuracy gates.
 
 ### Phase 2B: Expanded Benchmark And UX Validation
 
@@ -125,7 +127,7 @@ Coverage and benchmark notes:
 - The common selected-kernel coverage is approximately `1900-01-03T23:58:55Z` through `2100-01-02T23:58:55Z`. With the current year-boundary generator CLI, the widest conservative whole-year expanded range is `--start-year 1901 --end-year 2100`, effectively covering years `1901-2099`.
 - Smaller inspected candidates were rejected because they either did not include the target ids or did not cover the full window: Jupiter compact candidates top out at `jup380s` with only roughly `2015-2030` Galilean coverage; `sat143.bsp` includes the requested Saturn moons but stops around `2019`; inspected Neptune kernels through `nep105.bsp` do not cover Triton `801`.
 - Compare total source download size separately from generated web output size because the upstream SPKs stay out of git and are not shipped directly.
-- Consider versioning the generated expanded-profile `manifest.json` plus chunk files if their measured size is acceptable. This would avoid repeated multi-GB SPK downloads during normal GitHub Actions builds; the regeneration workflow would remain explicit/manual and provenance-backed. Defer the final choice until the benchmark reports real raw and gzip output sizes.
+- Do not version the current expanded-profile `manifest.json` plus chunk files yet. The first measured size is plausible for inspection, but the current integer-day cadence profile fails fast-moon accuracy gates. Revisit versioning after a sub-day or equivalent fast-satellite sampling pass reports acceptable visual error, largest-chunk gzip size, startup latency, chunk-transition behavior, and memory budget.
 - Benchmark generated output size and interpolation error for each accepted candidate set before making the expanded profile the default deployed dataset.
 
 First expanded configured-cadence benchmark:
@@ -207,4 +209,4 @@ Expanded benchmark problem list:
 - The existing baseline generated-data profile remains available while the expanded profile is benchmarked.
 - Educational context and richer exploration are lower-priority proposals for review, not blockers for the first catalog-expansion pass.
 - Upstream kernels remain non-versioned.
-- Versioning generated expanded-profile manifest and chunks is an open decision pending real output-size benchmarks.
+- The first expanded-profile generated manifest and chunks will not be versioned yet because the measured output came from a cadence profile that failed fast-moon accuracy gates.

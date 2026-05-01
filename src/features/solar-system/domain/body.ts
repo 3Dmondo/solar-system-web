@@ -1,6 +1,7 @@
 export type BodyMaterial = 'basic' | 'sun' | 'saturn' | 'earth' | 'moon' | 'venus';
 
 export type BodyCategory = 'star' | 'planet' | 'natural-satellite';
+export type BodySpinInitialPhaseStrategy = 'prime-meridian-solar-noon';
 
 type BodyJumpGroupId = 'quick-picks' | 'inner-planets' | 'outer-planets';
 type BodySystemGroupId =
@@ -26,6 +27,7 @@ type BodyRegistryEntry = {
   jumpGroups?: BodyJumpGroupId[];
   focusOffset: [number, number, number];
   hasRings?: boolean;
+  spinInitialPhaseStrategy?: BodySpinInitialPhaseStrategy;
 };
 
 const BODY_JUMP_GROUP_DEFINITIONS: Array<{ id: BodyJumpGroupId; label: string }> = [
@@ -151,7 +153,8 @@ export const BODY_REGISTRY = {
     defaultTrailWindowDays: 365,
     trailSampleRateMultiplier: 2,
     jumpGroups: ['quick-picks'],
-    focusOffset: [0, 0.25, 3.2]
+    focusOffset: [0, 0.25, 3.2],
+    spinInitialPhaseStrategy: 'prime-meridian-solar-noon'
   },
   moon: {
     naifBodyId: 301,
@@ -520,6 +523,8 @@ export type BodyMetadata = {
   poleDirectionRender?: [number, number, number];
   /** Signed angular velocity in rad/s; negative for retrograde bodies. */
   angularVelocityRadPerSec?: number;
+  /** Optional strategy for initializing the first rendered spin phase. */
+  spinInitialPhaseStrategy?: BodySpinInitialPhaseStrategy;
 };
 
 export type BodyPhysicalShape = {

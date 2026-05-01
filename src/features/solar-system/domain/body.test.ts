@@ -41,6 +41,9 @@ describe('body registry', () => {
     expect(getParentBody('phobos')).toBe('mars');
     expect(getParentBody('io')).toBe('jupiter');
     expect(getParentBody('triton')).toBe('neptune');
+    expect(getBodyRegistryEntry('earth').spinInitialPhaseStrategy)
+      .toBe('prime-meridian-solar-noon');
+    expect(getBodyRegistryEntry('mars').spinInitialPhaseStrategy).toBeUndefined();
     expect(getTidalLockTargetBody('sun')).toBeNull();
     expect(getTidalLockTargetBody('earth')).toBeNull();
     expect(getTidalLockTargetBody('moon')).toBe('earth');

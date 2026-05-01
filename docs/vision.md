@@ -24,7 +24,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 
 - The app starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The current deployed generated dataset covers the Sun, all 8 planets, and the Moon only.
-- The current web runtime still assumes a small fixed body set in several places, so the major-moon expansion starts with registry and generated-data contract work.
+- The major-moon expansion is staged through a central registry, while the deployed generated dataset still covers only the Sun, planets, and Moon.
 - The experience uses a cinematic scale model only.
 - Discovery aids are tuned for the current small catalog and need crowded-system validation before major moons become default.
 - Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
@@ -39,7 +39,7 @@ Focus areas:
 
 - keep the current Sun, planet, and Moon behavior stable while the catalog boundary expands
 - use the `SpiceNet` SSD catalog snapshot to choose candidate satellite kernels and benchmark generated web output
-- move fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, and future system views
+- keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
 - add the curated major moons only after generated asset size, interpolation behavior, and overview readability are validated
 - keep educational context and richer exploration modes as lower-priority proposals until the major-moon path is validated
 

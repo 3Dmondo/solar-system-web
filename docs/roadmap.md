@@ -249,8 +249,10 @@ Started:
 - curated major-moon registry entries are staged behind loaded-manifest filtering, preserving the current baseline generated-data profile while expanded output is benchmarked
 - reference-frame options now derive from loaded satellite systems, so expanded catalogs can expose parent-centered frames without hard-coding each system into the UI
 - schema-1 generated-data parsing now tolerates partial generated physical metadata for staged expanded bodies while preserving full baseline metadata behavior
+- remaining catalog-growth runtime assumptions needed for this phase are now registry-driven, including Earth prime-meridian spin initialization metadata
 - a separate `SpiceNet` `expanded-major-moons` generation script now records the selected SSD kernels, body ids, parent ids, and starter cadence defaults without changing the baseline profile
 - the first expanded configured-cadence benchmark ran from the local SSD cache; output size is plausible for inspection, but fast-moon interpolation errors require sub-day cadence or another sampling strategy before adoption
+- the current expanded generated manifest and chunks will not be versioned yet; that decision is deferred until an improved cadence profile clears accuracy and browser budget gates
 - the expanded-data evaluation now has an explicit browser validation plan covering visual error, chunk-transition preload behavior, data-format tradeoffs, RAM budget, and desktop/mobile UX gates
 
 Deferred until the major-moon path is validated:

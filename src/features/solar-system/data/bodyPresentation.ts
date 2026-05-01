@@ -12,7 +12,8 @@ export const presentationBodyMetadata: BodyMetadata[] = BODY_IDS.map((bodyId) =>
     defaultTrailWindowDays: registryEntry.defaultTrailWindowDays,
     trailSampleRateMultiplier: registryEntry.trailSampleRateMultiplier,
     focusOffset: [...registryEntry.focusOffset],
-    hasRings: registryEntry.hasRings
+    hasRings: registryEntry.hasRings,
+    spinInitialPhaseStrategy: registryEntry.spinInitialPhaseStrategy
   }
 })
 
