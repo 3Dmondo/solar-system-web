@@ -35,6 +35,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Added `scripts/Measure-ReducedMajorMoonPreview.ps1` as a repeatable retained-moon spot-check diagnostic that combines the SpiceNet truth report with staged preview orbit scale.
 - Manual visual inspection of the retained reduced-preview moons passed: positions and orbiting animations looked acceptable, including the diagnostic-flagged Umbriel, Titania, and Rhea.
 - Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn still need runtime measurement.
+- Tuned runtime chunk prefetch and cache budgeting so reduced-profile previews can keep the active chunk, next chunk, and loaded-catalog trail-history chunks ready without relying on the old fixed two-previous-chunk assumption.
 
 ## Goal
 
@@ -113,8 +114,9 @@ Deferred until the major-moon path is validated:
 - [x] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 - [ ] Benchmark chunk durations separately from cadence: generator-side total gzip size, largest chunk gzip size, and request count are recorded for `25`, `10`, `5`, and `1` year chunks; browser parse time and cache churn remain open.
 - [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
-- [ ] Add or tune next and previous chunk preloading when simulation time approaches a chunk boundary, including direction-aware prefetch for reverse or future reverse playback.
-- [ ] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
+- [x] Tune next and previous chunk preloading for current forward playback so the runtime warms the active chunk, next chunk, and loaded-catalog trail-history previous chunks.
+- [ ] Add direction-aware reverse prefetch when reverse or future reverse playback is introduced.
+- [x] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
 - [ ] Compare the current compact JSON plus gzip format against at least one binary numeric-array format before considering protobuf; include transfer size, decode time, parse allocations, implementation complexity, and numeric precision.
 - [ ] Test Float64, Float32, and any proposed quantized or delta-encoded representation against visual error and interpolation error before changing the runtime format.
 - [ ] Measure browser memory on desktop and mobile with the reduced expanded dataset: initial load, after first focus, after opening retained moon systems, after crossing chunk boundaries, and after several minutes of playback.
@@ -185,6 +187,14 @@ Reduced expanded chunk-duration size benchmark:
 - `5` year chunks: `40` chunks, `61,606,997` bytes raw, `29,506,707` bytes gzip, largest chunk `744,507` bytes gzip.
 - `1` year chunks: `199` chunks, `62,280,991` bytes raw, `29,954,948` bytes gzip, largest chunk `151,523` bytes gzip.
 - Size-only read: smaller chunks drastically reduce largest-chunk transfer and parse risk, while total gzip grows modestly; `1` year chunks add about `544 KB` gzip over `25` year chunks but multiply request count by about `25x`. Runtime parse time, boundary behavior, and cache churn still need browser measurement before choosing a default.
+
+Runtime chunk prefetch and cache budget:
+
+- `prefetchAroundUtc` now warms every ready previous chunk required by the loaded catalog's maximum trail window, plus the active chunk and next chunk.
+- The default chunk-cache budget is dynamic: it keeps at least `6` chunks, and expands to `ceil(maxLoadedTrailWindowDays / representativeChunkDurationDays) + 2` so smaller chunk-year profiles can hold trail history, active chunk, and next chunk.
+- Explicit `maxCachedChunks` test or caller overrides still cap the cache, preserving the LRU behavior used for low-budget scenarios.
+- The reduced `1` year chunk profile would budget roughly `27` chunks by default for `25` years of loaded trail history plus active and next chunks, avoiding unbounded growth while keeping long trails warm.
+- Reverse-direction prefetch remains a planned follow-up because the current simulation clock does not yet expose reverse playback direction to the catalog source.
 
 Expanded benchmark problem list:
 

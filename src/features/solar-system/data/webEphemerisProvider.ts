@@ -33,15 +33,15 @@ export type WebEphemerisProviderOptions = {
   presentationMetadata?: BodyMetadata[]
 }
 
-// Increased from 4 to support outer planet trails (up to 25 years)
-// that may span across chunk boundaries
-const defaultMaxCachedChunks = 6
+// Baseline cache for the active chunk, adjacent chunks, and normal 25-year chunks.
+// Smaller generated chunk profiles expand this budget from the active trail window.
+const minimumDefaultMaxCachedChunks = 6
 
 export function createWebEphemerisProvider({
   chunkBaseUrl,
   datasetLoader,
   fetchImpl = fetch,
-  maxCachedChunks = defaultMaxCachedChunks,
+  maxCachedChunks,
   presentationMetadata = presentationBodyMetadata
 }: WebEphemerisProviderOptions): BodyEphemerisProvider {
   const normalizedChunkBaseUrl = chunkBaseUrl.replace(/[\\/]+$/, '')
@@ -68,11 +68,15 @@ export function createWebEphemerisProvider({
         const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
         const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
         const chunk = await loadChunk(dataset, chunkRange)
+        const maxTrailWindowDays = getMaxTrailWindowDays(
+          presentationMetadataByBodyId,
+          dataset.manifest.bodies.map((body) => body.bodyId)
+        )
         const trailChunks = getReadyTrailChunks(
           dataset,
           chunk,
           approximateTdbSecondsFromJ2000,
-          getMaxTrailWindowDays(presentationMetadataByBodyId)
+          maxTrailWindowDays
         )
         const trailOriginBodyId = options?.trailOriginBodyId ?? null
 
@@ -132,16 +136,15 @@ export function createWebEphemerisProvider({
       const approximateTdbSecondsFromJ2000 = getApproximateTdbSecondsFromJ2000(utcDate)
       const chunkRange = getRequiredChunkRange(dataset, approximateTdbSecondsFromJ2000)
 
-      // Load 2 previous chunks to support outer planet trails (up to 25 years)
-      const prev1 = getPreviousChunkRange(dataset.manifest, chunkRange)
-      const prev2 = prev1 ? getPreviousChunkRange(dataset.manifest, prev1) : undefined
-
-      const ranges = [
-        prev2,
-        prev1,
+      const ranges = getPrefetchChunkRanges(
+        dataset,
         chunkRange,
-        getNextChunkRange(dataset.manifest, chunkRange)
-      ].filter((value): value is WebEphemerisChunkRange => value !== undefined)
+        approximateTdbSecondsFromJ2000,
+        getMaxTrailWindowDays(
+          presentationMetadataByBodyId,
+          dataset.manifest.bodies.map((body) => body.bodyId)
+        )
+      )
 
       await Promise.all(ranges.map((range) => loadChunk(dataset, range)))
     },
@@ -295,7 +298,7 @@ export function createWebEphemerisProvider({
       })
 
     touchCacheEntry(cacheKey, chunkPromise)
-    evictOverflowingChunks()
+    evictOverflowingChunks(dataset)
 
     return chunkPromise
   }
@@ -305,8 +308,10 @@ export function createWebEphemerisProvider({
     chunkCache.set(cacheKey, chunkPromise)
   }
 
-  function evictOverflowingChunks() {
-    while (chunkCache.size > maxCachedChunks) {
+  function evictOverflowingChunks(dataset: WebDataset) {
+    const chunkCacheLimit = getChunkCacheLimit(dataset)
+
+    while (chunkCache.size > chunkCacheLimit) {
       const oldestCacheKey = chunkCache.keys().next().value
 
       if (!oldestCacheKey) {
@@ -316,6 +321,21 @@ export function createWebEphemerisProvider({
       chunkCache.delete(oldestCacheKey)
       loadedChunkCache.delete(oldestCacheKey)
     }
+  }
+
+  function getChunkCacheLimit(dataset: WebDataset) {
+    if (maxCachedChunks !== undefined) {
+      return maxCachedChunks
+    }
+
+    const maxTrailWindowDays = getMaxTrailWindowDays(
+      presentationMetadataByBodyId,
+      dataset.manifest.bodies.map((body) => body.bodyId)
+    )
+    const chunkDurationDays = getRepresentativeChunkDurationDays(dataset)
+    const previousTrailChunkBudget = Math.ceil(maxTrailWindowDays / chunkDurationDays)
+
+    return Math.max(minimumDefaultMaxCachedChunks, previousTrailChunkBudget + 2)
   }
 
   function getReadyTrailChunks(
@@ -345,6 +365,35 @@ export function createWebEphemerisProvider({
 
     return chunks
   }
+}
+
+function getPrefetchChunkRanges(
+  dataset: WebDataset,
+  activeRange: WebEphemerisChunkRange,
+  targetTdbSecondsFromJ2000: number,
+  maxTrailWindowDays: number
+) {
+  const earliestTrailTdbSecondsFromJ2000 =
+    targetTdbSecondsFromJ2000 - maxTrailWindowDays * secondsPerDay
+  const previousRanges: WebEphemerisChunkRange[] = []
+  let previousRange = getPreviousChunkRange(dataset.manifest, activeRange)
+
+  while (
+    previousRange &&
+    previousRange.endTdbSecondsFromJ2000 > earliestTrailTdbSecondsFromJ2000
+  ) {
+    previousRanges.push(previousRange)
+    previousRange = getPreviousChunkRange(dataset.manifest, previousRange)
+  }
+
+  const nextRange = getNextChunkRange(dataset.manifest, activeRange)
+  const ranges = [...previousRanges.reverse(), activeRange]
+
+  if (nextRange) {
+    ranges.push(nextRange)
+  }
+
+  return ranges
 }
 
 async function loadJson(url: string, fetchImpl: typeof fetch) {
@@ -430,12 +479,26 @@ function sampleTrailAcrossChunks(
   }
 }
 
-function getMaxTrailWindowDays(metadataByBodyId: Map<BodyId, BodyMetadata>) {
+function getMaxTrailWindowDays(
+  metadataByBodyId: Map<BodyId, BodyMetadata>,
+  bodyIds: BodyId[]
+) {
   return Math.max(
     0,
-    ...Array.from(
-      metadataByBodyId.values(),
-      (metadata) => metadata.defaultTrailWindowDays ?? 0
-    )
+    ...bodyIds.map((bodyId) => metadataByBodyId.get(bodyId)?.defaultTrailWindowDays ?? 0)
+  )
+}
+
+function getRepresentativeChunkDurationDays(dataset: WebDataset) {
+  const firstChunk = dataset.manifest.chunks[0]
+
+  if (!firstChunk) {
+    return 1
+  }
+
+  return Math.max(
+    1,
+    (firstChunk.endTdbSecondsFromJ2000 - firstChunk.startTdbSecondsFromJ2000) /
+      secondsPerDay
   )
 }

@@ -61,6 +61,20 @@ const manifest: WebEphemerisManifest = {
       endUtc: '2000-01-07T12:00:00Z',
       startTdbSecondsFromJ2000: 345600,
       endTdbSecondsFromJ2000: 518400
+    },
+    {
+      fileName: 'chunk-3.json',
+      startUtc: '2000-01-07T12:00:00Z',
+      endUtc: '2000-01-09T12:00:00Z',
+      startTdbSecondsFromJ2000: 518400,
+      endTdbSecondsFromJ2000: 691200
+    },
+    {
+      fileName: 'chunk-4.json',
+      startUtc: '2000-01-09T12:00:00Z',
+      endUtc: '2000-01-11T12:00:00Z',
+      startTdbSecondsFromJ2000: 691200,
+      endTdbSecondsFromJ2000: 864000
     }
   ]
 }
@@ -137,6 +151,38 @@ const chunkByFileName = {
           345600, 0, 0, 1, 0, 0,
           432000, 0, 0, 1, 0, 0,
           518400, 0, 0, 1, 0, 0
+        ]
+      }
+    ]
+  },
+  'chunk-3.json': {
+    SchemaVersion: 1,
+    CenterBodyId: 0,
+    StartTdbSecondsFromJ2000: 518400,
+    EndTdbSecondsFromJ2000: 691200,
+    Bodies: [
+      {
+        BodyId: 399,
+        Samples: [
+          518400, 0, 0, 1, 0, 0,
+          604800, 0, 0, 1, 0, 0,
+          691200, 0, 0, 1, 0, 0
+        ]
+      }
+    ]
+  },
+  'chunk-4.json': {
+    SchemaVersion: 1,
+    CenterBodyId: 0,
+    StartTdbSecondsFromJ2000: 691200,
+    EndTdbSecondsFromJ2000: 864000,
+    Bodies: [
+      {
+        BodyId: 399,
+        Samples: [
+          691200, 0, 0, 1, 0, 0,
+          777600, 0, 0, 1, 0, 0,
+          864000, 0, 0, 1, 0, 0
         ]
       }
     ]
@@ -228,6 +274,25 @@ describe('webEphemerisProvider', () => {
       }
     ])
     expect(fetchMock).toHaveBeenCalledTimes(3)
+  })
+
+  it('prefetches the loaded catalog trail window instead of a fixed previous-chunk count', async () => {
+    const datasetLoader = createDatasetLoaderStub(dataset)
+    const fetchMock = createChunkFetchMock()
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock
+    })
+
+    await provider.prefetchAroundUtc(new Date(Date.parse(approximateJ2000UtcIso) + 604800 * 1000))
+
+    expect(fetchMock).toHaveBeenCalledTimes(5)
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-0.json')
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-1.json')
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-2.json')
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-3.json')
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-4.json')
   })
 
   it('clears chunk and dataset caches together', async () => {
