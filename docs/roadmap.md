@@ -11,7 +11,7 @@
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 - Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring.
 - Milestone 10 rendering and performance refinement is complete for the shipped trail-rendering scope, with pole-artifact audit and deeper `/debug` validation deferred to an optional unnumbered milestone.
-- Milestone 11 full solar system explorer work is now in progress. The reduced major-moon profile is deployed through GitHub Pages from a pinned release asset, with about `4` seconds of startup time accepted for now; Phase 4 discovery UI is closed for the reduced catalog, and chunk-size or file-format optimization is deferred to Milestone 13.
+- Milestone 11 full solar system explorer work is now in progress. The reduced major-moon profile is deployed through GitHub Pages from a pinned release asset, with about `4` seconds of startup time accepted for now; Phase 4 is now focused on HUD, selector, and playback-control redesign, while chunk-size or file-format optimization is deferred to Milestone 13.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 - Milestone 13 fast moon cadence work is planned to reintroduce major moons whose orbital periods are too short for Milestone 11's current integer-day sampling.
 
@@ -253,12 +253,12 @@ Started:
 - remaining catalog-growth runtime assumptions needed for this phase are now registry-driven, including Earth prime-meridian spin initialization metadata
 - a separate `SpiceNet` `expanded-major-moons` generation script now records the selected SSD kernels, body ids, parent ids, and starter cadence defaults without changing the baseline profile
 - the first expanded configured-cadence benchmark ran from the local SSD cache; output size is plausible for inspection, but fast-moon interpolation errors require a reduced Milestone 11 dataset before adoption
-- the current expanded generated manifest and chunks will not be versioned yet; that decision is deferred until the reduced profile clears accuracy and browser budget gates
+- the first full expanded generated manifest and chunks remain unversioned, while the reduced deployed profile is pinned through a GitHub release asset to keep Pages builds from redownloading multi-gigabyte kernels
 - Phase 3 shipped the reduced `expanded-major-moons` profile through the default deployed static asset path using a pinned GitHub release artifact
 - the reduced preview target temporarily removes fast undersampled moons, keeping the slower major moons for Phase 3 while Milestone 13 handles sub-day cadence
 - Phase 2B local validation passed well enough to proceed, with final timing and memory confidence deferred to the deployed GitHub Pages path
 - Phase 3 UI/readability work delivered satellite indicator and label distance gating, a satellite visibility toggle, mobile control layout fixes, deployed reduced-profile validation, and static Pages compatibility
-- Phase 4 discovery UI is closed for the reduced catalog with the current grouped `Jump to` surface accepted; larger menu redesign and focused-system affordances are deferred
+- Phase 4 now owns the HUD and discovery UI redesign: remove Quick picks, move `Jump to` into an isolated selector, make all selectors height-constrained and scrollable when needed, move simulation time and playback controls to the bottom center, add reverse and faster rate controls, move help near fullscreen, and keep the main HUD informational
 
 Deferred to Milestone 13:
 

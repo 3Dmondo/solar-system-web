@@ -43,7 +43,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Docked the mobile reference-frame selector above the layer selector to avoid the previous overlapping touch targets during reduced-preview validation.
 - Wired the GitHub Pages workflow to consume a pinned reduced expanded-major-moons GitHub release asset instead of downloading multi-gigabyte SPK kernels and regenerating ephemeris data on every deploy.
 - Deployed the reduced expanded-major-moons profile through GitHub Pages from the release artifact; observed startup is about `4` seconds and acceptable for Milestone 11.
-- Closed the Milestone 11 discovery-UI pass with the current registry-driven grouped `Jump to` menu, direct picking, labels, indicators, satellite toggle, and reference-frame selector accepted for the reduced catalog.
+- Closed the Milestone 11 Phase 3 runtime integration pass with the reduced deployment accepted for static GitHub Pages.
+- Reopened Phase 4 as the HUD and selector redesign pass: `Jump to` still needs a dedicated selector surface, Quick picks removal, mobile-landscape fit checks, and playback-control relocation.
 - Deferred deeper generated-data optimization, including smaller chunks and alternate file formats, to Milestone 13 rather than keeping it in Milestone 11.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, the GitHub Pages deployment starts in about `4` seconds, and chunk-size or file-format optimization is deferred to Milestone 13.
 
@@ -252,15 +253,23 @@ Status: Closed. The reduced major-moon profile is deployed through GitHub Pages 
 - [x] Keep the deployed app compatible with static GitHub Pages hosting.
 - [x] Recheck local and deployed `/debug` overlays after UI changes so debug panels do not hide critical mobile controls during validation. Current overlay behavior is acceptable for Milestone 11; deeper timing work is deferred.
 
-### Phase 4: Discovery UI
+### Phase 4: HUD And Discovery UI
 
-Status: Closed for Milestone 11. The existing registry-driven grouped `Jump to` menu is accepted for the reduced deployed catalog; larger menu redesign and richer focused-system affordances are deferred until a later UX pass after Milestone 13 restores fast moons.
+Status: Next. Phase 4 should treat the current controls as functional but not final. The HUD should become an information panel about the current view, while selection and playback controls move into dedicated, compact surfaces that remain usable on desktop and mobile landscape.
 
 - [x] Replace the fixed `Jump to` groups with registry-driven quick-pick and system groups for the current loaded catalog.
-- [x] Accept the current compact desktop `Jump to` grouping for the reduced catalog; removing Quick picks is deferred.
-- [x] Accept the current coarse-pointer `Jump to` surface for the reduced catalog after the mobile control overlap fix; a larger scrollable-sheet redesign is deferred.
-- [x] Verify direct body picking, labels, indicators, and jump-menu focus work well enough for retained major moons in the reduced deployment.
-- [x] Defer a focused-system affordance that exposes a parent planet plus retained moons without forcing users through the full global list.
+- [ ] Review and optimize the `Jump to` body picker for the reduced catalog.
+- [ ] Remove the Quick picks section from `Jump to`; prefer compact parent-system grouping.
+- [ ] Move `Jump to` out of the main HUD into an isolated selector button, matching the reference-frame and layer-selector interaction model.
+- [ ] Review all selector surfaces (`Jump to`, reference frame, layers) for desktop, portrait mobile, and horizontal mobile layouts.
+- [ ] Make every selector scrollable or otherwise constrained when it cannot fit within the screen height, with horizontal mobile orientation treated as a required layout.
+- [ ] Move the simulation time display and playback controls to the bottom center of the screen.
+- [ ] Replace the current rate button with play, reverse, pause, fast-forward, and fast-reverse controls; repeated fast-forward or fast-reverse clicks should step through playback rates.
+- [ ] Add `1 month/s` and `1 year/s` to the available simulation speeds.
+- [ ] Move the help button to the top right near the fullscreen control.
+- [ ] Keep the main HUD as an informative panel about the current target or overview, not as the primary home for selectors and playback controls.
+- [ ] Verify direct body picking, labels, indicators, and jump-menu focus still work for retained major moons after the selector redesign.
+- [ ] Consider a focused-system affordance that exposes a parent planet plus retained moons without forcing users through the full global list.
 
 ### Phase 5: Lower-Priority Educational Context Proposal
 
@@ -279,6 +288,7 @@ Status: Closed for Milestone 11. The existing registry-driven grouped `Jump to` 
 
 - [x] Update `docs/architecture.md` after the registry, generated-data contract, runtime behavior, or UI model changes.
 - [x] Update `docs/roadmap.md` when Milestone 11 moves from planned to in progress or when delivered scope changes.
+- [ ] Keep documentation aligned as Phase 4 changes the HUD, selectors, and playback controls.
 - [x] Document any deferred body categories or exploration features explicitly.
 
 ## Verification

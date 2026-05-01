@@ -25,14 +25,14 @@ The repository currently ships an overview-first solar-system scene with real-da
 - The app starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
 - The current deployed generated dataset is the reduced major-moons profile; fast undersampled moons remain deferred to Milestone 13.
 - The experience uses a cinematic scale model only.
-- Discovery aids are accepted for the reduced major-moon catalog, with larger Jump to redesign and focused-system affordances deferred.
+- Discovery aids are functional for the reduced major-moon catalog, but the HUD, selector, and playback controls still need a focused Phase 4 redesign.
 - Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
 - The current rendering controls are limited to the layer panel and still need optional brightness tuning controls.
 - Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
 
-The next implementation slice focuses on closing Milestone 11 and preparing Milestone 13 fast-moon cadence work.
+The next implementation slice focuses on Milestone 11 Phase 4: refining the HUD, selectors, and playback controls before closeout.
 
 Focus areas:
 
@@ -40,6 +40,7 @@ Focus areas:
 - use the `SpiceNet` SSD catalog snapshot to choose candidate satellite kernels and benchmark generated web output
 - keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
 - keep the reduced major-moon deployment stable while deferring fast undersampled moons to Milestone 13 sub-day cadence work
+- move discovery and playback controls out of the informational HUD into dedicated, mobile-safe selector and control surfaces
 - revisit generated-data chunking or file format only in Milestone 13 if the accepted `4` second deployed startup becomes a measured problem
 - keep educational context and richer exploration modes as lower-priority proposals until the major-moon path is validated
 
