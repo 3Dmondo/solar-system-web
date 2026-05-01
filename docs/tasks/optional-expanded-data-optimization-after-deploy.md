@@ -1,22 +1,22 @@
-# Optional: Expanded Data Optimization After Phase 3 Deploy
+# Deferred: Expanded Data Optimization For Milestone 13
 
-Status: Optional Backlog
+Status: Deferred To Milestone 13
 
 ## Start Point
 
-This work starts only after the Milestone 11 Phase 3 reduced major-moons experience is deployed to GitHub Pages and measured against the deployed static-hosting path. It does not block Phase 3 UI work or the first reduced-catalog deployment.
+This work was originally a post-deploy Milestone 11 follow-up. After the reduced major-moons profile deployed to GitHub Pages with about `4` seconds of startup time, the current data path was accepted for Milestone 11 and optimization moved to Milestone 13.
 
 ## Goal
 
-Evaluate whether the reduced expanded dataset needs chunk-size, cache, or file-format optimization after real GitHub Pages behavior is known.
+Evaluate whether the reduced expanded dataset or the restored fast-moon dataset needs chunk-size, cache, or file-format optimization during Milestone 13.
 
 ## Scope
 
-- Compare deployed startup latency, transfer behavior, parse time, cache churn, and browser memory against the local debug pass.
-- Revisit generated chunk duration only if the deployed `25` year reduced profile causes a measured user-facing issue.
+- Compare deployed startup latency, transfer behavior, parse time, cache churn, and browser memory against the local debug pass if Milestone 13 changes the data profile.
+- Revisit generated chunk duration only if the deployed `25` year reduced profile or restored fast-moon profile causes a measured user-facing issue.
 - Compare compact JSON plus gzip against at least one binary numeric-array format before considering protobuf.
 - Test Float64, Float32, and any proposed quantized or delta-encoded representation against visual error and interpolation error before changing runtime format.
-- Keep optimization changes separate from Phase 3 UI/readability changes.
+- Keep optimization changes separate from the closed Milestone 11 UI/readability changes.
 
 ## Deferred From Milestone 11 Phase 2B
 

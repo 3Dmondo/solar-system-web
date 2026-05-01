@@ -4,9 +4,9 @@ Status: Planned
 
 ## Start Point
 
-Milestone 13 starts after Milestone 11 validates a reduced expanded major-moon preview. Milestone 11 intentionally defers fast undersampled moons whose orbital periods are too short for the current integer-day cadence floor.
+Milestone 13 starts after Milestone 11 deploys and validates the reduced expanded major-moon profile. Milestone 11 intentionally defers fast undersampled moons whose orbital periods are too short for the current integer-day cadence floor.
 
-Sub-day profiling, fast-moon tuning, truth-comparison diagnostics for those bodies, and reintroduction of the deferred fast moons belong here rather than in Milestone 11.
+Sub-day profiling, fast-moon tuning, truth-comparison diagnostics for those bodies, and reintroduction of the deferred fast moons belong here rather than in Milestone 11. The deployed reduced profile currently starts in about `4` seconds, so reduced-profile chunk-size and file-format optimization is also deferred here and should only be pursued if later measurements justify it.
 
 ## Goal
 
@@ -17,6 +17,7 @@ Reintroduce fast major moons with sampling dense enough to preserve local orbita
 - Add sub-day cadence support or an equivalent fast-satellite sampling strategy in `SpiceNet`.
 - Keep slower moons on coarser cadences when they pass visual and interpolation gates.
 - Re-benchmark output size, largest chunk gzip size, parse cost, and memory after fast moons are restored.
+- Revisit reduced-profile chunk duration, request count, and file format only if the restored fast-moon profile or later deployed measurements make it necessary.
 - Keep generated assets out of git until the profile clears accuracy and browser budget gates.
 - Preserve the existing static GitHub Pages delivery model.
 
@@ -26,6 +27,7 @@ Reintroduce fast major moons with sampling dense enough to preserve local orbita
 - Jupiter: Io `501`, Europa `502`
 - Saturn: Mimas `601`, Enceladus `602`, Tethys `603`, Dione `604`
 - Uranus: Ariel `701`, Miranda `705`
+- Reduced-profile data optimization: chunk duration, cache churn, compact JSON versus binary numeric-array format, Float64/Float32/quantized representation, and release-asset packaging changes if the current `25` year chunk JSON profile stops being acceptable.
 
 ## Candidate Strategy
 
@@ -67,6 +69,7 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 - [ ] Derive first-pass cadence candidates from orbital period using at least `4` samples per orbit and a preferred `8` samples per orbit target before size and memory tradeoff review.
 - [ ] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
 - [ ] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
+- [ ] Compare the current reduced deployed `25` year chunk profile against any proposed smaller-chunk or alternate-format profile only if measured startup, parse, or memory costs require it.
 - [ ] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
 - [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the deferred fast moons.
 - [ ] Inspect whether the original large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.

@@ -6,7 +6,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 
 - Starts in a solar-system overview with the HUD title `Solar System`.
 - Loads real ephemeris-driven body positions from generated assets at startup and shows an explicit loading or error state when they are unavailable.
-- Renders the Sun, Mercury, Venus, Earth, Moon, Mars, Jupiter, Saturn, Uranus, and Neptune.
+- Renders the Sun, all 8 planets, the Moon, and the reduced Milestone 11 major-moon set.
 - Supports desktop orbit plus wheel zoom and mobile drag plus pinch zoom.
 - Uses a `Jump to` HUD menu plus double click or double tap to focus a body, and keeps `Jump to` available while focused so another body can be selected directly.
 - Includes a HUD help overlay, a focused-mode overview return control, a real star catalog, default-on constellation overlays, an aligned Milky Way texture background, and continuous self-rotation.
@@ -18,9 +18,9 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 
 - Body positions now come from generated ephemeris assets by default.
 - Missing local generated ephemeris assets now surface an explicit runtime error instead of silently substituting fallback positions.
-- Orbital trails are currently hidden until the chunk-derived trail path lands.
+- Orbital trails render from generated chunk data, including parent-relative satellite trails.
 - The scene still routes through the provider-backed `bodyStateStore.ts` boundary, with shared presentation metadata plus async-loaded snapshots merged at the catalog seam.
-- Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder.
+- Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder. The deployed default uses the reduced major-moons release asset.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
 - `pnpm test:e2e` requires Playwright browsers and a local preview server.
@@ -44,11 +44,12 @@ pnpm test
 pnpm build
 .\scripts\Ensure-LocalWebEphemerisData.ps1
 .\scripts\Stage-ExpandedMajorMoonsPreview.ps1
+.\scripts\Package-ReducedMajorMoonsReleaseAsset.ps1
 ```
 
 The local ephemeris helper reuses the pinned external `SpiceNet` workflow and defaults to a sibling checkout at `../SpiceNet`. It now defaults `de440s.bsp` to the JPL SSD URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`; pass `-SpiceNetRepoRoot`, `-SpkUrl`, or `-SpkFileName` if your local setup differs. If `public/ephemeris/generated/` is still missing when you run the app locally, the HUD now surfaces an explicit real-data error instead of a placeholder scene.
 
-Milestone 11 includes an opt-in expanded major-moons preview. After generating the reduced `expanded-major-moons` profile in the sibling `SpiceNet` repo, run `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1` to copy the ignored preview assets into `public/ephemeris/generated-expanded-major-moons/`, then start Vite with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`. The staging helper rejects the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation. The default app remains on the baseline generated profile.
+Milestone 11 ships a reduced major-moons generated profile by default on GitHub Pages. Local expanded-profile inspection still uses `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1` to copy ignored preview assets into `public/ephemeris/generated-expanded-major-moons/`, then starts Vite with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`. The staging helper rejects the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation. `.\scripts\Package-ReducedMajorMoonsReleaseAsset.ps1` packages staged preview assets into the release zip consumed by the Pages workflow.
 
 For Playwright:
 
