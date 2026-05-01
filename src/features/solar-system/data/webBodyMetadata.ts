@@ -108,17 +108,25 @@ function parseBodyPhysicalMetadata(input: unknown, path: string): BodyPhysicalMe
     throw new Error(`${path}.BodyId ${naifBodyId} is not part of the current app body set`)
   }
 
-  const metadata = expectRecord(body.Metadata, `${path}.Metadata`)
-  const shapeModel = expectRecord(metadata.ShapeModel, `${path}.Metadata.ShapeModel`)
-  const derivedPhysicalProperties = expectRecord(
+  const metadata = expectOptionalRecord(body.Metadata, `${path}.Metadata`)
+
+  if (!metadata) {
+    return {
+      id: bodyId,
+      naifBodyId
+    }
+  }
+
+  const shapeModel = expectOptionalRecord(metadata.ShapeModel, `${path}.Metadata.ShapeModel`)
+  const derivedPhysicalProperties = expectOptionalRecord(
     metadata.DerivedPhysicalProperties,
     `${path}.Metadata.DerivedPhysicalProperties`
   )
-  const poleOrientation = expectRecord(
+  const poleOrientation = expectOptionalRecord(
     metadata.PoleOrientation,
     `${path}.Metadata.PoleOrientation`
   )
-  const rotationModel = expectRecord(
+  const rotationModel = expectOptionalRecord(
     metadata.RotationModel,
     `${path}.Metadata.RotationModel`
   )
@@ -126,105 +134,116 @@ function parseBodyPhysicalMetadata(input: unknown, path: string): BodyPhysicalMe
   return {
     id: bodyId,
     naifBodyId,
-    radiiKm: expectFixedLengthNumberTuple(
+    radiiKm: expectOptionalFixedLengthNumberTuple(
       metadata.RadiiKm,
       `${path}.Metadata.RadiiKm`,
       3
     ) as [number, number, number],
-    meanRadiusKm: expectNumber(metadata.MeanRadiusKm, `${path}.Metadata.MeanRadiusKm`),
-    gravitationalParameterKm3PerSec2: expectNumber(
+    meanRadiusKm: expectOptionalNumber(
+      metadata.MeanRadiusKm,
+      `${path}.Metadata.MeanRadiusKm`
+    ),
+    gravitationalParameterKm3PerSec2: expectOptionalNumber(
       metadata.GravitationalParameterKm3PerSec2,
       `${path}.Metadata.GravitationalParameterKm3PerSec2`
     ),
-    shape: {
-      equatorialRadiusKm: expectNumber(
+    shape: shapeModel
+      ? {
+      equatorialRadiusKm: expectOptionalNumber(
         shapeModel.EquatorialRadiusKm,
         `${path}.Metadata.ShapeModel.EquatorialRadiusKm`
       ),
-      polarRadiusKm: expectNumber(
+      polarRadiusKm: expectOptionalNumber(
         shapeModel.PolarRadiusKm,
         `${path}.Metadata.ShapeModel.PolarRadiusKm`
       ),
-      volumeEquivalentRadiusKm: expectNumber(
+      volumeEquivalentRadiusKm: expectOptionalNumber(
         shapeModel.VolumeEquivalentRadiusKm,
         `${path}.Metadata.ShapeModel.VolumeEquivalentRadiusKm`
       ),
-      flattening: expectNumber(
+      flattening: expectOptionalNumber(
         shapeModel.Flattening,
         `${path}.Metadata.ShapeModel.Flattening`
       ),
-      approximateVolumeKm3: expectNumber(
+      approximateVolumeKm3: expectOptionalNumber(
         shapeModel.ApproxVolumeKm3,
         `${path}.Metadata.ShapeModel.ApproxVolumeKm3`
       ),
-      isTriAxial: expectBoolean(
+      isTriAxial: expectOptionalBoolean(
         shapeModel.IsTriAxial,
         `${path}.Metadata.ShapeModel.IsTriAxial`
       ),
-      isApproximatelySpherical: expectBoolean(
+      isApproximatelySpherical: expectOptionalBoolean(
         shapeModel.IsApproximatelySpherical,
         `${path}.Metadata.ShapeModel.IsApproximatelySpherical`
       )
-    },
-    physicalProperties: {
-      referenceRadiusKm: expectNumber(
+    }
+      : undefined,
+    physicalProperties: derivedPhysicalProperties
+      ? {
+      referenceRadiusKm: expectOptionalNumber(
         derivedPhysicalProperties.ReferenceRadiusKm,
         `${path}.Metadata.DerivedPhysicalProperties.ReferenceRadiusKm`
       ),
-      approximateMassKg: expectNumber(
+      approximateMassKg: expectOptionalNumber(
         derivedPhysicalProperties.ApproximateMassKg,
         `${path}.Metadata.DerivedPhysicalProperties.ApproximateMassKg`
       ),
-      approximateSurfaceGravityMps2: expectNumber(
+      approximateSurfaceGravityMps2: expectOptionalNumber(
         derivedPhysicalProperties.ApproximateSurfaceGravityMps2,
         `${path}.Metadata.DerivedPhysicalProperties.ApproximateSurfaceGravityMps2`
       ),
-      approximateEscapeVelocityKmPerSec: expectNumber(
+      approximateEscapeVelocityKmPerSec: expectOptionalNumber(
         derivedPhysicalProperties.ApproximateEscapeVelocityKmPerSec,
         `${path}.Metadata.DerivedPhysicalProperties.ApproximateEscapeVelocityKmPerSec`
       ),
-      approximateBulkDensityKgPerM3: expectNumber(
+      approximateBulkDensityKgPerM3: expectOptionalNumber(
         derivedPhysicalProperties.ApproximateBulkDensityKgPerM3,
         `${path}.Metadata.DerivedPhysicalProperties.ApproximateBulkDensityKgPerM3`
       )
-    },
-    poleOrientation: {
-      referenceEpoch: expectString(
+    }
+      : undefined,
+    poleOrientation: poleOrientation
+      ? {
+      referenceEpoch: expectOptionalString(
         poleOrientation.ReferenceEpoch,
         `${path}.Metadata.PoleOrientation.ReferenceEpoch`
       ),
-      axialTiltDegreesRelativeToJ2000Ecliptic: expectNumber(
+      axialTiltDegreesRelativeToJ2000Ecliptic: expectOptionalNumber(
         poleOrientation.AxialTiltDegreesRelativeToJ2000Ecliptic,
         `${path}.Metadata.PoleOrientation.AxialTiltDegreesRelativeToJ2000Ecliptic`
       ),
-      poleRightAscensionDegreesAtReferenceEpoch: expectNumber(
+      poleRightAscensionDegreesAtReferenceEpoch: expectOptionalNumber(
         poleOrientation.PoleRightAscensionDegreesAtReferenceEpoch,
         `${path}.Metadata.PoleOrientation.PoleRightAscensionDegreesAtReferenceEpoch`
       ),
-      poleDeclinationDegreesAtReferenceEpoch: expectNumber(
+      poleDeclinationDegreesAtReferenceEpoch: expectOptionalNumber(
         poleOrientation.PoleDeclinationDegreesAtReferenceEpoch,
         `${path}.Metadata.PoleOrientation.PoleDeclinationDegreesAtReferenceEpoch`
       ),
-      northPoleUnitVectorJ2000: expectFixedLengthNumberTuple(
+      northPoleUnitVectorJ2000: expectOptionalFixedLengthNumberTuple(
         poleOrientation.NorthPoleUnitVectorJ2000,
         `${path}.Metadata.PoleOrientation.NorthPoleUnitVectorJ2000`,
         3
       ) as [number, number, number]
-    },
-    rotationModel: {
-      siderealRotationPeriodHours: expectNumber(
+    }
+      : undefined,
+    rotationModel: rotationModel
+      ? {
+      siderealRotationPeriodHours: expectOptionalNumber(
         rotationModel.SiderealRotationPeriodHours,
         `${path}.Metadata.RotationModel.SiderealRotationPeriodHours`
       ),
-      primeMeridianRateDegreesPerDay: expectNumber(
+      primeMeridianRateDegreesPerDay: expectOptionalNumber(
         rotationModel.PrimeMeridianRateDegreesPerDay,
         `${path}.Metadata.RotationModel.PrimeMeridianRateDegreesPerDay`
       ),
-      isRetrograde: expectBoolean(
+      isRetrograde: expectOptionalBoolean(
         rotationModel.IsRetrograde,
         `${path}.Metadata.RotationModel.IsRetrograde`
       )
     }
+      : undefined
   }
 }
 
@@ -234,6 +253,14 @@ function expectRecord(input: unknown, path: string): JsonRecord {
   }
 
   return input as JsonRecord
+}
+
+function expectOptionalRecord(input: unknown, path: string): JsonRecord | undefined {
+  if (input === null || input === undefined) {
+    return undefined
+  }
+
+  return expectRecord(input, path)
 }
 
 function expectArray(input: unknown, path: string) {
@@ -252,6 +279,14 @@ function expectString(input: unknown, path: string) {
   return input
 }
 
+function expectOptionalString(input: unknown, path: string) {
+  if (input === null || input === undefined) {
+    return undefined
+  }
+
+  return expectString(input, path)
+}
+
 function expectBoolean(input: unknown, path: string) {
   if (typeof input !== 'boolean') {
     throw new Error(`${path} must be a boolean`)
@@ -260,12 +295,28 @@ function expectBoolean(input: unknown, path: string) {
   return input
 }
 
+function expectOptionalBoolean(input: unknown, path: string) {
+  if (input === null || input === undefined) {
+    return undefined
+  }
+
+  return expectBoolean(input, path)
+}
+
 function expectNumber(input: unknown, path: string) {
   if (typeof input !== 'number' || !Number.isFinite(input)) {
     throw new Error(`${path} must be a finite number`)
   }
 
   return input
+}
+
+function expectOptionalNumber(input: unknown, path: string) {
+  if (input === null || input === undefined) {
+    return undefined
+  }
+
+  return expectNumber(input, path)
 }
 
 function expectInteger(input: unknown, path: string) {
@@ -296,4 +347,16 @@ function expectFixedLengthNumberTuple(
   })
 
   return values as number[]
+}
+
+function expectOptionalFixedLengthNumberTuple(
+  input: unknown,
+  path: string,
+  expectedLength: number
+) {
+  if (input === null || input === undefined) {
+    return undefined
+  }
+
+  return expectFixedLengthNumberTuple(input, path, expectedLength)
 }

@@ -523,47 +523,47 @@ export type BodyMetadata = {
 };
 
 export type BodyPhysicalShape = {
-  equatorialRadiusKm: number;
-  polarRadiusKm: number;
-  volumeEquivalentRadiusKm: number;
-  flattening: number;
-  approximateVolumeKm3: number;
-  isTriAxial: boolean;
-  isApproximatelySpherical: boolean;
+  equatorialRadiusKm?: number;
+  polarRadiusKm?: number;
+  volumeEquivalentRadiusKm?: number;
+  flattening?: number;
+  approximateVolumeKm3?: number;
+  isTriAxial?: boolean;
+  isApproximatelySpherical?: boolean;
 };
 
 export type BodyPhysicalProperties = {
-  referenceRadiusKm: number;
-  approximateMassKg: number;
-  approximateSurfaceGravityMps2: number;
-  approximateEscapeVelocityKmPerSec: number;
-  approximateBulkDensityKgPerM3: number;
+  referenceRadiusKm?: number;
+  approximateMassKg?: number;
+  approximateSurfaceGravityMps2?: number;
+  approximateEscapeVelocityKmPerSec?: number;
+  approximateBulkDensityKgPerM3?: number;
 };
 
 export type BodyPoleOrientation = {
-  referenceEpoch: string;
-  axialTiltDegreesRelativeToJ2000Ecliptic: number;
-  poleRightAscensionDegreesAtReferenceEpoch: number;
-  poleDeclinationDegreesAtReferenceEpoch: number;
-  northPoleUnitVectorJ2000: [number, number, number];
+  referenceEpoch?: string;
+  axialTiltDegreesRelativeToJ2000Ecliptic?: number;
+  poleRightAscensionDegreesAtReferenceEpoch?: number;
+  poleDeclinationDegreesAtReferenceEpoch?: number;
+  northPoleUnitVectorJ2000?: [number, number, number];
 };
 
 export type BodyRotationModel = {
-  siderealRotationPeriodHours: number;
-  primeMeridianRateDegreesPerDay: number;
-  isRetrograde: boolean;
+  siderealRotationPeriodHours?: number;
+  primeMeridianRateDegreesPerDay?: number;
+  isRetrograde?: boolean;
 };
 
 export type BodyPhysicalMetadata = {
   id: BodyId;
   naifBodyId: number;
-  radiiKm: [number, number, number];
-  meanRadiusKm: number;
-  gravitationalParameterKm3PerSec2: number;
-  shape: BodyPhysicalShape;
-  physicalProperties: BodyPhysicalProperties;
-  poleOrientation: BodyPoleOrientation;
-  rotationModel: BodyRotationModel;
+  radiiKm?: [number, number, number];
+  meanRadiusKm?: number;
+  gravitationalParameterKm3PerSec2?: number;
+  shape?: BodyPhysicalShape;
+  physicalProperties?: BodyPhysicalProperties;
+  poleOrientation?: BodyPoleOrientation;
+  rotationModel?: BodyRotationModel;
 };
 
 export type BodyState = {

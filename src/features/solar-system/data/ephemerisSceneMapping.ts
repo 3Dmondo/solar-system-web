@@ -79,28 +79,32 @@ export function mapPhysicalMetadataToScaledBodyMetadata(
 
   return baseMetadata.map((metadata) => {
     const physicalBody = physicalMetadataById.get(metadata.id)
-
-    if (!physicalBody) {
-      throw new Error(`physicalMetadata is missing body ${metadata.id}`)
-    }
-
-    const scaledRadius = physicalBody.meanRadiusKm * scale.sceneUnitsPerKilometer
+    const scaledRadius =
+      physicalBody?.meanRadiusKm && physicalBody.meanRadiusKm > 0
+        ? physicalBody.meanRadiusKm * scale.sceneUnitsPerKilometer
+        : metadata.radius
     const focusOffsetScale =
       metadata.radius > 0 ? scaledRadius / metadata.radius : 1
-    const poleDirectionRender = mapJ2000VectorToRenderSpace(
-      physicalBody.poleOrientation.northPoleUnitVectorJ2000
-    )
-    const angularVelocityRadPerSec = computeBodyAngularVelocityRadPerSec(
-      physicalBody.rotationModel.siderealRotationPeriodHours,
-      physicalBody.rotationModel.isRetrograde
-    )
+    const rotationMetadata =
+      physicalBody?.poleOrientation?.northPoleUnitVectorJ2000 &&
+      physicalBody.rotationModel?.siderealRotationPeriodHours &&
+      physicalBody.rotationModel.isRetrograde != null
+        ? {
+            poleDirectionRender: mapJ2000VectorToRenderSpace(
+              physicalBody.poleOrientation.northPoleUnitVectorJ2000
+            ),
+            angularVelocityRadPerSec: computeBodyAngularVelocityRadPerSec(
+              physicalBody.rotationModel.siderealRotationPeriodHours,
+              physicalBody.rotationModel.isRetrograde
+            )
+          }
+        : {}
 
     return {
       ...metadata,
       radius: scaledRadius,
       focusOffset: scaleVector(metadata.focusOffset, focusOffsetScale),
-      poleDirectionRender,
-      angularVelocityRadPerSec
+      ...rotationMetadata
     }
   })
 }

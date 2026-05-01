@@ -17,10 +17,15 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Extended the registry with the curated major-moon target set, grouped by parent system, with conservative presentation metadata and a shared lit solid material path for bodies without texture assets.
 - The web catalog source now scales presentation metadata only for bodies present in the loaded generated-data manifest, so the current baseline profile remains compatible while the expanded registry is staged.
 - Reference-frame options now derive from loaded satellite systems, preserving the current SSB and Earth-centered baseline while allowing expanded catalogs to expose loaded parent-centered frames.
+- Schema-1 metadata parsing now tolerates partial or unavailable generated physical metadata for staged bodies, while preserving full physical radius and rotation mapping for bodies that still have complete metadata.
+- Added a sibling `SpiceNet` generation script for the `expanded-major-moons` profile that keeps the existing baseline profile unchanged and records the selected SPKs, expanded body ids, parent ids, and starter cadence defaults in one profile entry point.
 - Recorded initial SSD catalog-backed kernel shortlist and download-size tradeoffs from the local `SpiceNet` snapshot.
 - Ran the first `Spice.SsdCatalog` kernel inspection and fallback pass and recorded `C:\Dev\repos\3Dmondo\SpiceNet\docs\SsdCatalog\kernel_inspection.json`.
 - Confirmed the inspected compact and sub-500 MB fallback satellite candidates are not enough for the full `1950-2050` major-moon target window.
-- Existing schema-1 generated-data parsing remains unchanged.
+- Ran the first `expanded-major-moons` configured-cadence benchmark from the local SSD cache and recorded generated web-output size plus interpolation error at `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons\configured-cadence-benchmark.json`.
+- The first expanded benchmark is not adoption-ready: output size looks plausible for inspection, but integer-day starter cadences undersample several fast inner moons.
+- Added a follow-up benchmark and browser validation plan so the next pass measures visual impact, chunk transitions, data format tradeoffs, and browser memory instead of relying only on kilometer error totals.
+- Existing schema-1 generated-data parsing remains the web runtime contract for this step.
 
 ## Goal
 
@@ -62,19 +67,37 @@ Deferred until the major-moon path is validated:
 - [x] Add a registry-driven discovery-group helper for loaded body ids.
 - [x] Extend the central registry with the curated major-moon body set after expanded kernel coverage is chosen.
 - [ ] Replace hard-coded body assumptions in the web app with registry lookups where the larger catalog needs dynamic behavior.
-- [ ] Preserve schema-1 ephemeris parsing for the current generated dataset.
+- [x] Preserve schema-1 ephemeris parsing for the current generated dataset.
 - [ ] Add schema-2 parsing only if the expanded generated data needs repeated SPK provenance, parent body ids, body categories, or other manifest fields that do not fit the current schema.
 
 ### Phase 2: SpiceNet Expanded Profile
 
-- [ ] Add a new `SpiceNet` generation profile named `expanded-major-moons` without changing the existing `baseline-de440s-ssb-25y-mixed-cadence` profile in place.
+- [x] Add a new `SpiceNet` generation profile named `expanded-major-moons` without changing the existing `baseline-de440s-ssb-25y-mixed-cadence` profile in place.
 - [x] Extend `Spice.WebDataGenerator` to accept repeated SPK inputs so planets and satellite systems can come from separate SSD catalog entries.
-- [ ] Add known body names, parent ids, and cadence defaults for the expanded body set.
-- [ ] Make metadata export tolerate partial metadata for bodies whose radii, GM, pole, or rotation fields are unavailable from current generic kernels.
-- [ ] Preserve complete metadata output for the existing Sun, planets, and Moon.
+- [x] Add known body names, parent ids, and cadence defaults for the expanded body set.
+- [x] Make metadata export tolerate partial metadata for bodies whose radii, GM, pole, or rotation fields are unavailable from current generic kernels.
+- [x] Preserve complete metadata output for the existing Sun, planets, and Moon.
 - [x] Record initial SSD catalog-backed candidate kernel sizes before coverage and output benchmarking.
-- [ ] Benchmark expanded output size, largest chunk gzip size, and interpolation error before web runtime adoption.
+- [x] Benchmark expanded output size, largest chunk gzip size, and interpolation error before web runtime adoption.
 - [ ] Decide whether to version the generated expanded-profile manifest and chunks after real file sizes are known.
+
+### Phase 2B: Expanded Benchmark And UX Validation
+
+- [ ] Add generator support for sub-day cadence inputs or an equivalent fast-satellite sampling strategy before re-benchmarking the fast inner moons.
+- [ ] Run at least three expanded cadence profiles: current integer-day starter profile, targeted fast-moon sub-day profile, and a conservative high-quality profile for visual comparison.
+- [ ] Normalize interpolation error by local orbit scale and on-screen pixel displacement for the worst bodies instead of judging kilometer error alone.
+- [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the worst bodies.
+- [ ] Inspect whether current large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
+- [ ] Benchmark chunk durations separately from cadence: start with `25`, `10`, `5`, and `1` year chunks and record total gzip size, largest chunk gzip size, request count, parse time, and cache churn.
+- [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
+- [ ] Add or tune next and previous chunk preloading when simulation time approaches a chunk boundary, including direction-aware prefetch for reverse or future reverse playback.
+- [ ] Define a browser chunk-cache budget that covers the active chunk plus adjacent chunks and trail history without unbounded RAM growth.
+- [ ] Compare the current compact JSON plus gzip format against at least one binary numeric-array format before considering protobuf; include transfer size, decode time, parse allocations, implementation complexity, and numeric precision.
+- [ ] Test Float64, Float32, and any proposed quantized or delta-encoded representation against visual error and interpolation error before changing the runtime format.
+- [ ] Measure browser memory on desktop and mobile with the expanded dataset: initial load, after first focus, after opening a dense moon system, after crossing chunk boundaries, and after several minutes of playback.
+- [ ] Track runtime metrics for manifest load, metadata load, first chunk load, adjacent chunk prefetch, catalog refresh, trail resampling, frame time, and JS heap use where browser APIs permit.
+- [ ] Validate expanded-catalog UX on desktop and coarse-pointer layouts: jump menu size, labels, indicators, picking, focus transitions, local-system readability, trail readability, and recovery to overview.
+- [ ] Decide adoption gates before enabling the expanded profile by default, including acceptable visual error, largest chunk gzip size, startup latency, chunk-transition smoothness, and memory budget.
 
 Initial SSD catalog source:
 
@@ -104,6 +127,27 @@ Coverage and benchmark notes:
 - Compare total source download size separately from generated web output size because the upstream SPKs stay out of git and are not shipped directly.
 - Consider versioning the generated expanded-profile `manifest.json` plus chunk files if their measured size is acceptable. This would avoid repeated multi-GB SPK downloads during normal GitHub Actions builds; the regeneration workflow would remain explicit/manual and provenance-backed. Defer the final choice until the benchmark reports real raw and gzip output sizes.
 - Benchmark generated output size and interpolation error for each accepted candidate set before making the expanded profile the default deployed dataset.
+
+First expanded configured-cadence benchmark:
+
+- Command source: `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Generate-WebDataExpandedMajorMoonsDataset.ps1 -BenchmarkConfiguredCadence`
+- Cache root: `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\kernel-cache\ssd`
+- Report: `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\expanded-major-moons\configured-cadence-benchmark.json`
+- Generated output: `144,076,540` bytes raw, `68,978,203` bytes gzip, across `8` chunks.
+- Largest chunk: `chunk-2051-2076.json`, `18,148,950` bytes raw, `8,679,876` bytes gzip.
+- The current output size is plausible for local inspection but should not be adopted yet because interpolation errors are too high for fast moons at the current integer-day cadence floor.
+- Worst max position errors in the first pass: Mimas `428,874 km`, Enceladus `192,527 km`, Io `143,310 km`, Miranda `94,262 km`, Tethys `78,103 km`, Phobos `37,518 km`, Dione `25,358 km`, Deimos `24,371 km`, Ariel `17,529 km`, Europa `17,372 km`.
+- Next profile work should add sub-day cadence support or another fast-satellite sampling strategy before repeating the benchmark and considering generated asset versioning.
+
+Expanded benchmark problem list:
+
+- Kilometer error is not directly a user-experience metric. The next benchmark must translate error into local orbit fraction and screen-space displacement for typical overview and focused camera distances.
+- A large gzip total can still be acceptable if startup only needs the manifest plus one chunk, but largest chunk size, parse time, and adjacent prefetch cost are the user-facing constraints.
+- Smaller chunks may improve transition loading and RAM pressure but increase request count, manifest size, and edge-case frequency at chunk boundaries.
+- Browser memory must include decoded numeric arrays, parsed JSON objects before compaction or garbage collection, trail caches, generated trail geometry, metadata, textures, and Three.js scene objects.
+- Protobuf is not automatically better for large numeric arrays. A custom binary layout with typed arrays may be smaller and faster, but only after precision and implementation-cost checks.
+- Chunk transitions need explicit validation because interpolation, trail stitching, and focused-body tracking can expose discontinuities even when raw samples are accurate.
+- Expanded major-moon UX may need local-system scale/readability controls even if the data format and cadence pass.
 
 ### Phase 3: Web Runtime Integration
 

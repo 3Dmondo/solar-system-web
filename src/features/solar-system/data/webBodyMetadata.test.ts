@@ -120,6 +120,45 @@ describe('webBodyMetadata', () => {
     })
   })
 
+  it('accepts bodies with partial or unavailable generated metadata', () => {
+    const metadataFile = parseWebBodyMetadataFile({
+      ...rawBodyMetadataFixture,
+      Bodies: [
+        {
+          BodyId: 401,
+          BodyName: 'Phobos',
+          Metadata: {
+            RadiiKm: [13, 11.4, 9.1],
+            MeanRadiusKm: 11.166666666666666,
+            ShapeModel: {
+              EquatorialRadiusKm: 12.2,
+              PolarRadiusKm: 9.1
+            }
+          }
+        },
+        {
+          BodyId: 402,
+          BodyName: 'Deimos',
+          Metadata: null
+        }
+      ]
+    })
+
+    expect(getBodyPhysicalMetadataById(metadataFile, 'phobos')).toMatchObject({
+      id: 'phobos',
+      radiiKm: [13, 11.4, 9.1],
+      meanRadiusKm: 11.166666666666666,
+      shape: {
+        equatorialRadiusKm: 12.2,
+        polarRadiusKm: 9.1
+      }
+    })
+    expect(getBodyPhysicalMetadataById(metadataFile, 'deimos')).toEqual({
+      id: 'deimos',
+      naifBodyId: 402
+    })
+  })
+
   it('rejects bodies outside the supported app body set', () => {
     expect(() =>
       parseWebBodyMetadataFile({

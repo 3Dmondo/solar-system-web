@@ -194,16 +194,45 @@ describe('ephemerisSceneMapping', () => {
     )
   })
 
-  it('rejects invalid scale factors and incomplete physical metadata', () => {
+  it('rejects invalid scale factors and preserves presentation metadata when physical metadata is missing', () => {
     expect(() => createPhysicalSceneScale(0)).toThrowError(/greater than zero/)
 
-    expect(() =>
-      mapPhysicalMetadataToScaledBodyMetadata(
-        physicalMetadata.filter((body) => body.id !== 'moon'),
-        createPhysicalSceneScale(0.0001),
-        baseMetadata
-      )
-    ).toThrowError(/moon/)
+    const mappedMetadata = mapPhysicalMetadataToScaledBodyMetadata(
+      physicalMetadata.filter((body) => body.id !== 'moon'),
+      createPhysicalSceneScale(0.0001),
+      baseMetadata
+    )
+    const moon = mappedMetadata.find((body) => body.id === 'moon')
+    const moonBase = baseMetadata.find((body) => body.id === 'moon')
+
+    expect(moon).toMatchObject({
+      id: 'moon',
+      radius: moonBase?.radius,
+      focusOffset: moonBase?.focusOffset
+    })
+    expect(moon?.poleDirectionRender).toBeUndefined()
+    expect(moon?.angularVelocityRadPerSec).toBeUndefined()
+  })
+
+  it('scales available radius metadata without requiring pole or rotation fields', () => {
+    const partialMetadata: BodyPhysicalMetadata[] = [
+      {
+        id: 'moon',
+        naifBodyId: 301,
+        radiiKm: [1738.1, 1738.1, 1736],
+        meanRadiusKm: 1737.4
+      }
+    ]
+    const mappedMetadata = mapPhysicalMetadataToScaledBodyMetadata(
+      partialMetadata,
+      createPhysicalSceneScale(0.001),
+      [baseMetadata[1]!]
+    )
+    const moon = mappedMetadata[0]
+
+    expect(moon?.radius).toBeCloseTo(1.7374, 9)
+    expect(moon?.poleDirectionRender).toBeUndefined()
+    expect(moon?.angularVelocityRadPerSec).toBeUndefined()
   })
 })
 
