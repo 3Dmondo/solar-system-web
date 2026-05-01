@@ -33,6 +33,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Ran the reduced `expanded-major-moons` configured-cadence benchmark without the Milestone 13 fast-moon set and staged the ignored local preview assets for browser inspection.
 - The reduced preview is smaller and no longer has the known fast-moon hundred-thousand-kilometer errors, but browser UX, chunk-duration, chunk-boundary, memory, and data-format gates remain open before adoption.
 - Added `scripts/Measure-ReducedMajorMoonPreview.ps1` as a repeatable retained-moon spot-check diagnostic that combines the SpiceNet truth report with staged preview orbit scale.
+- Manual visual inspection of the retained reduced-preview moons passed: positions and orbiting animations looked acceptable, including the diagnostic-flagged Umbriel, Titania, and Rhea.
 
 ## Goal
 
@@ -108,7 +109,7 @@ Deferred until the major-moon path is validated:
 - [x] Record the reduced generated output size, largest chunk gzip size, chunk count, body count, and interpolation error before any web runtime adoption.
 - [x] Normalize reduced-profile interpolation error by local orbit scale and likely focused-view screen displacement instead of judging kilometer error alone.
 - [x] Build a lightweight truth-comparison or spot-check diagnostic for selected retained moons if reduced-profile interpolation error remains suspicious.
-- [ ] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
+- [x] Inspect retained moons in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 - [ ] Benchmark chunk durations separately from cadence: start with `25`, `10`, `5`, and `1` year chunks and record total gzip size, largest chunk gzip size, request count, parse time, and cache churn.
 - [ ] Test chunk-boundary playback by driving simulation time across previous and next chunk boundaries at slow, normal, and high playback rates.
 - [ ] Add or tune next and previous chunk preloading when simulation time approaches a chunk boundary, including direction-aware prefetch for reverse or future reverse playback.
@@ -171,6 +172,7 @@ Reduced expanded configured-cadence benchmark:
 - Retained moon worst max position errors: Rhea `5,017 km`, Titania `4,867 km`, Umbriel `3,654 km`, Ganymede `1,676 km`, Callisto `1,657 km`, Titan `1,519 km`, Triton `1,184 km`, Oberon `1,164 km`, Iapetus `118 km`.
 - Local-orbit normalization from the staged `chunk-2001-2026.json`, using parent-relative mean distance and a `300 px` focused-orbit-radius proxy: Umbriel `1.363%` / `4.1 px`, Titania `1.111%` / `3.3 px`, Rhea `0.946%` / `2.8 px`, Triton `0.333%` / `1.0 px`, Oberon `0.199%` / `0.6 px`, Ganymede `0.155%` / `0.5 px`, Titan `0.124%` / `0.4 px`, Callisto `0.088%` / `0.3 px`, Iapetus `0.003%` / `<0.1 px`.
 - Repeatable diagnostic: `scripts/Measure-ReducedMajorMoonPreview.ps1` reads the reduced benchmark report plus the staged preview chunk and uses Hermite interpolation for parent positions when normalizing moon error by local orbit scale. With default thresholds of `0.5%` orbit error or `2 px` at a `300 px` focused-orbit proxy, it flags Umbriel, Titania, and Rhea for manual visual spot-checking.
+- Manual focused-view inspection passed for all retained reduced-preview moons. The diagnostic-flagged moons did not show unacceptable position or orbit-animation artifacts, so the current thresholds should be treated as conservative review triggers rather than automatic rejection gates.
 - This reduced benchmark clears the first known-bad fast-moon blocker for inspection only. It is not adoption-ready until the remaining browser, chunking, memory, and format gates pass.
 
 Expanded benchmark problem list:

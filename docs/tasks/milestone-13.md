@@ -31,9 +31,27 @@ Reintroduce fast major moons with sampling dense enough to preserve local orbita
 
 - Allow fractional `SampleDays` values in the generation profile, or add explicit sample intervals in hours.
 - Choose cadences from orbital period, not from body category alone.
-- Target enough samples per orbit for stable Hermite interpolation and readable local trails.
+- Target enough samples per orbit for stable Hermite interpolation and readable local trails: use `4` samples per orbital period as the minimum visual gate and `8` samples per orbital period as the preferred starting point.
 - Consider per-body caps so very fast moons do not dominate the entire profile size without review.
 - Keep the manifest schema unchanged if fractional days fit the current `SampleDays` field and runtime layout.
+- Treat visual inspection as the final user-experience gate; retained Milestone 11 moons passed despite conservative diagnostic flags, so normalized error should trigger review rather than reject a body automatically.
+
+## Initial Sampling Ratios
+
+Approximate orbital-period-to-cadence ratios for the Milestone 11 deferred moons if sampled at the current `1 day` floor:
+
+- Phobos: `0.32` samples per orbit
+- Mimas: `0.94` samples per orbit
+- Deimos: `1.26` samples per orbit
+- Enceladus: `1.37` samples per orbit
+- Miranda: `1.41` samples per orbit
+- Io: `1.77` samples per orbit
+- Tethys: `1.89` samples per orbit
+- Ariel: `2.52` samples per orbit
+- Dione: `2.74` samples per orbit
+- Europa: `3.55` samples per orbit
+
+Europa, Dione, and Ariel are the most plausible first candidates for a permissive visual re-check, but they still fall below the preferred `4` to `8` samples-per-orbit target for focused inspection.
 
 ## Checklist
 
@@ -46,6 +64,7 @@ Reintroduce fast major moons with sampling dense enough to preserve local orbita
 ### Phase 2: Fast Moon Benchmark
 
 - [ ] Define per-body cadence candidates for Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
+- [ ] Derive first-pass cadence candidates from orbital period using at least `4` samples per orbit and a preferred `8` samples per orbit target before size and memory tradeoff review.
 - [ ] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
 - [ ] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
 - [ ] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
