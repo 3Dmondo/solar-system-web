@@ -196,9 +196,19 @@ export function getCameraClipPlanes(
 
     return Math.max(maximumDistance, bodyDistance);
   }, 0);
+  const farthestTrailDistance = catalog.snapshot.trails.reduce((maximumDistance, trail) => {
+    const trailDistance = trail.positions.reduce((maximumPointDistance, position) => {
+      const pointDistance = getDistance(cameraPosition, position);
+
+      return Math.max(maximumPointDistance, pointDistance);
+    }, 0);
+
+    return Math.max(maximumDistance, trailDistance);
+  }, 0);
   const far = Math.max(
     MIN_CAMERA_FAR,
     farthestBodyDistance * 1.1,
+    farthestTrailDistance * 1.1,
     cameraDistanceToTarget + targetRadius * 2
   );
   const surfaceClearance = Math.max(cameraDistanceToTarget - targetRadius, MIN_CAMERA_NEAR);

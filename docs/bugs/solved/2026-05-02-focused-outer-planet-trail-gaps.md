@@ -1,6 +1,6 @@
 # Bug: Outer Planet Trails Show Gaps In Focused View
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -71,3 +71,25 @@ Possible areas to verify:
 - Does it reproduce in production preview or deployed GitHub Pages, or only local dev?
 - Does disabling depth testing for trails, changing camera angle, or returning to overview make the trail continuous?
 - Is Saturn the only planet trail with visible gaps, or do Jupiter/Uranus/Neptune trails show the same issue in focused views?
+
+## Closeout
+
+Root cause: confirmed in `getCameraClipPlanes`. Focused-view far clipping was derived from current body positions but not from historical trail vertices. Long background trails can extend past the current body position, so sections of a trail could be clipped by the far plane even while the corresponding planet remained visible.
+
+Fix summary: `getCameraClipPlanes` now includes every current trail point when sizing the far plane, preserving the existing body-position and focused-target safeguards. Added a regression test that focuses Neptune while Saturn's trail extends beyond Saturn's current position and verifies the far plane covers the farthest trail point.
+
+Changed files:
+
+- `src/features/solar-system/domain/focus.ts`
+- `src/features/solar-system/domain/focus.test.ts`
+- `docs/bugs/solved/2026-05-02-focused-outer-planet-trail-gaps.md`
+
+Verification:
+
+- `pnpm vitest run src/features/solar-system/domain/focus.test.ts` passed after rerunning outside the sandbox because the first sandboxed attempt hit `spawn EPERM` while starting esbuild.
+- `pnpm test` passed: 37 files, 181 tests.
+- `pnpm lint` passed with one existing warning in `src/features/solar-system/components/SunImpostor.tsx` about Fast Refresh export shape.
+
+Remaining risks:
+
+- The original screenshot context did not identify the focused body, reference frame, browser, or deployed/local build. The regression covers the confirmed clipping mechanism, but a manual focused outer-planet inspection is still useful for visual confidence.

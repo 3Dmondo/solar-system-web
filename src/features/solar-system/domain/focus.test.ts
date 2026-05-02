@@ -155,4 +155,39 @@ describe('focus helpers', () => {
     expect(clipPlanes.far).toBeGreaterThan(4_000_000);
     expect(clipPlanes.far).toBeGreaterThan(clipPlanes.near);
   });
+
+  it('keeps focused-view clip planes beyond long background trails', () => {
+    const focusedCatalog: ResolvedBodyCatalog = {
+      ...physicallyScaledCatalog,
+      snapshot: {
+        ...physicallyScaledCatalog.snapshot,
+        trails: [
+          {
+            id: 'saturn',
+            positions: [
+              [1_430_000, 0, 0],
+              [1_430_000, 0, -1_500_000],
+              [1_430_000, 0, -3_000_000]
+            ]
+          }
+        ]
+      }
+    };
+    const cameraPosition: [number, number, number] = [4_500_000, 0, 250];
+    const farthestTrailPoint: [number, number, number] = [1_430_000, 0, -3_000_000];
+    const farthestTrailPointDistance = Math.hypot(
+      cameraPosition[0] - farthestTrailPoint[0],
+      cameraPosition[1] - farthestTrailPoint[1],
+      cameraPosition[2] - farthestTrailPoint[2]
+    );
+
+    const clipPlanes = getCameraClipPlanes(
+      'neptune',
+      cameraPosition,
+      [4_500_000, 0, 0],
+      focusedCatalog
+    );
+
+    expect(clipPlanes.far).toBeGreaterThan(farthestTrailPointDistance);
+  });
 });
