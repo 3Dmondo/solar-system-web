@@ -7,6 +7,7 @@ import {
 } from 'three';
 import type { Line2 } from 'three/examples/jsm/lines/Line2.js';
 import type { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { createAnchoredTrailLineGeometry } from '../rendering/trailLineGeometry';
 
 type GlowingTrailLineProps = {
   /** Line color (hex string) */
@@ -38,6 +39,10 @@ export function GlowingTrailLine({
     const baseColor = new Color(color);
     return baseColor.multiplyScalar(colorIntensity);
   }, [color, colorIntensity]);
+  const trailGeometry = useMemo(
+    () => createAnchoredTrailLineGeometry(positions),
+    [positions]
+  );
 
   useEffect(() => {
     if (!lineRef.current) return;
@@ -58,7 +63,8 @@ export function GlowingTrailLine({
       depthWrite={false}
       frustumCulled={false}
       lineWidth={lineWidth}
-      points={positions}
+      points={trailGeometry.points}
+      position={trailGeometry.anchor}
       raycast={ignoreRaycast}
       renderOrder={1}
       toneMapped={false}

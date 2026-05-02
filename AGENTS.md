@@ -64,6 +64,7 @@ These instructions apply to every session in this repository.
 - Solved bug reports should be closed out in place first, then moved to `docs/bugs/solved/` with `git mv` when available.
 - Before editing files, briefly state the step being implemented.
 - After finishing a step, summarize what changed, how it was verified, and what should be inspected.
+- Do not start the preview server just for user inspection; suggest the preview command and let the user run it unless they explicitly ask the agent to start it.
 - Do not continue automatically past a milestone or review checkpoint without user confirmation.
 
 ## Practical Notes

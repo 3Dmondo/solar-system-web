@@ -1,6 +1,6 @@
 # Bug: Outer Satellite Trail Artifacts
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -56,6 +56,32 @@ Milestone 10 changed trails to constant-width screen-space ribbons. Milestone 11
 Possible floating-point precision issue in the trail rendering path. The provider samples satellite trails relative to the parent by default, but the scene/frame transform later offsets those small local trail coordinates by the parent body's current world position. For outer-planet systems, this can place small satellite-orbit deltas on top of very large absolute scene coordinates before the `Line`/fat-line shader projects them, which may expose GPU `float` precision or camera-relative cancellation artifacts in focused views.
 
 Other possibilities to verify include incorrect chunk stitching at trail segment boundaries, stale cached trail samples around chunk transitions, or an unintended double transform between parent-relative sampling and frame-specific trail transforms.
+
+## Closeout
+
+Root cause: Confirmed rendering precision issue in the `GlowingTrailLine` path. Satellite trail samples were correctly generated parent-relative, but `referenceFrameTransform` expanded them back onto the parent planet's large scene-space position before `@react-three/drei`/Three fat-line geometry received the points. For outer-planet satellites such as Umbriel, that put very small local orbit deltas into large absolute geometry attributes, making the screen-space line shader vulnerable to float precision loss and stray straight segments in focused views.
+
+Fix summary: Trail line geometry is now anchored near its own sampled path. `GlowingTrailLine` sends local delta points to the fat-line geometry and applies the averaged path position as the line object's transform, preserving world placement while keeping GPU line attributes small.
+
+Changed files:
+
+- `src/features/solar-system/components/GlowingTrailLine.tsx`
+- `src/features/solar-system/rendering/trailLineGeometry.ts`
+- `src/features/solar-system/rendering/trailLineGeometry.test.ts`
+- `docs/bugs/solved/2026-05-02-outer-satellite-trail-artifacts.md`
+
+Verification:
+
+- Inspected `C:\Dev\repos\3Dmondo\solar-system-web\.tmp\trail-artifact-2-contact-sheet.png` and confirmed the reported Umbriel straight-segment artifact shape.
+- `pnpm test -- src/features/solar-system/rendering/trailLineGeometry.test.ts` passed after rerunning outside the sandbox because Vitest/esbuild hit `spawn EPERM` in the sandbox.
+- `pnpm build` passed.
+- `pnpm lint` passed with one pre-existing warning in `src/features/solar-system/components/SunImpostor.tsx`.
+- `pnpm test` passed: 36 files, 176 tests.
+- User confirmed the visual fix after inspection.
+
+Remaining risks or follow-ups:
+
+- The separate saved report for focused outer-planet trail gaps remains open and was not addressed by this fix.
 
 ## Open Questions
 
