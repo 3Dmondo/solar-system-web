@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { ExperienceHud } from './ExperienceHud';
@@ -85,5 +86,14 @@ describe('ExperienceHud', () => {
 
     expect(screen.getByText(/loading real positions for the requested time/i)).toBeInTheDocument();
     expect(screen.queryByText(/showing the fallback snapshot/i)).not.toBeInTheDocument();
+  });
+
+  it('docks the narrow HUD below the top rail', () => {
+    const css = readFileSync('src/features/experience/components/experience-hud.css', 'utf8');
+
+    expect(css).toMatch(
+      /@media \(max-width: 767px\)\s*{\s*\.experience-hud\s*{[^}]*inset: 4\.05rem 0\.75rem auto auto;/s
+    );
+    expect(css).not.toMatch(/bottom: (8\.75|4\.25)rem/);
   });
 });

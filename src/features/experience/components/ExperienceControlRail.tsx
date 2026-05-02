@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { type ReferenceFrame, type ReferenceFrameId } from '../../solar-system/domain/referenceFrame';
@@ -9,9 +9,10 @@ import { LayerPanel } from './LayerPanel';
 import { ReferenceFrameSelector } from './ReferenceFrameSelector';
 import './experience-control-rail.css';
 
-type ActivePanel = 'help' | 'jump' | 'frame' | 'layers';
+export type ExperienceControlPanel = 'info' | 'help' | 'jump' | 'frame' | 'layers';
 
 type ExperienceControlRailProps = {
+  activePanel: ExperienceControlPanel | null;
   availableFrames: ReferenceFrame[];
   catalog: ResolvedBodyCatalog;
   focusedBodyId: ViewTargetId;
@@ -21,10 +22,12 @@ type ExperienceControlRailProps = {
   onFocusBody: (bodyId: BodyId) => void;
   onReturnToOverview: () => void;
   onSelectFrame: (frameId: ReferenceFrameId) => void;
+  onSetActivePanel: (panel: ExperienceControlPanel | null) => void;
   onToggleLayer: (layerId: LayerId) => void;
 };
 
 export function ExperienceControlRail({
+  activePanel,
   availableFrames,
   catalog,
   focusedBodyId,
@@ -34,9 +37,9 @@ export function ExperienceControlRail({
   onFocusBody,
   onReturnToOverview,
   onSelectFrame,
+  onSetActivePanel,
   onToggleLayer
 }: ExperienceControlRailProps) {
-  const [activePanel, setActivePanel] = useState<ActivePanel | null>(null);
   const railRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -46,17 +49,18 @@ export function ExperienceControlRail({
 
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
+      const targetElement = event.target instanceof Element ? event.target : null;
 
-      if (railRef.current?.contains(target)) {
+      if (railRef.current?.contains(target) || targetElement?.closest('.experience-hud')) {
         return;
       }
 
-      setActivePanel(null);
+      onSetActivePanel(null);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setActivePanel(null);
+        onSetActivePanel(null);
       }
     };
 
@@ -67,18 +71,31 @@ export function ExperienceControlRail({
       window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activePanel]);
+  }, [activePanel, onSetActivePanel]);
 
-  const togglePanel = (panel: ActivePanel) => {
-    setActivePanel((currentPanel) => (currentPanel === panel ? null : panel));
+  const togglePanel = (panel: ExperienceControlPanel) => {
+    onSetActivePanel(activePanel === panel ? null : panel);
   };
 
   const closePanel = () => {
-    setActivePanel(null);
+    onSetActivePanel(null);
   };
 
   return (
     <div ref={railRef} className="experience-control-rail" aria-label="Experience controls">
+      <div className="experience-control-rail__item">
+        <button
+          aria-label={activePanel === 'info' ? 'Hide information panel' : 'Show information panel'}
+          aria-pressed={activePanel === 'info'}
+          className="experience-control-rail__button"
+          title="Info"
+          type="button"
+          onClick={() => togglePanel('info')}
+        >
+          i
+        </button>
+      </div>
+
       <div className="experience-control-rail__item">
         <button
           aria-expanded={activePanel === 'help'}

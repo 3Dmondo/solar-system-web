@@ -1,6 +1,6 @@
 # Bug: Informational HUD Disappears Below 768 Px Width
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -56,7 +56,42 @@ Likely CSS breakpoint interaction. `experience-hud.css` positions `.experience-h
 
 ## Open Questions
 
-- Is the HUD still present in the DOM but visually covered by playback controls?
-- Does this happen in both portrait and landscape narrow viewports?
-- Should the narrow-layout HUD remain top-left, move above the playback bar, or collapse into a compact control?
-- Does the issue reproduce on deployed GitHub Pages, local dev, or both?
+- The HUD was visually covered by the playback controls rather than removed from the DOM.
+- The final fix targets the shared `max-width: 767px` breakpoint by making the HUD an information layer controlled from the top rail.
+- Deployed GitHub Pages was not separately reproduced during closeout; verification was local source/test/build based.
+
+## Closeout
+
+### Root Cause
+
+The HUD used the base `inset: auto auto 1rem 1rem` placement below `768px`, putting it on the same bottom-left edge as the mobile playback bar. At `767px`, the playback controls expand across the bottom and have a higher stacking order, so they could occlude the HUD.
+
+### Fix Summary
+
+- Added an `i` information toggle to the top control rail.
+- Made the informational HUD default open on wide viewports and default closed below `768px`.
+- Kept the wide-screen HUD in the original top-left position.
+- Docked the narrow-screen HUD below the top rail when opened instead of reserving space above the playback bar.
+- Allowed the narrow info panel to receive touch/scroll events without being treated as an outside click.
+- Added focused regression tests for the rail toggle behavior and narrow HUD docking rule.
+
+### Changed Files
+
+- `src/features/experience/SolarSystemExperience.tsx`
+- `src/features/experience/components/ExperienceControlRail.tsx`
+- `src/features/experience/components/ExperienceControlRail.test.tsx`
+- `src/features/experience/components/experience-control-rail.css`
+- `src/features/experience/components/experience-hud.css`
+- `src/features/experience/components/ExperienceHud.test.tsx`
+- `src/features/experience/hooks/useWideViewport.ts`
+
+### Verification
+
+- `pnpm vitest run src/features/experience/components/ExperienceHud.test.tsx src/features/experience/components/ExperienceControlRail.test.tsx` passed.
+- `pnpm lint` passed with the existing `react-refresh/only-export-components` warning in `src/features/solar-system/components/SunImpostor.tsx`.
+- `pnpm test` passed: 37 files, 180 tests.
+- `pnpm build` passed with the existing large chunk warning.
+
+### Remaining Risks
+
+- No browser screenshot pass was run, so final visual spacing should still be inspected around `767px` width, portrait mobile, and compact mobile landscape.

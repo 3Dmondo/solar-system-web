@@ -33,6 +33,7 @@
 
 .experience-control-rail__button:hover,
 .experience-control-rail__button[aria-expanded="true"],
+.experience-control-rail__button[aria-pressed="true"],
 .experience-control-rail .fullscreen-button:hover {
   background: rgba(9, 13, 31, 0.95);
   border-color: rgba(255, 255, 255, 0.22);
