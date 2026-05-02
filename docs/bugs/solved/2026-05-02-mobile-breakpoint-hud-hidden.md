@@ -69,7 +69,10 @@ The HUD used the base `inset: auto auto 1rem 1rem` placement below `768px`, putt
 ### Fix Summary
 
 - Added an `i` information toggle to the top control rail.
-- Made the informational HUD default open on wide viewports and default closed below `768px`.
+- Made the informational HUD default open outside mobile portrait layouts and default closed in mobile portrait.
+- The info HUD default now follows orientation changes automatically; it can still be shown or hidden with the `i` button and closed with the panel `x` button.
+- Split the info HUD state from the active rail popover state so wide-enough layouts keep the info HUD visible while Help, Jump, Frame, or Layers are open.
+- In mobile portrait, opening another rail popover temporarily hides the info HUD and restores it when that popover closes if the HUD was open beforehand.
 - Kept the wide-screen HUD in the original top-left position.
 - Docked the narrow-screen HUD below the top rail when opened instead of reserving space above the playback bar.
 - Allowed the narrow info panel to receive touch/scroll events without being treated as an outside click.
@@ -83,7 +86,8 @@ The HUD used the base `inset: auto auto 1rem 1rem` placement below `768px`, putt
 - `src/features/experience/components/experience-control-rail.css`
 - `src/features/experience/components/experience-hud.css`
 - `src/features/experience/components/ExperienceHud.test.tsx`
-- `src/features/experience/hooks/useWideViewport.ts`
+- `src/features/experience/hooks/useInfoPanelDefaultOpen.ts`
+- `src/features/experience/domain/infoPanelVisibility.ts`
 
 ### Verification
 

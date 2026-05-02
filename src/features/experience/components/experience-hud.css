@@ -9,7 +9,8 @@
   inset: 1.25rem auto auto 1.25rem;
   z-index: 15;
   display: flex;
-  max-width: min(18rem, calc(100vw - 2rem));
+  max-width: min(21rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 8.5rem);
   flex-direction: column;
   gap: 0.25rem;
   overflow-y: auto;
@@ -18,11 +19,39 @@
   border-radius: 0.8rem;
   background: var(--panel);
   backdrop-filter: blur(12px);
-  pointer-events: none;
+  overscroll-behavior: contain;
+  pointer-events: auto;
+  touch-action: pan-y;
+}
+
+.experience-hud__close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.experience-hud__close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.experience-hud__close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
 }
 
 .experience-hud__title {
-  padding-right: 0;
+  padding-right: 1.9rem;
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -56,11 +85,73 @@
   font-weight: 700;
 }
 
+.experience-hud__facts {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.55rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.experience-hud__facts-heading {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.experience-hud__facts-summary {
+  display: grid;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.experience-hud__facts-summary p {
+  margin: 0;
+}
+
+.experience-hud__fact-list {
+  display: grid;
+  gap: 0.36rem;
+  margin: 0;
+}
+
+.experience-hud__fact-row {
+  display: grid;
+  grid-template-columns: minmax(4.25rem, 0.7fr) minmax(0, 1.3fr);
+  gap: 0.55rem;
+  align-items: baseline;
+  font-size: 0.77rem;
+  line-height: 1.35;
+}
+
+.experience-hud__fact-row dt {
+  color: rgba(255, 255, 255, 0.62);
+  font-weight: 600;
+}
+
+.experience-hud__fact-row dd {
+  min-width: 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 767px) {
   .experience-hud {
     inset: 4.05rem 0.75rem auto auto;
-    max-width: min(18rem, calc(100vw - 1.5rem));
+    max-width: min(21rem, calc(100vw - 1.5rem));
     max-height: min(16rem, calc(100vh - 11.25rem));
-    pointer-events: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .experience-hud__fact-row {
+    grid-template-columns: 1fr;
+    gap: 0.05rem;
   }
 }

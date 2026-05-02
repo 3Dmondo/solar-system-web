@@ -48,6 +48,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Implemented the Phase 4 HUD and discovery redesign: the HUD is informational, `Jump to` is a dedicated grouped selector with `Overview` as the first row, Quick picks are removed, Help/Fullscreen/Jump/Frame/Layers live in a shared top-right rail, layers use check rows, frame options are names-only, and simulation time plus signed playback controls live in a bottom-center bar.
 - Refined Phase 4 playback UX after inspection: the playback bar now uses one play or pause action, an explicit reverse or forward direction selector, bounded speed decrease/increase controls, and catalog range clamping that pauses at the supported ephemeris edge with a UTC-based HUD warning.
 - Closed Phase 4 after the HUD, selector, playback, and ephemeris-range UX redesign passed automated validation and user inspection. A focused local-system affordance remains deferred to Phase 6.
+- Implemented the Phase 5 lightweight educational context pass: focused bodies now show a read-only facts drawer with two short Wikipedia-sourced description paragraphs plus generated physical radius, gravity, density when available, and concise provenance.
+- Closed Phase 5 with quizzes, tours, and long-form encyclopedia pages still deferred.
 - Deferred deeper generated-data optimization, including smaller chunks and alternate file formats, to Milestone 13 rather than keeping it in Milestone 11.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, the GitHub Pages deployment starts in about `4` seconds, and chunk-size or file-format optimization is deferred to Milestone 13.
 
@@ -279,10 +281,12 @@ Status: Closed. The HUD is now an information panel about the current view, whil
 
 ### Phase 5: Lower-Priority Educational Context Proposal
 
-- [ ] Add a focused-body facts drawer backed by generated physical metadata plus small authored copy.
-- [ ] Show radius, parent body, orbital role, gravity or density when available, and source or provenance in concise language.
-- [ ] Keep the first pass read-only and lightweight.
-- [ ] Defer quizzes, tours, and long-form encyclopedia pages.
+Status: Closed. Focused bodies now have a read-only facts drawer with generated physical values and concise Wikipedia-sourced context; interactive lessons remain deferred.
+
+- [x] Add a focused-body facts drawer backed by generated physical metadata plus concise Wikipedia-sourced copy.
+- [x] Show radius, gravity or density when available, and source or provenance in concise language.
+- [x] Keep the first pass read-only and lightweight.
+- [x] Defer quizzes, tours, and long-form encyclopedia pages.
 
 ### Phase 6: Lower-Priority Richer Exploration Proposal
 

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ExperienceHud } from './ExperienceHud';
 
 describe('ExperienceHud', () => {
@@ -36,6 +37,57 @@ describe('ExperienceHud', () => {
     expect(screen.getByText('Saturn')).toBeInTheDocument();
     expect(screen.getByText(/focused body view/i)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /overview/i })).not.toBeInTheDocument();
+  });
+
+  it('exposes a close action when the shell owns HUD visibility', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    render(
+      <ExperienceHud
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="overview"
+        focusedBodyDisplayName={null}
+        onClose={onClose}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Close information panel' }));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a focused-body facts drawer when facts are available', () => {
+    render(
+      <ExperienceHud
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="ganymede"
+        focusedBodyDisplayName="Ganymede"
+        focusedBodyFacts={{
+          summaryParagraphs: [
+            'Ganymede is Jupiter\'s largest moon and the largest natural satellite in the solar system.',
+            'Its surface mixes older dark terrain with younger grooved regions shaped by tectonic processes.'
+          ],
+          rows: [
+            { label: 'Radius', value: '2,634 km' },
+            { label: 'Gravity', value: '1.43 m/s^2' },
+            { label: 'Density', value: '1,942 kg/m^3' },
+            { label: 'Source', value: 'Wikipedia description; Generated physical metadata, NAIF 503' }
+          ]
+        }}
+      />
+    );
+
+    expect(screen.getByRole('region', { name: /focused body facts/i })).toBeInTheDocument();
+    expect(screen.getByText(/largest natural satellite/i)).toBeInTheDocument();
+    expect(screen.getByText(/tectonic processes/i)).toBeInTheDocument();
+    expect(screen.getByText('2,634 km')).toBeInTheDocument();
+    expect(screen.queryByText('Parent')).not.toBeInTheDocument();
+    expect(screen.queryByText('Role')).not.toBeInTheDocument();
+    expect(screen.getByText('Wikipedia description; Generated physical metadata, NAIF 503'))
+      .toBeInTheDocument();
   });
 
   it('shows an explicit error status message when real ephemeris loading fails', () => {
@@ -95,5 +147,14 @@ describe('ExperienceHud', () => {
       /@media \(max-width: 767px\)\s*{\s*\.experience-hud\s*{[^}]*inset: 4\.05rem 0\.75rem auto auto;/s
     );
     expect(css).not.toMatch(/bottom: (8\.75|4\.25)rem/);
+  });
+
+  it('keeps the HUD scrollable on short screens', () => {
+    const css = readFileSync('src/features/experience/components/experience-hud.css', 'utf8');
+
+    expect(css).toMatch(/\.experience-hud\s*{[^}]*overflow-y: auto;/s);
+    expect(css).toMatch(/\.experience-hud\s*{[^}]*pointer-events: auto;/s);
+    expect(css).toMatch(/\.experience-hud\s*{[^}]*touch-action: pan-y;/s);
+    expect(css).not.toMatch(/\.experience-hud\s*{[^}]*pointer-events: none;/s);
   });
 });

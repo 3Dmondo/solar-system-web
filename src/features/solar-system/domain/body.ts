@@ -488,6 +488,15 @@ export type BodyMetadata = {
   angularVelocityRadPerSec?: number;
   /** Optional strategy for initializing the first rendered spin phase. */
   spinInitialPhaseStrategy?: BodySpinInitialPhaseStrategy;
+  /** Compact physical facts derived from generated metadata for informational UI. */
+  facts?: BodyFacts;
+};
+
+export type BodyFacts = {
+  meanRadiusKm?: number;
+  approximateSurfaceGravityMps2?: number;
+  approximateBulkDensityKgPerM3?: number;
+  provenance: string;
 };
 
 export type BodyPhysicalShape = {

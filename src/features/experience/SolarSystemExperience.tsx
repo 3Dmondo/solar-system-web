@@ -2,17 +2,27 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { type BodyId } from '../solar-system/domain/body';
 import { type ReferenceFrameId } from '../solar-system/domain/referenceFrame';
 import { type LayerId } from './state/useLayerVisibility';
-import { ExperienceControlRail, type ExperienceControlPanel } from './components/ExperienceControlRail';
+import { ExperienceControlRail } from './components/ExperienceControlRail';
 import { ExperienceHud } from './components/ExperienceHud';
 import { ExperienceScene } from './components/ExperienceScene';
 import { DebugFpsOverlay } from './components/DebugFpsOverlay';
 import { PlaybackControls } from './components/PlaybackControls';
 import { useCoarsePointer } from './hooks/useCoarsePointer';
-import { getIsWideViewport, useWideViewport } from './hooks/useWideViewport';
+import {
+  getIsInfoPanelDefaultOpen,
+  useInfoPanelDefaultOpen
+} from './hooks/useInfoPanelDefaultOpen';
 import { useFocusedBody } from './state/useFocusedBody';
 import { useLayerVisibility } from './state/useLayerVisibility';
 import { useReferenceFrame } from './state/useReferenceFrame';
 import { useCatalogTimeRange } from './state/useCatalogTimeRange';
+import { getFocusedBodyFacts } from './domain/bodyFacts';
+import {
+  applyInfoPanelDefault,
+  closeExperiencePopoverPanel,
+  openExperiencePopoverPanel,
+  type ExperiencePopoverPanel
+} from './domain/infoPanelVisibility';
 import {
   useResolvedBodyCatalog
 } from './state/useResolvedBodyCatalog';
@@ -36,10 +46,12 @@ export function SolarSystemExperience({
 }: SolarSystemExperienceProps) {
   const { focusedBodyId, setFocusedBodyId } = useFocusedBody('overview');
   const isCoarsePointer = useCoarsePointer();
-  const isWideViewport = useWideViewport();
-  const [activeControlPanel, setActiveControlPanel] = useState<ExperienceControlPanel | null>(
-    () => (getIsWideViewport() ? 'info' : null)
-  );
+  const isInfoPanelDefaultOpen = useInfoPanelDefaultOpen();
+  const [panelState, setPanelState] = useState(() => ({
+    activePopoverPanel: null as ExperiencePopoverPanel | null,
+    isInfoPanelOpen: getIsInfoPanelDefaultOpen(),
+    restoreInfoPanelAfterPopoverClose: false
+  }));
   const { range: supportedTimeRange } = useCatalogTimeRange(catalogSource);
   const minUtcMs = supportedTimeRange ? Date.parse(supportedTimeRange.startUtc) : undefined;
   const maxUtcMs = supportedTimeRange ? Date.parse(supportedTimeRange.endUtc) : undefined;
@@ -77,14 +89,8 @@ export function SolarSystemExperience({
   }, [showDebugOverlay]);
 
   useEffect(() => {
-    setActiveControlPanel((currentPanel) => {
-      if (currentPanel !== 'info' && currentPanel !== null) {
-        return currentPanel;
-      }
-
-      return isWideViewport ? 'info' : null;
-    });
-  }, [isWideViewport]);
+    setPanelState((state) => applyInfoPanelDefault(state, isInfoPanelDefaultOpen));
+  }, [isInfoPanelDefaultOpen]);
 
   // Load catalog with trails computed relative to the selected reference frame's origin
   const { catalog: baseCatalog, status, error } = useResolvedBodyCatalog(
@@ -107,6 +113,11 @@ export function SolarSystemExperience({
     focusedBodyId === 'overview'
       ? null
       : catalog.metadata.find((metadata) => metadata.id === focusedBodyId)?.displayName ?? null;
+  const focusedBodyFacts = getFocusedBodyFacts(
+    focusedBodyId === 'overview'
+      ? null
+      : catalog.metadata.find((metadata) => metadata.id === focusedBodyId)
+  );
   const rangeWarning =
     boundaryState && supportedTimeRange
       ? createRangeWarning(boundaryState, supportedTimeRange)
@@ -124,6 +135,35 @@ export function SolarSystemExperience({
     toggleLayer(layerId);
   };
 
+  const handleSetActiveControlPanel = (panel: ExperiencePopoverPanel | null) => {
+    setPanelState((state) => {
+      if (!panel) {
+        return closeExperiencePopoverPanel(state);
+      }
+
+      return openExperiencePopoverPanel(state, panel, isInfoPanelDefaultOpen);
+    });
+  };
+
+  const handleToggleInfoPanel = () => {
+    setPanelState((state) => ({
+      activePopoverPanel:
+        !state.isInfoPanelOpen && state.activePopoverPanel
+          ? null
+          : state.activePopoverPanel,
+      isInfoPanelOpen: !state.isInfoPanelOpen,
+      restoreInfoPanelAfterPopoverClose: false
+    }));
+  };
+
+  const handleCloseInfoPanel = () => {
+    setPanelState((state) => ({
+      ...state,
+      isInfoPanelOpen: false,
+      restoreInfoPanelAfterPopoverClose: false
+    }));
+  };
+
   return (
     <SimulationClockContext.Provider value={{ playbackRateMultiplier, isPaused, simulationInitialUtcMs }}>
       <main className="experience-shell" aria-label="Solar system experience">
@@ -134,19 +174,22 @@ export function SolarSystemExperience({
           layerVisibility={visibility}
           onFocusBody={setFocusedBodyId}
         />
-        {activeControlPanel === 'info' ? (
+        {panelState.isInfoPanelOpen ? (
           <ExperienceHud
             catalogError={error}
             catalogStatus={status}
+            focusedBodyFacts={focusedBodyFacts}
             focusedBodyId={focusedBodyId}
             focusedBodyDisplayName={focusedBodyDisplayName}
             rangeWarning={rangeWarning}
+            onClose={handleCloseInfoPanel}
           />
         ) : null}
         <ExperienceControlRail
-          activePanel={activeControlPanel}
+          activePanel={panelState.activePopoverPanel}
           catalog={catalog}
           focusedBodyId={focusedBodyId}
+          isInfoPanelOpen={panelState.isInfoPanelOpen}
           selectedFrameId={selectedFrame.id}
           availableFrames={availableFrames}
           visibility={visibility}
@@ -154,7 +197,8 @@ export function SolarSystemExperience({
           onFocusBody={handleFocusBody}
           onReturnToOverview={() => setFocusedBodyId('overview')}
           onSelectFrame={handleSelectFrame}
-          onSetActivePanel={setActiveControlPanel}
+          onSetActivePanel={handleSetActiveControlPanel}
+          onToggleInfoPanel={handleToggleInfoPanel}
           onToggleLayer={handleToggleLayer}
         />
         <PlaybackControls

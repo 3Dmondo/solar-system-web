@@ -7,22 +7,23 @@ import { FullscreenButton } from './FullscreenButton';
 import { JumpToSelector } from './JumpToSelector';
 import { LayerPanel } from './LayerPanel';
 import { ReferenceFrameSelector } from './ReferenceFrameSelector';
+import { type ExperiencePopoverPanel } from '../domain/infoPanelVisibility';
 import './experience-control-rail.css';
 
-export type ExperienceControlPanel = 'info' | 'help' | 'jump' | 'frame' | 'layers';
-
 type ExperienceControlRailProps = {
-  activePanel: ExperienceControlPanel | null;
+  activePanel: ExperiencePopoverPanel | null;
   availableFrames: ReferenceFrame[];
   catalog: ResolvedBodyCatalog;
   focusedBodyId: ViewTargetId;
+  isInfoPanelOpen: boolean;
   layerConfigs: LayerConfig[];
   selectedFrameId: ReferenceFrameId;
   visibility: LayerVisibility;
   onFocusBody: (bodyId: BodyId) => void;
   onReturnToOverview: () => void;
   onSelectFrame: (frameId: ReferenceFrameId) => void;
-  onSetActivePanel: (panel: ExperienceControlPanel | null) => void;
+  onSetActivePanel: (panel: ExperiencePopoverPanel | null) => void;
+  onToggleInfoPanel: () => void;
   onToggleLayer: (layerId: LayerId) => void;
 };
 
@@ -31,6 +32,7 @@ export function ExperienceControlRail({
   availableFrames,
   catalog,
   focusedBodyId,
+  isInfoPanelOpen,
   layerConfigs,
   selectedFrameId,
   visibility,
@@ -38,6 +40,7 @@ export function ExperienceControlRail({
   onReturnToOverview,
   onSelectFrame,
   onSetActivePanel,
+  onToggleInfoPanel,
   onToggleLayer
 }: ExperienceControlRailProps) {
   const railRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +54,10 @@ export function ExperienceControlRail({
       const target = event.target as Node | null;
       const targetElement = event.target instanceof Element ? event.target : null;
 
-      if (railRef.current?.contains(target) || targetElement?.closest('.experience-hud')) {
+      if (
+        railRef.current?.contains(target) ||
+        targetElement?.closest('.experience-hud')
+      ) {
         return;
       }
 
@@ -73,7 +79,7 @@ export function ExperienceControlRail({
     };
   }, [activePanel, onSetActivePanel]);
 
-  const togglePanel = (panel: ExperienceControlPanel) => {
+  const togglePanel = (panel: ExperiencePopoverPanel) => {
     onSetActivePanel(activePanel === panel ? null : panel);
   };
 
@@ -85,12 +91,12 @@ export function ExperienceControlRail({
     <div ref={railRef} className="experience-control-rail" aria-label="Experience controls">
       <div className="experience-control-rail__item">
         <button
-          aria-label={activePanel === 'info' ? 'Hide information panel' : 'Show information panel'}
-          aria-pressed={activePanel === 'info'}
+          aria-label={isInfoPanelOpen ? 'Hide information panel' : 'Show information panel'}
+          aria-pressed={isInfoPanelOpen}
           className="experience-control-rail__button"
           title="Info"
           type="button"
-          onClick={() => togglePanel('info')}
+          onClick={onToggleInfoPanel}
         >
           i
         </button>

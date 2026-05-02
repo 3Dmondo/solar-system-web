@@ -176,6 +176,12 @@ describe('ephemerisSceneMapping', () => {
     expect(earth?.focusOffset[0]).toBeCloseTo(0, 9)
     expect(earth?.radius).toBeCloseTo(0.63710084, 9)
     expect(moon?.radius).toBeCloseTo(0.17374, 9)
+    expect(earth?.facts).toEqual({
+      meanRadiusKm: 6371.0084,
+      approximateSurfaceGravityMps2: 1,
+      approximateBulkDensityKgPerM3: 1,
+      provenance: 'Generated physical metadata, NAIF 399'
+    })
     expect((moon?.radius ?? 0) / (earth?.radius ?? 1)).toBeCloseTo(
       (moonPhysical?.meanRadiusKm ?? 0) / (earthPhysical?.meanRadiusKm ?? 1),
       9

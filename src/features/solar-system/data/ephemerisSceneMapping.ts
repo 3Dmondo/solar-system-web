@@ -104,9 +104,21 @@ export function mapPhysicalMetadataToScaledBodyMetadata(
       ...metadata,
       radius: scaledRadius,
       focusOffset: scaleVector(metadata.focusOffset, focusOffsetScale),
+      facts: physicalBody ? createBodyFacts(physicalBody) : metadata.facts,
       ...rotationMetadata
     }
   })
+}
+
+function createBodyFacts(physicalBody: BodyPhysicalMetadata): BodyMetadata['facts'] {
+  return {
+    meanRadiusKm: physicalBody.meanRadiusKm,
+    approximateSurfaceGravityMps2:
+      physicalBody.physicalProperties?.approximateSurfaceGravityMps2,
+    approximateBulkDensityKgPerM3:
+      physicalBody.physicalProperties?.approximateBulkDensityKgPerM3,
+    provenance: `Generated physical metadata, NAIF ${physicalBody.naifBodyId}`
+  }
 }
 
 function getDistinctBodyMap<Value extends { id: string }>(

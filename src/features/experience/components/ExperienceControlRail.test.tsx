@@ -35,49 +35,75 @@ describe('ExperienceControlRail', () => {
 
   it('exposes an information toggle in the rail', async () => {
     const user = userEvent.setup();
-    const onSetActivePanel = vi.fn();
+    const onToggleInfoPanel = vi.fn();
 
-    renderRail({ activePanel: null, onSetActivePanel });
+    renderRail({ activePanel: null, isInfoPanelOpen: false, onToggleInfoPanel });
 
     const infoButton = screen.getByRole('button', { name: 'Show information panel' });
     expect(infoButton).toHaveAttribute('aria-pressed', 'false');
 
     await user.click(infoButton);
 
-    expect(onSetActivePanel).toHaveBeenCalledWith('info');
+    expect(onToggleInfoPanel).toHaveBeenCalledTimes(1);
   });
 
   it('allows the active information layer to be hidden', async () => {
     const user = userEvent.setup();
-    const onSetActivePanel = vi.fn();
+    const onToggleInfoPanel = vi.fn();
 
-    renderRail({ activePanel: 'info', onSetActivePanel });
+    renderRail({ activePanel: null, isInfoPanelOpen: true, onToggleInfoPanel });
 
     const infoButton = screen.getByRole('button', { name: 'Hide information panel' });
     expect(infoButton).toHaveAttribute('aria-pressed', 'true');
 
     await user.click(infoButton);
 
-    expect(onSetActivePanel).toHaveBeenCalledWith(null);
+    expect(onToggleInfoPanel).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces the information layer when opening another rail panel', async () => {
+  it('opens other rail panels without changing information panel visibility directly', async () => {
     const user = userEvent.setup();
     const onSetActivePanel = vi.fn();
 
-    renderRail({ activePanel: 'info', onSetActivePanel });
+    renderRail({ activePanel: null, isInfoPanelOpen: true, onSetActivePanel });
 
     await user.click(screen.getByRole('button', { name: 'Show interaction help' }));
 
     expect(onSetActivePanel).toHaveBeenCalledWith('help');
   });
 
+  it('keeps the information layer open when the scene is clicked outside it', async () => {
+    const user = userEvent.setup();
+    const onSetActivePanel = vi.fn();
+
+    renderRail({ activePanel: null, isInfoPanelOpen: true, onSetActivePanel });
+
+    await user.pointer({ keys: '[MouseLeft]', target: document.body });
+
+    expect(onSetActivePanel).not.toHaveBeenCalled();
+  });
+
+  it('still closes popover panels when the scene is clicked outside them', async () => {
+    const user = userEvent.setup();
+    const onSetActivePanel = vi.fn();
+
+    renderRail({ activePanel: 'help', onSetActivePanel });
+
+    await user.pointer({ keys: '[MouseLeft]', target: document.body });
+
+    expect(onSetActivePanel).toHaveBeenCalledWith(null);
+  });
+
   function renderRail({
     activePanel,
-    onSetActivePanel
+    isInfoPanelOpen = false,
+    onSetActivePanel = vi.fn(),
+    onToggleInfoPanel = vi.fn()
   }: {
-    activePanel: 'info' | 'help' | 'jump' | 'frame' | 'layers' | null;
-    onSetActivePanel: (panel: 'info' | 'help' | 'jump' | 'frame' | 'layers' | null) => void;
+    activePanel: 'help' | 'jump' | 'frame' | 'layers' | null;
+    isInfoPanelOpen?: boolean;
+    onSetActivePanel?: (panel: 'help' | 'jump' | 'frame' | 'layers' | null) => void;
+    onToggleInfoPanel?: () => void;
   }) {
     render(
       <ExperienceControlRail
@@ -85,6 +111,7 @@ describe('ExperienceControlRail', () => {
         availableFrames={[getReferenceFrame('ssb')]}
         catalog={catalog}
         focusedBodyId="overview"
+        isInfoPanelOpen={isInfoPanelOpen}
         layerConfigs={LAYER_CONFIGS}
         selectedFrameId="ssb"
         visibility={visibility}
@@ -92,6 +119,7 @@ describe('ExperienceControlRail', () => {
         onReturnToOverview={vi.fn()}
         onSelectFrame={vi.fn()}
         onSetActivePanel={onSetActivePanel}
+        onToggleInfoPanel={onToggleInfoPanel}
         onToggleLayer={vi.fn()}
       />
     );
