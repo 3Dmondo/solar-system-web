@@ -2,7 +2,8 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { useRef, useState } from 'react';
 import { Vector3 } from 'three';
 import { type BodyDefinition } from '../domain/body';
-import { SunImpostor, computeSunImpostorOpacity } from './SunImpostor';
+import { SunImpostor } from './SunImpostor';
+import { computeSunImpostorOpacity } from './sunImpostorOpacity';
 
 // Reusable vector for calculations
 const tempVec = new Vector3();

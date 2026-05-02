@@ -1,6 +1,6 @@
 # Bug: Fast Refresh Lint Warning In Sun Impostor
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -62,5 +62,35 @@ Likely caused by `SunImpostor.tsx` exporting both the `SunImpostor` React compon
 
 ## Open Questions
 
-- Should the solver keep `SUN_IMPOSTOR_THRESHOLDS` public from a helper module, or remove the export if no external code needs it?
-- Should a focused unit test cover `computeSunImpostorOpacity` after moving it out of the component module?
+- Answered: `SUN_IMPOSTOR_THRESHOLDS` remains exported from the helper module so tests and future callers can inspect the public threshold contract without importing a React component module.
+- Answered: Added focused unit coverage for `computeSunImpostorOpacity`.
+
+## Root Cause
+
+Confirmed. `SunImpostor.tsx` exported both the `SunImpostor` React component and the non-component `computeSunImpostorOpacity` helper. The configured `react-refresh/only-export-components` rule allows constant exports but warns on exported functions from component modules, so the wrapper import made the component file fail Fast Refresh export-shape expectations.
+
+## Fix Summary
+
+- Moved `computeSunImpostorOpacity` and `SUN_IMPOSTOR_THRESHOLDS` into `src/features/solar-system/components/sunImpostorOpacity.ts`.
+- Updated `SunImpostorWrapper.tsx` to import the opacity helper from the non-component module.
+- Kept `SunImpostor.tsx` component-only, aside from local rendering constants.
+- Added focused tests for lower threshold, upper threshold, and midpoint smoothstep behavior.
+
+## Changed Files
+
+- `src/features/solar-system/components/SunImpostor.tsx`
+- `src/features/solar-system/components/SunImpostorWrapper.tsx`
+- `src/features/solar-system/components/sunImpostorOpacity.ts`
+- `src/features/solar-system/components/sunImpostorOpacity.test.ts`
+- `docs/bugs/solved/2026-05-02-fast-refresh-lint-warning.md`
+
+## Verification
+
+- `pnpm lint` passed with no warnings.
+- `pnpm exec vitest run src/features/solar-system/components/sunImpostorOpacity.test.ts` passed after rerunning outside the sandbox because Vite/esbuild spawn was blocked by sandbox `EPERM`.
+- `pnpm test` passed: 38 test files, 184 tests.
+- `pnpm build` passed. Vite still reports the existing large chunk-size warning for the main bundle.
+
+## Remaining Risks
+
+- No runtime visual preview was run because the fix only changes module boundaries and preserves the same opacity math. Inspecting the Sun impostor at far overview distances remains a reasonable manual smoke check if nearby visual work touches it later.
