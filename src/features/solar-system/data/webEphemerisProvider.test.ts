@@ -112,6 +112,14 @@ const satelliteManifest: WebEphemerisManifest = {
   bodies: [
     ...manifest.bodies,
     {
+      bodyId: 'mars',
+      naifBodyId: 499,
+      bodyName: 'Mars',
+      sourceNaifBodyId: 499,
+      sourceBodyName: 'Mars',
+      sampleDays: 1
+    },
+    {
       bodyId: 'moon',
       naifBodyId: 301,
       bodyName: 'Moon',
@@ -233,6 +241,14 @@ const satelliteChunkByFileName = {
           86410, 0, 0, 1, 0, 0,
           172810, 0, 0, 1, 0, 0
         ]
+      },
+      {
+        BodyId: 499,
+        Samples: [
+          1000, 0, 0, 1, 0, 0,
+          87400, 0, 0, 1, 0, 0,
+          173800, 0, 0, 1, 0, 0
+        ]
       }
     ]
   }
@@ -337,6 +353,30 @@ describe('webEphemerisProvider', () => {
     const snapshot = await provider.loadSnapshotAtUtc(requestUtc)
     const moonTrail = snapshot.trails.find((trail) => trail.id === 'moon')
 
+    expect(moonTrail?.positionsKm.length).toBeGreaterThan(1)
+    moonTrail?.positionsKm.forEach((positionKm) => {
+      expect(positionKm[0]).toBeCloseTo(10, 9)
+      expect(positionKm[1]).toBeCloseTo(0, 9)
+      expect(positionKm[2]).toBeCloseTo(0, 9)
+    })
+  })
+
+  it('keeps satellite trails parent-relative when a different trail origin is selected', async () => {
+    const datasetLoader = createDatasetLoaderStub(satelliteDataset)
+    const fetchMock = createChunkFetchMock(satelliteChunkByFileName)
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock
+    })
+    const requestUtc = new Date(Date.parse(approximateJ2000UtcIso) + 86400 * 1000)
+    const snapshot = await provider.loadSnapshotAtUtc(requestUtc, {
+      trailOriginBodyId: 'mars'
+    })
+    const moonTrail = snapshot.trails.find((trail) => trail.id === 'moon')
+    const earthTrail = snapshot.trails.find((trail) => trail.id === 'earth')
+
+    expect(earthTrail?.positionsKm.at(-1)).toEqual([-1000, 0, 0])
     expect(moonTrail?.positionsKm.length).toBeGreaterThan(1)
     moonTrail?.positionsKm.forEach((positionKm) => {
       expect(positionKm[0]).toBeCloseTo(10, 9)

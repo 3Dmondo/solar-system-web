@@ -92,15 +92,15 @@ export function SolarSystemExperience({
     setPanelState((state) => applyInfoPanelDefault(state, isInfoPanelDefaultOpen));
   }, [isInfoPanelDefaultOpen]);
 
-  // Load catalog with trails computed relative to the selected reference frame's origin
+  // Load catalog with non-satellite trails computed relative to the selected frame origin.
+  // Satellite trails stay parent-relative so the frame transform can place local orbits.
   const { catalog: baseCatalog, status, error } = useResolvedBodyCatalog(
     requestedUtc,
     catalogSource,
     { trailOriginBodyId: selectedFrame.originBodyId }
   );
 
-  // Transform body positions to selected reference frame
-  // (trails are already frame-relative from the provider)
+  // Transform body positions to selected reference frame.
   const catalog = useMemo(
     () => transformCatalogToFrame(baseCatalog, selectedFrame),
     [baseCatalog, selectedFrame]

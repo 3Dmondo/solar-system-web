@@ -15,8 +15,8 @@ export type SupportedTimeRange = {
 
 export type LoadCatalogOptions = {
   /**
-   * Body ID to use as the origin for trail positions.
-   * When set, trail positions are computed relative to this body at each sample time.
+   * Body ID to use as the origin for non-satellite trail positions.
+   * Satellite trails remain relative to their parent body.
    */
   trailOriginBodyId?: BodyId | null
 }

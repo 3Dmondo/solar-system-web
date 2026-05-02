@@ -610,9 +610,9 @@ export type BodyEphemerisSnapshot = {
 
 export type LoadSnapshotOptions = {
   /**
-   * Body ID to use as the origin for trail positions.
-   * When set, trail positions are computed relative to this body at each sample time.
-   * When null/undefined, trails are in SSB-centered coordinates.
+   * Body ID to use as the origin for non-satellite trail positions.
+   * Satellite trails remain relative to their parent body so frame transforms can
+   * center local orbits on the transformed parent position.
    */
   trailOriginBodyId?: BodyId | null;
 };

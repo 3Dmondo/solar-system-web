@@ -12,10 +12,11 @@ import type { ResolvedBodyCatalog } from './bodyStateStore';
  * Transforms a resolved body catalog to a new reference frame.
  * Works in scene-space coordinates (after scaling from km).
  *
- * - For SSB frame (originBodyId=null): only satellite trails are transformed to parent-relative
- * - For body-centered frames: body positions are transformed, trails are left as-is
- *   (trails are pre-computed relative to the frame origin by the provider)
- * - Satellite trails are always relative to their parent body, regardless of frame
+ * - For SSB frame (originBodyId=null): satellite parent-relative trails are
+ *   offset to the parent's current SSB position.
+ * - For body-centered frames: body positions are transformed, non-satellite trails
+ *   are already frame-relative, and satellite parent-relative trails are offset
+ *   to the transformed parent position.
  *
  * @param catalog - Original catalog (positions SSB-centered, trails may be frame-relative)
  * @param frame - Target reference frame
@@ -56,8 +57,8 @@ export function transformCatalogToFrame(
     position: subtractVector(body.position, originPosition)
   }));
 
-  // Trails are already computed relative to the frame origin by the provider.
-  // We only need to handle satellite trails to make them parent-relative.
+  // Non-satellite trails are already frame-relative. Satellite trails remain
+  // parent-relative from the provider and are centered on the transformed parent.
   const transformedTrails = transformTrailsForSatellitesInFrame(
     snapshot.trails,
     transformedBodyStates
@@ -94,8 +95,8 @@ function mergeTransformedBodies(
 
 /**
  * Handle satellite trails in a body-centered frame.
- * Satellite trails are already frame-relative from the provider, but we need to
- * offset them to be centered on their parent's position in the frame.
+ * Satellite trails are parent-relative from the provider, so offset them to be
+ * centered on their parent's position in the selected frame.
  * Non-satellite trails are left unchanged.
  */
 function transformTrailsForSatellitesInFrame(
@@ -110,8 +111,6 @@ function transformTrailsForSatellitesInFrame(
       const parentBody = parentId ? bodiesById.get(parentId) : null;
 
       if (parentBody && trail.positions.length > 0) {
-        // Satellite trail is frame-relative but centered at frame origin
-        // We need to offset it to center on the parent's position in this frame
         return {
           id: trail.id,
           positions: trail.positions.map((pos) => addVector(pos, parentBody.position))

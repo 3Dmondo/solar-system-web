@@ -177,13 +177,11 @@ export function createWebEphemerisProvider({
           metadataByBodyId.get(body.bodyId)?.trailSampleRateMultiplier ?? 1
         const bodyId = body.bodyId
 
-        // Determine the effective origin for this body's trail
-        // - If explicit origin is set (e.g., Earth-centered frame): use that
-        // - If body is a satellite: use parent as origin (so trail shows orbit around parent)
-        // - Otherwise: use absolute SSB positions
+        // Satellite trails stay parent-relative so the frame transform can center
+        // them on the transformed parent in every reference frame.
         let effectiveOrigin: BodyId | null = trailOriginBodyId
 
-        if (effectiveOrigin === null && isSatellite(bodyId)) {
+        if (isSatellite(bodyId)) {
           const parentId = getParentBody(bodyId)
           if (parentId) {
             effectiveOrigin = parentId
