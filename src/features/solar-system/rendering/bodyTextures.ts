@@ -10,9 +10,18 @@ const textureUrls: Partial<Record<BodyId, string>> = {
   venus: new URL('../../../../assets/textures/2k_venus_surface.jpg', import.meta.url).href,
   mars: new URL('../../../../assets/textures/2k_mars.jpg', import.meta.url).href,
   jupiter: new URL('../../../../assets/textures/2k_jupiter.jpg', import.meta.url).href,
+  ganymede: new URL('../../../../assets/textures/2k_ganymede.jpg', import.meta.url).href,
+  callisto: new URL('../../../../assets/textures/2k_callisto.jpg', import.meta.url).href,
   saturn: new URL('../../../../assets/textures/2k_saturn.jpg', import.meta.url).href,
+  rhea: new URL('../../../../assets/textures/2k_rhea.jpg', import.meta.url).href,
+  titan: new URL('../../../../assets/textures/2k_titan.jpg', import.meta.url).href,
+  iapetus: new URL('../../../../assets/textures/2k_iapetus.jpg', import.meta.url).href,
   uranus: new URL('../../../../assets/textures/2k_uranus.jpg', import.meta.url).href,
-  neptune: new URL('../../../../assets/textures/2k_neptune.jpg', import.meta.url).href
+  umbriel: new URL('../../../../assets/textures/2k_umbriel.jpg', import.meta.url).href,
+  titania: new URL('../../../../assets/textures/2k_titania.jpg', import.meta.url).href,
+  oberon: new URL('../../../../assets/textures/2k_oberon.jpg', import.meta.url).href,
+  neptune: new URL('../../../../assets/textures/2k_neptune.jpg', import.meta.url).href,
+  triton: new URL('../../../../assets/textures/2k_triton.jpg', import.meta.url).href
 }
 
 function configurePlanetTexture(texture: Texture) {
@@ -37,4 +46,8 @@ export function loadBodyTexture(bodyId: BodyId) {
   const texture = configurePlanetTexture(textureLoader.load(textureUrl))
   textureCache.set(bodyId, texture)
   return texture
+}
+
+export function hasBodyTexture(bodyId: BodyId) {
+  return Object.prototype.hasOwnProperty.call(textureUrls, bodyId)
 }

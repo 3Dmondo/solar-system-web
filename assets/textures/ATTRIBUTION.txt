@@ -87,3 +87,83 @@ NASA's Scientific Visualization Studio
 Relevant source data noted on the NASA page:
 - DEM (Digital Elevation Map) [LRO: LOLA]
 - LROC WAC Color Mosaic (Natural Color Hapke Normalized WAC Mosaic)
+
+NASA reduced major-moon texture attribution:
+
+NASA 3D Resources hub
+https://science.nasa.gov/3d-resources/
+
+NASA Images and Media Usage Guidelines
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+Source claim:
+NASA 3D Resources describes its models and textures as free to download and use, with use governed by NASA Images and Media Usage Guidelines. NASA media guidance says NASA texture-map media are generally not subject to U.S. copyright, may be used for computer graphical simulations and Internet web pages, should acknowledge NASA as the source, and must not imply NASA endorsement. No adopted source page was marked as third-party copyrighted.
+
+Processing notes:
+NASA 3D Resources JPG files were adopted directly. The Titan source JPG was downloaded from NASA Photojournal at 5760x2880, resized locally to 2048x1024 JPG quality 88 with System.Drawing high-quality bicubic interpolation, and the large source original was not kept in git.
+Titan conversion command summary: resize source JPG to 2048x1024 with System.Drawing HighQualityBicubic interpolation and save JPEG quality 88 to assets/textures/2k_titan.jpg.
+
+Adopted runtime textures:
+
+- 2k_ganymede.jpg
+  Body: Ganymede
+  Source URL: https://science.nasa.gov/3d-resources/jupiter-ganymede/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/jupiter---ganymede/Jupiter%20-%20Ganymede.jpg
+  Credit line: USGS, JPL, & Caltech
+  Realism classification: realistic Voyager/USGS mosaic from JPL/Caltech generated planetary maps
+
+- 2k_callisto.jpg
+  Body: Callisto
+  Source URL: https://science.nasa.gov/3d-resources/jupiter-callisto/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/jupiter---callisto/Jupiter%20-%20Callisto.jpg
+  Credit line: USGS, JPL, & Caltech
+  Realism classification: realistic Voyager/USGS mosaic from JPL/Caltech generated planetary maps
+
+- 2k_rhea.jpg
+  Body: Rhea
+  Source URL: https://science.nasa.gov/3d-resources/saturn-rhea/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/saturn---rhea/Saturn%20-%20Rhea.jpg
+  Credit line: NASA/JPL/Caltech generated planetary maps
+  Realism classification: realistic Voyager mosaic from JPL/Caltech generated planetary maps
+
+- 2k_titan.jpg
+  Body: Titan
+  Source URL: https://science.nasa.gov/photojournal/titan-mosaic-the-surface-under-the-haze/
+  Source file: https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia22/pia22770/PIA22770.jpg
+  Credit line: NASA/JPL-Caltech/Univ. Arizona
+  Realism classification: realistic Cassini ISS near-infrared global surface brightness mosaic
+
+- 2k_iapetus.jpg
+  Body: Iapetus
+  Source URL: https://science.nasa.gov/3d-resources/saturn-iapetus/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/saturn---iapetus/Saturn%20-%20Iapetus.jpg
+  Credit line: NASA/JPL/Caltech generated planetary maps
+  Realism classification: realistic Voyager mosaic from JPL/Caltech generated planetary maps
+
+- 2k_umbriel.jpg
+  Body: Umbriel
+  Source URL: https://science.nasa.gov/3d-resources/uranus-umbriel/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/uranus---umbriel/Uranus%20-%20Umbriel.jpg
+  Credit line: USGS/Tammy Becker & JPL/Caltech
+  Realism classification: realistic Voyager/USGS mosaic from JPL/Caltech generated planetary maps
+
+- 2k_titania.jpg
+  Body: Titania
+  Source URL: https://science.nasa.gov/3d-resources/uranus-titania/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/uranus---titania/Uranus%20-%20Titania.jpg
+  Credit line: USGS/Tammy Becker & JPL/Caltech
+  Realism classification: realistic Voyager/USGS mosaic from JPL/Caltech generated planetary maps
+
+- 2k_oberon.jpg
+  Body: Oberon
+  Source URL: https://science.nasa.gov/3d-resources/uranus-oberon/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/uranus---oberon/Uranus%20-%20Oberon.jpg
+  Credit line: USGS/Tammy Becker & JPL/Caltech
+  Realism classification: realistic Voyager/USGS mosaic from JPL/Caltech generated planetary maps
+
+- 2k_triton.jpg
+  Body: Triton
+  Source URL: https://science.nasa.gov/3d-resources/neptune-triton/
+  Source file: https://assets.science.nasa.gov/content/dam/science/cds/3d/resources/image/neptune---triton/Neptune%20-%20Triton.jpg
+  Credit line: USGS/Tammy Becker & JPL/Caltech
+  Realism classification: realistic limited Voyager/USGS stitched mosaic from JPL/Caltech generated planetary maps

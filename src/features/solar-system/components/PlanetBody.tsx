@@ -12,6 +12,7 @@ import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
 import { SolidBodyMaterial } from './SolidBodyMaterial'
 import { TexturedPlanetMaterial } from './TexturedPlanetMaterial'
 import { VenusCloudLayer } from './VenusCloudLayer';
+import { hasBodyTexture } from '../rendering/bodyTextures'
 
 // Module-level reusable objects to avoid allocating per frame.
 const Y_UP = new Vector3(0, 1, 0)
@@ -37,6 +38,7 @@ export function PlanetBody({
   const meshRef = useRef<Mesh>(null);
   const sphereSegments = body.material === 'sun' ? 96 : body.material === 'moon' ? 128 : 64;
   const { playbackRateMultiplier, isPaused, simulationInitialUtcMs } = useSimulationClockContext();
+  const useSolidMaterial = body.material === 'basic' && !hasBodyTexture(body.id)
 
   // Quaternion aligning the body Y axis to its physical north pole direction.
   const poleAlignQuat = useMemo(() => {
@@ -149,7 +151,7 @@ export function PlanetBody({
           <EarthSurfaceMaterial bodyPosition={body.position} poleDirectionRender={body.poleDirectionRender} sunPosition={sunPosition} />
         ) : body.material === 'moon' ? (
           <MoonSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
-        ) : body.material === 'basic' ? (
+        ) : useSolidMaterial ? (
           <SolidBodyMaterial
             bodyPosition={body.position}
             color={body.color}
