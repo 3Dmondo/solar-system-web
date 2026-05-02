@@ -46,7 +46,7 @@ if ($includedDeferredFastMoonIds.Count -gt 0 -and -not $AllowMilestone13FastMoon
 New-Item -ItemType Directory -Force -Path $outputRootPath | Out-Null
 
 Get-ChildItem -LiteralPath $outputRootPath -Filter "*.json" -File | ForEach-Object {
-  Remove-Item -LiteralPath $_.FullName
+  Remove-Item -LiteralPath $_.FullName -Force
 }
 
 Copy-Item -LiteralPath $manifestPath -Destination $outputRootPath

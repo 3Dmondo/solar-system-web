@@ -33,9 +33,11 @@ export type WebEphemerisProviderOptions = {
   presentationMetadata?: BodyMetadata[]
 }
 
-// Baseline cache for the active chunk, adjacent chunks, and normal 25-year chunks.
-// Smaller generated chunk profiles expand this budget from the active trail window.
+// Baseline cache for the active chunk, the warmed playback runway, and normal
+// 25-year chunks. Smaller generated chunk profiles expand this budget from the
+// active trail window.
 const minimumDefaultMaxCachedChunks = 6
+const playbackPrefetchChunkRadius = 5
 
 export function createWebEphemerisProvider({
   chunkBaseUrl,
@@ -358,8 +360,15 @@ export function createWebEphemerisProvider({
     )
     const chunkDurationDays = getRepresentativeChunkDurationDays(dataset)
     const previousTrailChunkBudget = Math.ceil(maxTrailWindowDays / chunkDurationDays)
+    const previousChunkBudget = Math.max(
+      playbackPrefetchChunkRadius,
+      previousTrailChunkBudget
+    )
 
-    return Math.max(minimumDefaultMaxCachedChunks, previousTrailChunkBudget + 2)
+    return Math.max(
+      minimumDefaultMaxCachedChunks,
+      previousChunkBudget + 1 + playbackPrefetchChunkRadius
+    )
   }
 
   function getReadyTrailChunks(
@@ -404,18 +413,26 @@ function getPrefetchChunkRanges(
 
   while (
     previousRange &&
-    previousRange.endTdbSecondsFromJ2000 > earliestTrailTdbSecondsFromJ2000
+    (
+      previousRanges.length < playbackPrefetchChunkRadius ||
+      previousRange.endTdbSecondsFromJ2000 > earliestTrailTdbSecondsFromJ2000
+    )
   ) {
     previousRanges.push(previousRange)
     previousRange = getPreviousChunkRange(dataset.manifest, previousRange)
   }
 
-  const nextRange = getNextChunkRange(dataset.manifest, activeRange)
+  const nextRanges: WebEphemerisChunkRange[] = []
+  let nextRange = getNextChunkRange(dataset.manifest, activeRange)
+
+  while (nextRange && nextRanges.length < playbackPrefetchChunkRadius) {
+    nextRanges.push(nextRange)
+    nextRange = getNextChunkRange(dataset.manifest, nextRange)
+  }
+
   const ranges = [...previousRanges.reverse(), activeRange]
 
-  if (nextRange) {
-    ranges.push(nextRange)
-  }
+  ranges.push(...nextRanges)
 
   return ranges
 }

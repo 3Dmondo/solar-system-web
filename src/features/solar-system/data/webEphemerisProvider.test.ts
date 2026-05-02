@@ -8,6 +8,7 @@ import {
 import { type WebBodyMetadataFile } from './webBodyMetadata'
 import { type WebDataset } from './webDatasetLoader'
 import { type WebEphemerisManifest } from './webEphemeris'
+import { type BodyMetadata } from '../domain/body'
 
 const manifest: WebEphemerisManifest = {
   schemaVersion: 1,
@@ -278,7 +279,7 @@ describe('webEphemerisProvider', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
-  it('prefetches adjacent chunks and evicts old cache entries when the limit is exceeded', async () => {
+  it('prefetches the playback runway and evicts old cache entries when the limit is exceeded', async () => {
     const datasetLoader = createDatasetLoaderStub(dataset)
     const fetchMock = createChunkFetchMock()
     const provider = createWebEphemerisProvider({
@@ -289,10 +290,10 @@ describe('webEphemerisProvider', () => {
     })
 
     await provider.prefetchAroundUtc(new Date(Date.parse(approximateJ2000UtcIso) + 216000 * 1000))
-    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
 
     await provider.loadSnapshotAtUtc(new Date(Date.parse(approximateJ2000UtcIso) + 43200 * 1000))
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(6)
   })
 
   it('extends trails with ready previous chunks without refetching during snapshot load', async () => {
@@ -321,7 +322,7 @@ describe('webEphemerisProvider', () => {
         ]
       }
     ])
-    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
   })
 
   it('samples satellite trails relative to their parent body by default', async () => {
@@ -363,6 +364,82 @@ describe('webEphemerisProvider', () => {
     expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-4.json')
   })
 
+  it('keeps five previous and five future chunks cached for one-year playback prefetch', async () => {
+    const playbackManifest = createLinearManifest(12)
+    const playbackDataset = {
+      manifest: playbackManifest,
+      bodyMetadata
+    } satisfies WebDataset
+    const datasetLoader = createDatasetLoaderStub(playbackDataset)
+    const fetchMock = createChunkFetchMock(createLinearChunkFixtures(playbackManifest))
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock,
+      presentationMetadata: [
+        createEarthMetadata({
+          defaultTrailWindowDays: 4
+        })
+      ]
+    })
+    const activeChunk = playbackManifest.chunks[6]!
+
+    await provider.prefetchAroundUtc(utcAtTdbOffsetSeconds(
+      activeChunk.startTdbSecondsFromJ2000 + 43200
+    ))
+
+    expect(fetchMock).toHaveBeenCalledTimes(11)
+    expect(fetchMock).not.toHaveBeenCalledWith('/ephemeris/chunk-0.json')
+
+    for (let index = 1; index <= 11; index += 1) {
+      expect(fetchMock).toHaveBeenCalledWith(`/ephemeris/chunk-${index}.json`)
+    }
+
+    await provider.loadSnapshotAtUtc(utcAtTdbOffsetSeconds(
+      playbackManifest.chunks[1]!.startTdbSecondsFromJ2000 + 43200
+    ))
+    await provider.loadSnapshotAtUtc(utcAtTdbOffsetSeconds(
+      playbackManifest.chunks[11]!.startTdbSecondsFromJ2000 + 43200
+    ))
+
+    expect(fetchMock).toHaveBeenCalledTimes(11)
+  })
+
+  it('prefetches trail-history chunks beyond the five previous playback chunks', async () => {
+    const playbackManifest = createLinearManifest(14)
+    const playbackDataset = {
+      manifest: playbackManifest,
+      bodyMetadata
+    } satisfies WebDataset
+    const datasetLoader = createDatasetLoaderStub(playbackDataset)
+    const fetchMock = createChunkFetchMock(createLinearChunkFixtures(playbackManifest))
+    const provider = createWebEphemerisProvider({
+      chunkBaseUrl: '/ephemeris',
+      datasetLoader,
+      fetchImpl: fetchMock,
+      presentationMetadata: [
+        createEarthMetadata({
+          defaultTrailWindowDays: 14
+        })
+      ]
+    })
+    const activeChunk = playbackManifest.chunks[10]!
+
+    await provider.prefetchAroundUtc(utcAtTdbOffsetSeconds(
+      activeChunk.startTdbSecondsFromJ2000 + 43200
+    ))
+
+    expect(fetchMock).toHaveBeenCalledTimes(11)
+    expect(fetchMock).toHaveBeenCalledWith('/ephemeris/chunk-3.json')
+    expect(fetchMock).not.toHaveBeenCalledWith('/ephemeris/chunk-2.json')
+
+    await provider.loadSnapshotAtUtc(utcAtTdbOffsetSeconds(
+      playbackManifest.chunks[3]!.startTdbSecondsFromJ2000 + 43200
+    ))
+
+    expect(fetchMock).toHaveBeenCalledTimes(11)
+  })
+
   it('clears chunk and dataset caches together', async () => {
     const datasetLoader = createDatasetLoaderStub(dataset)
     const fetchMock = createChunkFetchMock()
@@ -400,4 +477,66 @@ function createChunkFetchMock(chunks: Record<string, unknown> = chunkByFileName)
       status: 200
     })
   })
+}
+
+function createLinearManifest(chunkCount: number): WebEphemerisManifest {
+  const chunkDurationSeconds = 172800
+
+  return {
+    ...manifest,
+    chunks: Array.from({ length: chunkCount }, (_, index) => {
+      const startTdbSecondsFromJ2000 = index * chunkDurationSeconds
+      const endTdbSecondsFromJ2000 = startTdbSecondsFromJ2000 + chunkDurationSeconds
+
+      return {
+        fileName: `chunk-${index}.json`,
+        startUtc: utcAtTdbOffsetSeconds(startTdbSecondsFromJ2000).toISOString(),
+        endUtc: utcAtTdbOffsetSeconds(endTdbSecondsFromJ2000).toISOString(),
+        startTdbSecondsFromJ2000,
+        endTdbSecondsFromJ2000
+      }
+    })
+  }
+}
+
+function createLinearChunkFixtures(linearManifest: WebEphemerisManifest) {
+  return Object.fromEntries(
+    linearManifest.chunks.map((range) => [
+      range.fileName,
+      {
+        SchemaVersion: 1,
+        CenterBodyId: 0,
+        StartTdbSecondsFromJ2000: range.startTdbSecondsFromJ2000,
+        EndTdbSecondsFromJ2000: range.endTdbSecondsFromJ2000,
+        Bodies: [
+          {
+            BodyId: 399,
+            Samples: [
+              range.startTdbSecondsFromJ2000, 0, 0, 1, 0, 0,
+              range.startTdbSecondsFromJ2000 + 86400, 0, 0, 1, 0, 0,
+              range.endTdbSecondsFromJ2000, 0, 0, 1, 0, 0
+            ]
+          }
+        ]
+      }
+    ])
+  )
+}
+
+function createEarthMetadata(
+  overrides: Partial<BodyMetadata> = {}
+): BodyMetadata {
+  return {
+    id: 'earth',
+    displayName: 'Earth',
+    color: '#3a7bd5',
+    material: 'earth',
+    radius: 0.72,
+    focusOffset: [0, 0.25, 3.2],
+    ...overrides
+  }
+}
+
+function utcAtTdbOffsetSeconds(offsetSeconds: number) {
+  return new Date(Date.parse(approximateJ2000UtcIso) + offsetSeconds * 1000)
 }

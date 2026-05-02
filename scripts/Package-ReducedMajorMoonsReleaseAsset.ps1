@@ -50,7 +50,7 @@ foreach ($chunkPath in $chunkPaths) {
   Copy-Item -LiteralPath $chunkPath.FullName -Destination $stagingRoot
 }
 
-Compress-Archive -Path (Join-Path $stagingRoot "*") -DestinationPath $assetPath -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $stagingRoot "*") -DestinationPath $assetPath -CompressionLevel Optimal -Force
 
 $checksum = Get-FileHash -Algorithm SHA256 -LiteralPath $assetPath
 "$($checksum.Hash.ToLowerInvariant())  $AssetName" | Set-Content -LiteralPath $checksumPath -Encoding ascii
