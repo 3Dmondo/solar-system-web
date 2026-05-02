@@ -9,6 +9,7 @@ import {
 import { interpolateChunkBodyAtTdbTime } from './webEphemerisTimeline'
 
 const secondsPerDay = 86_400
+const maxCachedInteriorTrailRanges = 8
 
 export type ChunkBodyTrailSampler = {
   sampleAtTdbTime: (
@@ -332,6 +333,8 @@ function getCachedInteriorPositions(
   const cachedPositions = interiorPositionsByRangeKey.get(rangeKey)
 
   if (cachedPositions) {
+    interiorPositionsByRangeKey.delete(rangeKey)
+    interiorPositionsByRangeKey.set(rangeKey, cachedPositions)
     return cachedPositions
   }
 
@@ -341,8 +344,23 @@ function getCachedInteriorPositions(
   )
 
   interiorPositionsByRangeKey.set(rangeKey, nextPositions)
+  evictOverflowingInteriorTrailRanges(interiorPositionsByRangeKey)
 
   return nextPositions
+}
+
+function evictOverflowingInteriorTrailRanges(
+  interiorPositionsByRangeKey: Map<string, Array<[number, number, number]>>
+) {
+  while (interiorPositionsByRangeKey.size > maxCachedInteriorTrailRanges) {
+    const oldestRangeKey = interiorPositionsByRangeKey.keys().next().value
+
+    if (!oldestRangeKey) {
+      return
+    }
+
+    interiorPositionsByRangeKey.delete(oldestRangeKey)
+  }
 }
 
 function getTrailResampleCadenceSeconds(

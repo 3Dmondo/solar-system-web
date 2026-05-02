@@ -116,4 +116,22 @@ describe('webEphemerisTrails', () => {
     expect(firstTrail.positionsKm[0]).not.toBe(secondTrail.positionsKm[0])
     expect(firstTrail.positionsKm.at(-1)).not.toBe(secondTrail.positionsKm.at(-1))
   })
+
+  it('bounds cached moving interior ranges so playback cannot grow trail memory without limit', () => {
+    const sampler = createChunkBodyTrailSampler(manifest, chunk, 'earth', {
+      sampleRateMultiplier: 24
+    })
+    const firstTrail = sampler.sampleAtTdbTime(43200, 0.25)
+    const firstInteriorPoint = firstTrail.positionsKm[1]
+
+    for (let hourOffset = 1; hourOffset <= 9; hourOffset += 1) {
+      sampler.sampleAtTdbTime(43200 + hourOffset * 3600, 0.25)
+    }
+
+    const resampledFirstTrail = sampler.sampleAtTdbTime(43200, 0.25)
+
+    expect(firstInteriorPoint).toEqual([25200, 0, 0])
+    expect(resampledFirstTrail.positionsKm[1]).toEqual(firstInteriorPoint)
+    expect(resampledFirstTrail.positionsKm[1]).not.toBe(firstInteriorPoint)
+  })
 })

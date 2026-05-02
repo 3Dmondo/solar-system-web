@@ -124,6 +124,7 @@ describe('webEphemeris', () => {
     expect(earthManifest).toBeDefined()
     expect(earthChunkBody).toBeDefined()
     expect(moonManifest).toBeDefined()
+    expect(earthChunkBody!.samples).toBeInstanceOf(Float64Array)
 
     expect(getChunkBodySampleTime(chunk, earthManifest!, 0)).toBe(0)
     expect(getChunkBodySampleTime(chunk, earthManifest!, 1)).toBe(604800)

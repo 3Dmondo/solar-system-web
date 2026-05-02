@@ -322,6 +322,28 @@ export function createWebEphemerisProvider({
 
       chunkCache.delete(oldestCacheKey)
       loadedChunkCache.delete(oldestCacheKey)
+      evictTrailSamplerCacheEntriesForChunk(oldestCacheKey)
+    }
+  }
+
+  function evictTrailSamplerCacheEntriesForChunk(fileName: string) {
+    const cacheKeyPrefix = `${fileName}:`
+
+    for (const cacheKey of trailSamplerCache.keys()) {
+      if (cacheKey.startsWith(cacheKeyPrefix)) {
+        trailSamplerCache.delete(cacheKey)
+      }
+    }
+
+    for (const cacheKey of relativeTrailSamplerCache.keys()) {
+      if (cacheKey.startsWith(cacheKeyPrefix)) {
+        relativeTrailSamplerCache.delete(cacheKey)
+      }
+    }
+
+    if (cachedTrailsKey.includes(fileName)) {
+      cachedTrails = undefined
+      cachedTrailsKey = ''
     }
   }
 

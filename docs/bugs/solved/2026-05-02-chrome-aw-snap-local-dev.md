@@ -1,6 +1,6 @@
 # Bug: Chrome Aw Snap Crashes On Local Dev Server
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -69,3 +69,40 @@ The `/debug` route may help capture FPS, JS heap when available, and generated-d
 - Does `pnpm build` followed by `pnpm preview` reproduce locally, or only `pnpm dev`?
 - Does the crash correlate with specific actions such as focusing moons, opening selectors, changing reference frame, fast playback, or leaving the app running?
 - Is Chrome task-manager memory, GPU memory, or `chrome://crashes` information available after a crash?
+
+## Closeout
+
+Root cause:
+
+- Confirmed code-level memory pressure in the web ephemeris runtime. Parsed chunk sample arrays were retained as regular JavaScript number arrays, which are expensive for large generated JSON chunks.
+- Confirmed retained-cache growth risk in trail sampling. Per-chunk trail samplers cached moving interior trail ranges by `startIndex:endIndex`; during high-rate playback these keys can keep changing and retain many overlapping arrays.
+- Confirmed stale sampler retention risk in chunk cache eviction. When the provider evicted chunk promises and parsed chunks from the LRU cache, sampler caches for the evicted chunk were not purged, so closures could keep evicted chunk data and cached trail interiors reachable.
+
+Fix summary:
+
+- Store parsed ephemeris sample buffers as `Float64Array` after JSON validation so retained chunk data is compact and the raw parsed JSON arrays can be collected.
+- Bound each trail sampler's cached moving interior ranges with a small LRU window.
+- Purge absolute and relative trail samplers for a chunk whenever that chunk is evicted from the provider cache, and clear the single cached trail snapshot if it references the evicted chunk.
+- Added regression coverage for typed sample buffers and bounded trail-range caching.
+
+Changed files:
+
+- `src/features/solar-system/data/webEphemeris.ts`
+- `src/features/solar-system/data/webEphemeris.test.ts`
+- `src/features/solar-system/data/webEphemerisTrails.ts`
+- `src/features/solar-system/data/webEphemerisTrails.test.ts`
+- `src/features/solar-system/data/webEphemerisProvider.ts`
+- `docs/bugs/solved/2026-05-02-chrome-aw-snap-local-dev.md`
+
+Verification:
+
+- `pnpm test src/features/solar-system/data/webEphemeris.test.ts src/features/solar-system/data/webEphemerisTrails.test.ts src/features/solar-system/data/webEphemerisProvider.test.ts` passed.
+- `pnpm lint` passed.
+- `pnpm build` passed.
+- `pnpm test` passed: 38 files, 185 tests.
+
+Remaining risks:
+
+- The original Chrome `Aw, Snap!` crash was not reproduced locally in this session, so the browser crash itself is not proven eliminated by direct Chrome crash-loop measurement.
+- JSON parsing still temporarily materializes the raw response arrays before conversion to typed arrays; Milestone 13 data-format work may still be needed if chunk parse peaks remain too high on constrained devices.
+- DevTools, source maps, GPU driver behavior, and Vite dev-mode overhead can still amplify memory use independently of the retained-runtime fixes above.

@@ -58,10 +58,12 @@ export type WebEphemerisManifest = {
   chunks: WebEphemerisChunkRange[]
 }
 
+export type WebEphemerisSampleBuffer = ArrayLike<number> & { length: number }
+
 export type WebEphemerisChunkBody = {
   bodyId: BodyId
   naifBodyId: number
-  samples: number[]
+  samples: WebEphemerisSampleBuffer
 }
 
 export type WebEphemerisChunk = {
@@ -387,7 +389,7 @@ function parseChunkBody(input: unknown, path: string): WebEphemerisChunkBody {
   return {
     bodyId,
     naifBodyId,
-    samples
+    samples: new Float64Array(samples)
   }
 }
 
