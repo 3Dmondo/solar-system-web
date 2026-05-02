@@ -155,6 +155,10 @@
 }
 
 @media (max-width: 767px) {
+  .jump-to-selector-container {
+    position: static;
+  }
+
   .jump-to-selector__toggle {
     width: 2.75rem;
     height: 2.75rem;

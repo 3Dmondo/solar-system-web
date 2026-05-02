@@ -144,6 +144,10 @@
 }
 
 @media (max-width: 767px) {
+  .reference-frame-selector-container {
+    position: static;
+  }
+
   .reference-frame-selector__toggle {
     min-width: 2.75rem;
     height: 2.75rem;

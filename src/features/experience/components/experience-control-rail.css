@@ -110,6 +110,10 @@
     gap: 0.35rem;
   }
 
+  .experience-control-rail__item {
+    position: static;
+  }
+
   .experience-control-rail__button,
   .experience-control-rail .fullscreen-button {
     width: 2.75rem;

@@ -133,6 +133,10 @@
 }
 
 @media (max-width: 767px) {
+  .layer-panel-container {
+    position: static;
+  }
+
   .layer-panel__toggle {
     width: 2.75rem;
     height: 2.75rem;
