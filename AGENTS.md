@@ -27,6 +27,10 @@ These instructions apply to every session in this repository.
 - `docs/vision.md`: product goals, current experience, next experience, and non-goals.
 - `docs/architecture.md`: actual stack, module map, runtime behavior, and known gaps.
 - `docs/roadmap.md`: milestone status and sequencing.
+- `docs/bug-reporting.md`: bug-reporting workflow for preparing solver-ready reports.
+- `docs/bug-solving.md`: bug-solving workflow for resolving saved reports.
+- `docs/bugs/*.md`: open bug reports for later triage or fixing.
+- `docs/bugs/solved/*.md`: resolved bug reports with closeout notes.
 - `docs/tasks/*.md`: actionable milestone checklists.
 - `docs/decisions/*.md`: durable architectural or workflow decisions.
 
@@ -35,6 +39,10 @@ These instructions apply to every session in this repository.
 - `docs/vision.md` must reflect current product goals, milestone scope, and non-goals.
 - `docs/architecture.md` must reflect the actual chosen stack and structural decisions.
 - `docs/roadmap.md` must reflect the current milestone sequence and status at a high level.
+- `docs/bug-reporting.md` must reflect the current bug-reporting workflow.
+- `docs/bug-solving.md` must reflect the current bug-solving and closeout workflow.
+- `docs/bugs/*.md` should capture one open bug per file with enough detail for a later solving agent.
+- `docs/bugs/solved/*.md` should capture resolved reports with root cause, fix summary, verification, and remaining risks.
 - `docs/tasks/*.md` must reflect the actionable checklist for the current or recently open milestone.
 - `docs/decisions/*.md` should capture durable architectural or workflow decisions.
 
@@ -49,6 +57,11 @@ These instructions apply to every session in this repository.
 ## Session Behavior
 
 - At the start of a task, read `AGENTS.md` plus the relevant docs and source files before making changes.
+- When the user reports a bug, read `docs/bug-reporting.md` before writing a report or beginning bug triage.
+- Bug-reporting sessions should inspect the current session context, relevant docs, and likely source files before asking questions.
+- Bug-reporting sessions should ask focused required clarifying questions only for details not clear from context or code before creating `docs/bugs/*.md`.
+- When asked to fix, investigate, close, or follow up on a saved bug report, read `docs/bug-solving.md` before changing code.
+- Solved bug reports should be closed out in place first, then moved to `docs/bugs/solved/` with `git mv` when available.
 - Before editing files, briefly state the step being implemented.
 - After finishing a step, summarize what changed, how it was verified, and what should be inspected.
 - Do not continue automatically past a milestone or review checkpoint without user confirmation.
