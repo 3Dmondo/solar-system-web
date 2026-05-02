@@ -118,7 +118,7 @@ export function ExperienceScene({
         />
       ) : null}
       {layerVisibility.labels ? (
-        <BodyLabels bodies={visibleBodies} focusedBodyId={focusedBodyId} onSelect={onFocusBody} />
+        <BodyLabels bodies={visibleBodies} focusedBodyId={focusedBodyId} />
       ) : null}
       {sunBody ? <SunImpostorWrapper sunBody={sunBody} /> : null}
 

@@ -2,14 +2,15 @@ import { Html } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import { Group, Vector3 } from 'three';
-import type { BodyDefinition, BodyId } from '../domain/body';
+import type { BodyDefinition } from '../domain/body';
+import { BODY_LABEL_HTML_Z_INDEX_RANGE } from './bodyLabelLayering';
 
 /**
  * Visibility thresholds for body labels in pixels.
  * Labels appear when body is visible enough to need identification
  * but small enough that text is helpful.
  */
-export const LABEL_THRESHOLDS = {
+const LABEL_THRESHOLDS = {
   /** Hide label when body's screen-space radius exceeds this (too big, obvious what it is) */
   hideAbovePx: 80
 } as const;
@@ -22,7 +23,6 @@ const INDICATOR_SIZE_PX = 24;
 
 type BodyLabelProps = {
   body: BodyDefinition;
-  onSelect: (bodyId: BodyId) => void;
   /** Whether to show the label (controlled by parent) */
   visible?: boolean;
   /** Screen-space offset [x, y] in pixels for spreading apart overlapping labels */
@@ -37,11 +37,10 @@ const tempPosition = new Vector3();
 /**
  * A text label that follows a body in 3D space.
  * Rendered as HTML overlay positioned above the body or its indicator.
- * Selectable via click or tap to focus the body.
+ * Passive by design so labels do not compete with app chrome or scene hit targets.
  */
 export function BodyLabel({
   body,
-  onSelect,
   visible = true,
   screenOffset,
   occluded = false
@@ -105,16 +104,13 @@ export function BodyLabel({
     }
   }, -1); // Priority -1: run before Html's useFrame
 
-  const handleClick = () => {
-    onSelect(body.id);
-  };
-
   if (!visible || occluded) return null;
 
   return (
     <group ref={groupRef}>
       <Html
         center
+        zIndexRange={BODY_LABEL_HTML_Z_INDEX_RANGE}
         style={{
           pointerEvents: 'none',
           userSelect: 'none',
@@ -122,35 +118,32 @@ export function BodyLabel({
         }}
       >
         <div ref={htmlRef} style={{ display: 'block', pointerEvents: 'none' }}>
-          <button
-            onClick={handleClick}
-            className="body-label"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              padding: '4px 8px',
-              cursor: 'pointer',
-              color: '#fff',
-              fontSize: '12px',
-              fontFamily: 'system-ui, -apple-system, sans-serif',
-              fontWeight: 500,
-              textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
-              letterSpacing: '0.02em',
-              opacity: 0.9,
-              transition: 'opacity 0.15s ease',
-              pointerEvents: 'auto'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.opacity = '1';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.opacity = '0.9';
-            }}
-          >
-            {body.displayName}
-          </button>
+          <BodyLabelText displayName={body.displayName} />
         </div>
       </Html>
     </group>
+  );
+}
+
+export function BodyLabelText({ displayName }: { displayName: string }) {
+  return (
+    <div
+      className="body-label"
+      style={{
+        background: 'transparent',
+        border: 'none',
+        padding: '4px 8px',
+        color: '#fff',
+        fontSize: '12px',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        fontWeight: 500,
+        textShadow: '0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
+        letterSpacing: '0.02em',
+        opacity: 0.9,
+        pointerEvents: 'none'
+      }}
+    >
+      {displayName}
+    </div>
   );
 }

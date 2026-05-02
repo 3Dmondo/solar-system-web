@@ -1,6 +1,6 @@
 # Bug: Body Labels Overlap UI Controls
 
-Status: Reported
+Status: Resolved
 Date: 2026-05-02
 
 ## Summary
@@ -59,6 +59,37 @@ Likely a UI layering or label-avoidance issue between drei `Html` body labels an
 
 ## Open Questions
 
-- Which UI controls were overlapped: top-right rail, open selector panels, HUD, playback bar, or debug overlay?
-- Was the overlap observed on mobile, desktop, or both?
-- Does the label visually overlap only, or does it also intercept taps/clicks meant for the UI control?
+- Which UI controls were overlapped: top-right rail, open selector panels, HUD, playback bar, or debug overlay? Not isolated to a single control in this fix; the shared label stacking and pointer behavior was corrected for all app chrome.
+- Was the overlap observed on mobile, desktop, or both? Unknown from the original report; the fix applies across viewports.
+- Does the label visually overlap only, or does it also intercept taps/clicks meant for the UI control? Both risks were addressed: labels now sit below floating chrome and no longer expose clickable label controls.
+
+## Root Cause
+
+drei `Html` labels used the default high z-index range, which can place projected scene labels above the app's absolutely positioned floating chrome. The labels also rendered as clickable buttons with `pointerEvents: 'auto'`, so their DOM overlays could compete with nearby UI hit targets.
+
+## Fix Summary
+
+- Set body-label `Html` overlays to an explicit low z-index range below the floating HUD, selector rail, playback controls, fullscreen button, and debug overlay.
+- Changed body labels from clickable buttons to passive text annotations with pointer events disabled.
+- Removed the now-unused label selection prop flow from `BodyLabels` and `ExperienceScene`; bodies and indicators remain selectable.
+- Added regression coverage for the label layering contract and passive text rendering.
+
+## Changed Files
+
+- `src/features/solar-system/components/BodyLabel.tsx`
+- `src/features/solar-system/components/BodyLabels.tsx`
+- `src/features/solar-system/components/bodyLabelLayering.ts`
+- `src/features/solar-system/components/BodyLabel.test.tsx`
+- `src/features/experience/components/ExperienceScene.tsx`
+- `docs/architecture.md`
+
+## Verification
+
+- `pnpm vitest run src/features/solar-system/components/BodyLabel.test.tsx` passed.
+- `pnpm lint` passed with one existing warning in `src/features/solar-system/components/SunImpostor.tsx`.
+- `pnpm test` passed: 34 files, 172 tests.
+- `pnpm build` passed; Vite reported the existing large chunk warning.
+
+## Remaining Risks
+
+- This fix does not add dynamic screen-space exclusion zones around open panels; labels are instead layered beneath chrome and made non-interactive. If translucent panels still make underlying labels visually distracting, a later pass can hide labels inside measured UI exclusion rectangles.

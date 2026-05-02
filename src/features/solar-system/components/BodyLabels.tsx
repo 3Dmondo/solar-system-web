@@ -15,20 +15,18 @@ import { BodyLabel } from './BodyLabel';
 type BodyLabelsProps = {
   bodies: BodyDefinition[];
   focusedBodyId: ViewTargetId;
-  onSelect: (bodyId: BodyId) => void;
   visible?: boolean;
 };
 
 /**
  * Manages all body labels in the scene.
- * Labels are text overlays that help identify bodies at a glance.
+ * Labels are passive text overlays that help identify bodies at a glance.
  * Handles overlap detection: satellites occluded when overlapping parent,
  * same-level bodies (planets) spread apart.
  */
 export function BodyLabels({
   bodies,
   focusedBodyId,
-  onSelect,
   visible = true
 }: BodyLabelsProps) {
   const { computeOverlaps } = useLabelOverlap();
@@ -90,7 +88,6 @@ export function BodyLabels({
           <BodyLabel
             key={body.id}
             body={body}
-            onSelect={onSelect}
             visible={visibleBodyIds.has(body.id)}
             occluded={overlapResult?.occluded ?? false}
             screenOffset={overlapResult?.offset}

@@ -82,7 +82,7 @@
 ## Rendering Model
 
 - Body indicators render camera-facing ring billboards for bodies whose screen-space radius is below the visibility threshold (4 px). The indicators use a custom GLSL ring shader and smooth opacity transitions during zoom. Satellite indicators are additionally hidden in distant overview contexts when their projected separation from the parent planet is too small, but remain available in parent or satellite focused views.
-- Body labels render as HTML overlays using drei's `Html` component, positioned above each body. Labels auto-hide when the body is large on screen (> 80 px radius) and are clickable to focus the body. Satellite labels share the same parent-separation gate as indicators so global overviews stay readable while focused local-system views can still expose moon labels.
+- Body labels render as passive HTML overlays using drei's `Html` component, positioned above each body with a low z-index range beneath app chrome. Labels auto-hide when the body is large on screen (> 80 px radius), and satellite labels share the same parent-separation gate as indicators so global overviews stay readable while focused local-system views can still expose moon labels.
 - The Sun impostor is a camera-facing billboard with a radial-gradient shader that remains visible when the Sun sphere is too small to see. It blends opacity based on screen-space radius thresholds (appears below 15 px, full opacity below 3 px).
 - Post-processing uses `@react-three/postprocessing` for a subtle bloom effect on the Sun impostor.
 - Lighting uses custom world-space shaders on all planet materials. The scene has only a small ambient light for non-custom materials (e.g., orbit trails); there is no PointLight.
