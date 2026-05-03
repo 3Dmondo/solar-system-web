@@ -1,5 +1,12 @@
 import { EMPTY_RESOLVED_BODY_CATALOG, type ResolvedBodyCatalog } from '../data/bodyStateStore'
-import { type ViewTargetId } from './body';
+import {
+  getParentBody,
+  getSystemTargetParentBody,
+  isSystemTargetId,
+  type BodyDefinition,
+  type BodyId,
+  type ViewTargetId
+} from './body';
 
 export type FocusTransitionProfile = {
   cameraEasingRate: number;
@@ -22,6 +29,8 @@ const DEFAULT_OVERVIEW_CAMERA_DIRECTION = DEFAULT_OVERVIEW_CAMERA_POSITION.map(
 const BODY_FOCUS_DISTANCE_IN_RADII = 10;
 const STATIC_OVERVIEW_SCENE_RADIUS_THRESHOLD = 36;
 const OVERVIEW_FRAMING_PADDING = 1.08;
+const SYSTEM_FRAMING_PADDING = 1.25;
+const SYSTEM_MINIMUM_FOCUS_DISTANCE_MULTIPLIER = 1.6;
 const SATURN_VISIBLE_RADIUS_MULTIPLIER = 2.25;
 const MIN_CAMERA_NEAR = 0.01;
 const MIN_CAMERA_FAR = 100;
@@ -35,13 +44,22 @@ export function getFocusDistance(
     return getOverviewCameraDistance(catalog, aspect);
   }
 
-  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
+  if (isSystemTargetId(bodyId)) {
+    const parentBodyId = getSystemTargetParentBody(bodyId);
+    const parentFocusDistance = getBodyFocusDistance(parentBodyId, catalog);
+    const systemRadius = getSystemOverviewRadius(parentBodyId, catalog);
+    const systemFramingDistance = getFramingDistanceForRadius(
+      systemRadius * SYSTEM_FRAMING_PADDING,
+      aspect
+    );
 
-  if (!body) {
-    return Math.hypot(0, 2.2, 7.5);
+    return Math.max(
+      parentFocusDistance * SYSTEM_MINIMUM_FOCUS_DISTANCE_MULTIPLIER,
+      systemFramingDistance
+    );
   }
 
-  return body.radius * BODY_FOCUS_DISTANCE_IN_RADII;
+  return getBodyFocusDistance(bodyId, catalog);
 }
 
 export function getFocusTarget(
@@ -52,7 +70,9 @@ export function getFocusTarget(
     return [0, 0, 0];
   }
 
-  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
+  const targetBodyId = getTargetBodyId(bodyId);
+
+  const body = catalog.bodies.find((candidate) => candidate.id === targetBodyId);
 
   if (!body) {
     return [0, 0, 0];
@@ -76,7 +96,8 @@ export function getFocusCameraPosition(
     ];
   }
 
-  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
+  const targetBodyId = getTargetBodyId(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === targetBodyId);
 
   if (!body) {
     return [0, 2.2, 7.5];
@@ -102,7 +123,8 @@ export function getFocusCameraPositionForViewDirection(
     return getFocusCameraPosition('overview', catalog, aspect);
   }
 
-  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
+  const targetBodyId = getTargetBodyId(bodyId);
+  const body = catalog.bodies.find((candidate) => candidate.id === targetBodyId);
 
   if (!body) {
     return getFocusCameraPosition(bodyId, catalog);
@@ -174,6 +196,10 @@ export function getViewTargetVisibleRadius(
     return getSceneOverviewRadius(catalog);
   }
 
+  if (isSystemTargetId(bodyId)) {
+    return getSystemOverviewRadius(getSystemTargetParentBody(bodyId), catalog);
+  }
+
   const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
 
   if (!body) {
@@ -240,6 +266,48 @@ function getOverviewCameraDistance(
     return DEFAULT_OVERVIEW_CAMERA_DISTANCE;
   }
 
+  return Math.max(
+    DEFAULT_OVERVIEW_CAMERA_DISTANCE,
+    getFramingDistanceForRadius(sceneRadius * OVERVIEW_FRAMING_PADDING, aspect)
+  );
+}
+
+function getBodyFocusDistance(
+  bodyId: BodyId,
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
+) {
+  const body = catalog.bodies.find((candidate) => candidate.id === bodyId);
+
+  if (!body) {
+    return Math.hypot(0, 2.2, 7.5);
+  }
+
+  return body.radius * BODY_FOCUS_DISTANCE_IN_RADII;
+}
+
+function getSystemOverviewRadius(
+  parentBodyId: BodyId,
+  catalog: ResolvedBodyCatalog = EMPTY_RESOLVED_BODY_CATALOG
+) {
+  const parentBody = catalog.bodies.find((candidate) => candidate.id === parentBodyId);
+
+  if (!parentBody) {
+    return 0;
+  }
+
+  return catalog.bodies.reduce((maximumRadius, body) => {
+    if (body.id !== parentBodyId && getParentBody(body.id) !== parentBodyId) {
+      return maximumRadius;
+    }
+
+    const systemBodyRadius = getDistance(parentBody.position, body.position) +
+      getVisibleBodyRadius(body);
+
+    return Math.max(maximumRadius, systemBodyRadius);
+  }, getVisibleBodyRadius(parentBody));
+}
+
+function getFramingDistanceForRadius(radius: number, aspect: number) {
   const halfVerticalFieldOfView = (DEFAULT_CAMERA_FOV_DEGREES * Math.PI) / 360;
   const normalizedAspect = Number.isFinite(aspect) && aspect > 0 ? aspect : 1;
   const halfHorizontalFieldOfView = Math.atan(
@@ -250,17 +318,23 @@ function getOverviewCameraDistance(
     halfHorizontalFieldOfView
   );
 
-  if (!Number.isFinite(limitingHalfFieldOfView) || limitingHalfFieldOfView <= 0) {
+  if (
+    !Number.isFinite(radius) ||
+    radius <= 0 ||
+    !Number.isFinite(limitingHalfFieldOfView) ||
+    limitingHalfFieldOfView <= 0
+  ) {
     return DEFAULT_OVERVIEW_CAMERA_DISTANCE;
   }
 
-  return Math.max(
-    DEFAULT_OVERVIEW_CAMERA_DISTANCE,
-    (sceneRadius * OVERVIEW_FRAMING_PADDING) / Math.sin(limitingHalfFieldOfView)
-  );
+  return radius / Math.sin(limitingHalfFieldOfView);
 }
 
-function getVisibleBodyRadius(body: ResolvedBodyCatalog['bodies'][number]) {
+function getTargetBodyId(bodyId: Exclude<ViewTargetId, 'overview'>): BodyId {
+  return isSystemTargetId(bodyId) ? getSystemTargetParentBody(bodyId) : bodyId;
+}
+
+function getVisibleBodyRadius(body: BodyDefinition) {
   return body.hasRings ? body.radius * SATURN_VISIBLE_RADIUS_MULTIPLIER : body.radius;
 }
 

@@ -1,5 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { type BodyId } from '../solar-system/domain/body';
+import {
+  getBodyRegistryEntry,
+  getSystemTargetParentBody,
+  isSystemTargetId,
+  type ViewTargetId
+} from '../solar-system/domain/body';
 import { type ReferenceFrameId } from '../solar-system/domain/referenceFrame';
 import { type LayerId } from './state/useLayerVisibility';
 import { ExperienceControlRail } from './components/ExperienceControlRail';
@@ -29,7 +34,11 @@ import {
 import { useSimulationClock } from './state/useSimulationClock';
 import { SimulationClockContext } from './state/SimulationClockContext';
 import { setRuntimeDebugMetricsEnabled } from './debug/runtimeDebugMetrics';
-import { type BodyCatalogSource, type SupportedTimeRange } from '../solar-system/data/bodyStateStore';
+import {
+  type BodyCatalogSource,
+  type ResolvedBodyCatalog,
+  type SupportedTimeRange
+} from '../solar-system/data/bodyStateStore';
 import { transformCatalogToFrame } from '../solar-system/data/referenceFrameTransform';
 import { getReferenceFramesForLoadedBodies } from '../solar-system/domain/referenceFrame';
 
@@ -109,12 +118,9 @@ export function SolarSystemExperience({
     () => getReferenceFramesForLoadedBodies(baseCatalog.metadata.map((metadata) => metadata.id)),
     [baseCatalog.metadata]
   );
-  const focusedBodyDisplayName =
-    focusedBodyId === 'overview'
-      ? null
-      : catalog.metadata.find((metadata) => metadata.id === focusedBodyId)?.displayName ?? null;
+  const focusedBodyDisplayName = getFocusedTargetDisplayName(focusedBodyId, catalog);
   const focusedBodyFacts = getFocusedBodyFacts(
-    focusedBodyId === 'overview'
+    focusedBodyId === 'overview' || isSystemTargetId(focusedBodyId)
       ? null
       : catalog.metadata.find((metadata) => metadata.id === focusedBodyId)
   );
@@ -123,8 +129,8 @@ export function SolarSystemExperience({
       ? createRangeWarning(boundaryState, supportedTimeRange)
       : null;
 
-  const handleFocusBody = (bodyId: BodyId) => {
-    setFocusedBodyId(bodyId);
+  const handleFocusTarget = (targetId: ViewTargetId) => {
+    setFocusedBodyId(targetId);
   };
 
   const handleSelectFrame = (frameId: ReferenceFrameId) => {
@@ -194,7 +200,7 @@ export function SolarSystemExperience({
           availableFrames={availableFrames}
           visibility={visibility}
           layerConfigs={layerConfigs}
-          onFocusBody={handleFocusBody}
+          onFocusTarget={handleFocusTarget}
           onReturnToOverview={() => setFocusedBodyId('overview')}
           onSelectFrame={handleSelectFrame}
           onSetActivePanel={handleSetActiveControlPanel}
@@ -218,6 +224,22 @@ export function SolarSystemExperience({
       </main>
     </SimulationClockContext.Provider>
   );
+}
+
+function getFocusedTargetDisplayName(
+  focusedBodyId: ViewTargetId,
+  catalog: ResolvedBodyCatalog
+) {
+  if (focusedBodyId === 'overview') {
+    return null;
+  }
+
+  if (isSystemTargetId(focusedBodyId)) {
+    const parentBodyId = getSystemTargetParentBody(focusedBodyId);
+    return `${getBodyRegistryEntry(parentBodyId).displayName} system`;
+  }
+
+  return catalog.metadata.find((metadata) => metadata.id === focusedBodyId)?.displayName ?? null;
 }
 
 function createRangeWarning(

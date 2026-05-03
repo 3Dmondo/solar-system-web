@@ -410,7 +410,9 @@ export const BODY_REGISTRY = {
 
 export type BodyId = keyof typeof BODY_REGISTRY;
 
-export type ViewTargetId = BodyId | 'overview';
+export type SystemTargetId = `system:${BodyId}`;
+
+export type ViewTargetId = BodyId | 'overview' | SystemTargetId;
 
 export const BODY_IDS = Object.keys(BODY_REGISTRY) as BodyId[];
 
@@ -440,6 +442,61 @@ export function getBodyDiscoveryGroups(availableBodyIds: Iterable<BodyId>) {
   }
 
   return groups;
+}
+
+export type BodySystemTarget = {
+  id: SystemTargetId;
+  parentBodyId: BodyId;
+  label: string;
+  satelliteBodyIds: BodyId[];
+};
+
+export function getBodySystemTargets(availableBodyIds: Iterable<BodyId>): BodySystemTarget[] {
+  const availableBodyIdSet = new Set(availableBodyIds);
+
+  return BODY_IDS.flatMap((parentBodyId) => {
+    if (!availableBodyIdSet.has(parentBodyId) || isSatellite(parentBodyId)) {
+      return [];
+    }
+
+    const satelliteBodyIds = BODY_IDS.filter(
+      (bodyId) =>
+        availableBodyIdSet.has(bodyId) &&
+        isSatellite(bodyId) &&
+        getParentBody(bodyId) === parentBodyId
+    );
+
+    if (satelliteBodyIds.length === 0) {
+      return [];
+    }
+
+    return [
+      {
+        id: createSystemTargetId(parentBodyId),
+        parentBodyId,
+        label: `${getBodyRegistryEntry(parentBodyId).displayName} system`,
+        satelliteBodyIds
+      }
+    ];
+  });
+}
+
+export function createSystemTargetId(parentBodyId: BodyId): SystemTargetId {
+  return `system:${parentBodyId}`;
+}
+
+export function isSystemTargetId(targetId: ViewTargetId): targetId is SystemTargetId {
+  return typeof targetId === 'string' && targetId.startsWith('system:');
+}
+
+export function getSystemTargetParentBody(targetId: SystemTargetId): BodyId {
+  const parentBodyId = targetId.slice('system:'.length) as BodyId;
+
+  if (!BODY_IDS.includes(parentBodyId)) {
+    throw new Error(`Unknown system target: ${targetId}`);
+  }
+
+  return parentBodyId;
 }
 
 const bodyIdsByNaifId = new Map<number, BodyId>(

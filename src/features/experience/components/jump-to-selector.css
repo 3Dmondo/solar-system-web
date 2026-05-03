@@ -89,6 +89,7 @@
 }
 
 .jump-to-selector__overview,
+.jump-to-selector__system-target,
 .jump-to-selector__target {
   display: flex;
   align-items: center;
@@ -112,9 +113,16 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.jump-to-selector__system-target {
+  margin-bottom: 0.35rem;
+  background: rgba(117, 168, 255, 0.08);
+}
+
 .jump-to-selector__overview:hover:not(:disabled),
+.jump-to-selector__system-target:hover,
 .jump-to-selector__target:hover,
 .jump-to-selector__overview[aria-pressed="true"],
+.jump-to-selector__system-target[aria-pressed="true"],
 .jump-to-selector__target[aria-pressed="true"] {
   background: rgba(255, 255, 255, 0.065);
   border-color: rgba(255, 255, 255, 0.08);
@@ -125,6 +133,7 @@
 }
 
 .jump-to-selector__overview:focus-visible,
+.jump-to-selector__system-target:focus-visible,
 .jump-to-selector__target:focus-visible,
 .jump-to-selector__close:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.5);

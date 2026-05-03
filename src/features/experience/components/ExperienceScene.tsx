@@ -18,8 +18,10 @@ import { type LayerVisibility } from '../state/useLayerVisibility';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import {
   getTidalLockTargetBody,
+  getSystemTargetParentBody,
   isSatellite,
   isStar,
+  isSystemTargetId,
   type BodyId,
   type ViewTargetId
 } from '../../solar-system/domain/body';
@@ -71,6 +73,9 @@ export function ExperienceScene({
   const visibleTrails = layerVisibility.satellites
     ? catalog.snapshot.trails
     : catalog.snapshot.trails.filter((trail) => !isSatellite(trail.id));
+  const selectedBodyId = isSystemTargetId(focusedBodyId)
+    ? getSystemTargetParentBody(focusedBodyId)
+    : focusedBodyId;
   const sunBody = bodies.find((body) => isStar(body.id));
   const sunPosition = sunBody?.position ?? [0, 0, 0];
   const getTidalLockTargetPosition = (bodyId: BodyId) => {
@@ -113,12 +118,12 @@ export function ExperienceScene({
       {layerVisibility.bodyIndicators ? (
         <BodyIndicators
           bodies={visibleBodies}
-          focusedBodyId={focusedBodyId}
+          focusedBodyId={selectedBodyId}
           onSelect={onFocusBody}
         />
       ) : null}
       {layerVisibility.labels ? (
-        <BodyLabels bodies={visibleBodies} focusedBodyId={focusedBodyId} />
+        <BodyLabels bodies={visibleBodies} focusedBodyId={selectedBodyId} />
       ) : null}
       {sunBody ? <SunImpostorWrapper sunBody={sunBody} /> : null}
 
@@ -126,7 +131,7 @@ export function ExperienceScene({
         <PlanetBody
           key={body.id}
           body={body}
-          focused={body.id === focusedBodyId}
+          focused={body.id === selectedBodyId}
           onSelect={onFocusBody}
           sunPosition={sunPosition}
           tidalLockTargetPosition={getTidalLockTargetPosition(body.id)}

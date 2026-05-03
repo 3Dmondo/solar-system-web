@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { type BodyId, type ViewTargetId } from '../../solar-system/domain/body';
+import { type ViewTargetId } from '../../solar-system/domain/body';
 import { type ResolvedBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { type ReferenceFrame, type ReferenceFrameId } from '../../solar-system/domain/referenceFrame';
 import { type LayerConfig, type LayerId, type LayerVisibility } from '../state/useLayerVisibility';
@@ -19,7 +19,7 @@ type ExperienceControlRailProps = {
   layerConfigs: LayerConfig[];
   selectedFrameId: ReferenceFrameId;
   visibility: LayerVisibility;
-  onFocusBody: (bodyId: BodyId) => void;
+  onFocusTarget: (targetId: ViewTargetId) => void;
   onReturnToOverview: () => void;
   onSelectFrame: (frameId: ReferenceFrameId) => void;
   onSetActivePanel: (panel: ExperiencePopoverPanel | null) => void;
@@ -36,7 +36,7 @@ export function ExperienceControlRail({
   layerConfigs,
   selectedFrameId,
   visibility,
-  onFocusBody,
+  onFocusTarget,
   onReturnToOverview,
   onSelectFrame,
   onSetActivePanel,
@@ -147,7 +147,7 @@ export function ExperienceControlRail({
         focusedBodyId={focusedBodyId}
         isExpanded={activePanel === 'jump'}
         onClose={closePanel}
-        onFocusBody={onFocusBody}
+        onFocusTarget={onFocusTarget}
         onReturnToOverview={onReturnToOverview}
         onToggleExpanded={() => togglePanel('jump')}
       />

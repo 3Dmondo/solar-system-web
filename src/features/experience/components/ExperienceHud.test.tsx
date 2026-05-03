@@ -39,6 +39,21 @@ describe('ExperienceHud', () => {
     expect(screen.queryByRole('button', { name: /overview/i })).not.toBeInTheDocument();
   });
 
+  it('shows planetary system state without focused body facts', () => {
+    render(
+      <ExperienceHud
+        catalogError={null}
+        catalogStatus="ready"
+        focusedBodyId="system:jupiter"
+        focusedBodyDisplayName="Jupiter system"
+      />
+    );
+
+    expect(screen.getByText('Jupiter system')).toBeInTheDocument();
+    expect(screen.getByText(/planetary system view/i)).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /focused body facts/i })).not.toBeInTheDocument();
+  });
+
   it('exposes a close action when the shell owns HUD visibility', async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();

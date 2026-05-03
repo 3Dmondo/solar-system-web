@@ -4,15 +4,19 @@ import {
   BODY_JUMP_GROUPS,
   BODY_REGISTRY,
   BODY_SYSTEM_GROUPS,
+  createSystemTargetId,
   getBodyDiscoveryGroups,
+  getBodySystemTargets,
   getBodyCategory,
   getBodyRegistryEntry,
   getTidalLockTargetBody,
   getBodyIdForNaifBodyId,
   getNaifBodyId,
   getParentBody,
+  getSystemTargetParentBody,
   isStar,
-  isSatellite
+  isSatellite,
+  isSystemTargetId
 } from './body';
 
 describe('body registry', () => {
@@ -156,5 +160,23 @@ describe('body registry', () => {
         bodyIds: ['mars', 'jupiter']
       }
     ]);
+  });
+
+  it('derives selectable system targets only from loaded parent-satellite pairs', () => {
+    expect(getBodySystemTargets(['sun', 'jupiter', 'ganymede', 'callisto', 'saturn'])).toEqual([
+      {
+        id: 'system:jupiter',
+        parentBodyId: 'jupiter',
+        label: 'Jupiter system',
+        satelliteBodyIds: ['ganymede', 'callisto']
+      }
+    ]);
+
+    expect(getBodySystemTargets(['ganymede', 'callisto'])).toEqual([]);
+    expect(getBodySystemTargets(['jupiter'])).toEqual([]);
+    expect(createSystemTargetId('saturn')).toBe('system:saturn');
+    expect(isSystemTargetId('system:saturn')).toBe(true);
+    expect(isSystemTargetId('saturn')).toBe(false);
+    expect(getSystemTargetParentBody('system:saturn')).toBe('saturn');
   });
 });

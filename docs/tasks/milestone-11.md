@@ -1,6 +1,6 @@
 # Milestone 11: Full Solar System Explorer
 
-Status: In Progress
+Status: Complete
 
 ## Start Point
 
@@ -50,6 +50,8 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Closed Phase 4 after the HUD, selector, playback, and ephemeris-range UX redesign passed automated validation and user inspection. A focused local-system affordance remains deferred to Phase 6.
 - Implemented the Phase 5 lightweight educational context pass: focused bodies now show a read-only facts drawer with two short Wikipedia-sourced description paragraphs plus generated physical radius, gravity, density when available, and concise provenance.
 - Closed Phase 5 with quizzes, tours, and long-form encyclopedia pages still deferred.
+- Implemented the Phase 6 selectable planetary-system view pass: loaded parent-satellite systems now appear as first-class `Jump to` rows that keep the current reference frame, target the parent planet, and land far enough back to frame the loaded satellites.
+- Closed Milestone 11 after user inspection accepted the selectable planetary-system view pass.
 - Deferred deeper generated-data optimization, including smaller chunks and alternate file formats, to Milestone 13 rather than keeping it in Milestone 11.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, the GitHub Pages deployment starts in about `4` seconds, and chunk-size or file-format optimization is deferred to Milestone 13.
 
@@ -277,7 +279,7 @@ Status: Closed. The HUD is now an information panel about the current view, whil
 - [x] Move the help button to the top right near the fullscreen control.
 - [x] Keep the main HUD as an informative panel about the current target or overview, not as the primary home for selectors and playback controls.
 - [x] Verify direct body picking, labels, indicators, and jump-menu focus still work for retained major moons after the selector redesign.
-- [x] Consider a focused-system affordance that exposes a parent planet plus retained moons without forcing users through the full global list. Deferred to Phase 6 local-system focus work.
+- [x] Consider a focused-system affordance that exposes a parent planet plus retained moons without forcing users through the full global list. Delivered in Phase 6 as selectable planetary-system rows in `Jump to`.
 
 ### Phase 5: Lower-Priority Educational Context Proposal
 
@@ -288,18 +290,25 @@ Status: Closed. Focused bodies now have a read-only facts drawer with generated 
 - [x] Keep the first pass read-only and lightweight.
 - [x] Defer quizzes, tours, and long-form encyclopedia pages.
 
-### Phase 6: Lower-Priority Richer Exploration Proposal
+### Phase 6: Selectable Planetary System Views
 
-- [ ] Add dynamic system views for loaded parent bodies with satellites, starting with Jupiter and Saturn.
+Status: Closed. The richer exploration pass stayed intentionally small: system views are selectable targets in `Jump to`, not a separate reference-frame or scale mode.
+
+- [x] Add selectable system targets for loaded parent bodies with satellites, starting with Jupiter and Saturn as the main acceptance targets.
 - [x] Let the reference-frame selector offer relevant loaded body-centered frames instead of only SSB and Earth.
-- [ ] Add a local-system focus mode that makes moons, local trails, and parent-relative motion easier to inspect without changing the global overview default.
+- [x] Keep reference-frame selection unchanged when a system target is selected.
+- [x] Add a local-system camera target that centers the parent planet and lands far enough back to frame the loaded satellites.
+- [x] Preserve existing satellite labels, indicators, trails, and layer behavior.
 
 ### Phase 7: Docs And Closeout
 
+Status: Closed. Milestone 11 is complete; remaining fast-moon cadence and data-format work is deferred to Milestone 13, with optional rendering validation tracked separately.
+
 - [x] Update `docs/architecture.md` after the registry, generated-data contract, runtime behavior, or UI model changes.
-- [x] Update `docs/roadmap.md` when Milestone 11 moves from planned to in progress or when delivered scope changes.
+- [x] Update `docs/roadmap.md` when Milestone 11 moves from planned to in progress, complete, or when delivered scope changes.
 - [x] Keep documentation aligned as Phase 4 changes the HUD, selectors, and playback controls.
 - [x] Document any deferred body categories or exploration features explicitly.
+- [x] Close Milestone 11 after Phase 6 user inspection.
 
 ## Verification
 
@@ -315,6 +324,7 @@ Status: Closed. Focused bodies now have a read-only facts drawer with generated 
    - existing Sun, planets, and Moon behavior is unchanged
    - retained major moons appear, can be focused, and have parent-relative trails
    - jump menu remains usable with the larger catalog
+   - selectable planetary-system rows frame loaded parent-satellite systems without changing the reference frame
    - expanded generated assets stay acceptable for static GitHub Pages delivery
 
 ## Locked Decisions

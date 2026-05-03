@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import {
+  getBodySystemTargets,
   getBodyDiscoveryGroups,
   type BodyId,
   type ViewTargetId
@@ -12,7 +13,7 @@ type JumpToSelectorProps = {
   focusedBodyId: ViewTargetId;
   isExpanded: boolean;
   onClose: () => void;
-  onFocusBody: (bodyId: BodyId) => void;
+  onFocusTarget: (targetId: ViewTargetId) => void;
   onReturnToOverview: () => void;
   onToggleExpanded: () => void;
 };
@@ -22,13 +23,21 @@ export function JumpToSelector({
   focusedBodyId,
   isExpanded,
   onClose,
-  onFocusBody,
+  onFocusTarget,
   onReturnToOverview,
   onToggleExpanded
 }: JumpToSelectorProps) {
-  const jumpGroups = useMemo(
-    () => getBodyDiscoveryGroups(catalog.metadata.map((metadata) => metadata.id)),
+  const availableBodyIds = useMemo(
+    () => catalog.metadata.map((metadata) => metadata.id),
     [catalog.metadata]
+  );
+  const jumpGroups = useMemo(
+    () => getBodyDiscoveryGroups(availableBodyIds),
+    [availableBodyIds]
+  );
+  const systemTargets = useMemo(
+    () => getBodySystemTargets(availableBodyIds),
+    [availableBodyIds]
   );
   const showingOverview = focusedBodyId === 'overview';
 
@@ -40,8 +49,8 @@ export function JumpToSelector({
     onClose();
   };
 
-  const handleFocusBody = (bodyId: BodyId) => {
-    onFocusBody(bodyId);
+  const handleFocusTarget = (targetId: ViewTargetId) => {
+    onFocusTarget(targetId);
     onClose();
   };
 
@@ -101,6 +110,12 @@ export function JumpToSelector({
               aria-label={group.label}
             >
               <div className="jump-to-selector__group-label">{group.label}</div>
+              <SystemTargetRow
+                focusedBodyId={focusedBodyId}
+                groupBodyIds={group.bodyIds}
+                systemTargets={systemTargets}
+                onFocusTarget={handleFocusTarget}
+              />
               <div className="jump-to-selector__list">
                 {group.bodyIds.map((bodyId) => {
                   const targetBody = catalog.metadata.find((body) => body.id === bodyId);
@@ -118,7 +133,7 @@ export function JumpToSelector({
                       aria-pressed={isSelected}
                       className="jump-to-selector__target"
                       type="button"
-                      onClick={() => handleFocusBody(targetBody.id)}
+                      onClick={() => handleFocusTarget(targetBody.id)}
                     >
                       <span>{targetBody.displayName}</span>
                       {isSelected ? (
@@ -135,6 +150,45 @@ export function JumpToSelector({
         </div>
       ) : null}
     </div>
+  );
+}
+
+function SystemTargetRow({
+  focusedBodyId,
+  groupBodyIds,
+  systemTargets,
+  onFocusTarget
+}: {
+  focusedBodyId: ViewTargetId;
+  groupBodyIds: BodyId[];
+  systemTargets: ReturnType<typeof getBodySystemTargets>;
+  onFocusTarget: (targetId: ViewTargetId) => void;
+}) {
+  const systemTarget = systemTargets.find((candidate) =>
+    candidate.satelliteBodyIds.some((bodyId) => groupBodyIds.includes(bodyId))
+  );
+
+  if (!systemTarget) {
+    return null;
+  }
+
+  const isSelected = focusedBodyId === systemTarget.id;
+
+  return (
+    <button
+      aria-label={`Jump to ${systemTarget.label}`}
+      aria-pressed={isSelected}
+      className="jump-to-selector__system-target"
+      type="button"
+      onClick={() => onFocusTarget(systemTarget.id)}
+    >
+      <span>{systemTarget.label}</span>
+      {isSelected ? (
+        <span className="jump-to-selector__selected-mark" aria-hidden="true">
+          <CheckIcon />
+        </span>
+      ) : null}
+    </button>
   );
 }
 

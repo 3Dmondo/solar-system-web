@@ -80,6 +80,28 @@ const physicallyScaledCatalog: ResolvedBodyCatalog = {
   ]
 };
 
+const jupiterSystemCatalog = resolveBodyCatalog(
+  presentationBodyMetadata,
+  {
+    capturedAt: '2026-04-22T00:00:00.000Z',
+    bodies: [
+      {
+        id: 'jupiter',
+        position: [1000, 0, 0]
+      },
+      {
+        id: 'ganymede',
+        position: [1120, 0, 0]
+      },
+      {
+        id: 'callisto',
+        position: [1000, 0, 220]
+      }
+    ],
+    trails: []
+  }
+);
+
 describe('focus helpers', () => {
   it('returns the selected body position as the focus target', () => {
     expect(getFocusTarget('earth', focusCatalog)).toEqual([100, 0, 50])
@@ -109,6 +131,41 @@ describe('focus helpers', () => {
 
   it('returns a focus distance based on the configured body-radius multiplier', () => {
     expect(getFocusDistance('earth', focusCatalog)).toBeCloseTo(7.2, 9)
+  });
+
+  it('targets the parent body for a planetary system view', () => {
+    expect(getFocusTarget('system:jupiter', jupiterSystemCatalog)).toEqual([1000, 0, 0]);
+  });
+
+  it('frames the loaded satellites from farther away than a normal body focus', () => {
+    const aspect = 16 / 9;
+    const systemDistance = getFocusDistance('system:jupiter', jupiterSystemCatalog, aspect);
+    const bodyDistance = getFocusDistance('jupiter', jupiterSystemCatalog, aspect);
+    const halfVerticalFieldOfView = (40 * Math.PI) / 360;
+    const halfHorizontalFieldOfView = Math.atan(Math.tan(halfVerticalFieldOfView) * aspect);
+    const limitingHalfFieldOfView = Math.min(halfVerticalFieldOfView, halfHorizontalFieldOfView);
+    const framedRadius = systemDistance * Math.sin(limitingHalfFieldOfView);
+
+    expect(systemDistance).toBeGreaterThan(bodyDistance);
+    expect(framedRadius).toBeGreaterThanOrEqual((220 + 0.22) * 1.25);
+  });
+
+  it('uses the parent focus direction for planetary system camera positions', () => {
+    const cameraPosition = getFocusCameraPosition('system:jupiter', jupiterSystemCatalog, 16 / 9);
+    const systemDistance = getFocusDistance('system:jupiter', jupiterSystemCatalog, 16 / 9);
+    const jupiterFocusOffset = presentationBodyMetadata.find((body) => body.id === 'jupiter')!
+      .focusOffset;
+    const focusOffsetLength = Math.hypot(...jupiterFocusOffset);
+
+    expect(cameraPosition[0]).toBeCloseTo(1000, 9);
+    expect(cameraPosition[1]).toBeCloseTo(
+      systemDistance * (jupiterFocusOffset[1] / focusOffsetLength),
+      6
+    );
+    expect(cameraPosition[2]).toBeCloseTo(
+      systemDistance * (jupiterFocusOffset[2] / focusOffsetLength),
+      6
+    );
   });
 
   it('preserves the current view direction when deriving a focused camera position', () => {

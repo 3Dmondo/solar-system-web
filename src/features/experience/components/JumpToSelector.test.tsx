@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { JumpToSelector } from './JumpToSelector';
 import { resolveBodyCatalog } from '../../solar-system/data/bodyStateStore';
 import { presentationBodyMetadata } from '../../solar-system/data/bodyPresentation';
+import { type BodyId } from '../../solar-system/domain/body';
 
 describe('JumpToSelector', () => {
   afterEach(() => {
@@ -29,7 +30,7 @@ describe('JumpToSelector', () => {
         focusedBodyId="overview"
         isExpanded
         onClose={vi.fn()}
-        onFocusBody={vi.fn()}
+        onFocusTarget={vi.fn()}
         onReturnToOverview={vi.fn()}
         onToggleExpanded={vi.fn()}
       />
@@ -52,7 +53,7 @@ describe('JumpToSelector', () => {
         focusedBodyId="overview"
         isExpanded
         onClose={onClose}
-        onFocusBody={onFocusBody}
+        onFocusTarget={onFocusBody}
         onReturnToOverview={vi.fn()}
         onToggleExpanded={vi.fn()}
       />
@@ -75,7 +76,7 @@ describe('JumpToSelector', () => {
         focusedBodyId="saturn"
         isExpanded
         onClose={onClose}
-        onFocusBody={vi.fn()}
+        onFocusTarget={vi.fn()}
         onReturnToOverview={onReturnToOverview}
         onToggleExpanded={vi.fn()}
       />
@@ -86,4 +87,97 @@ describe('JumpToSelector', () => {
     expect(onReturnToOverview).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('shows selectable system rows for loaded parent-satellite systems', () => {
+    render(
+      <JumpToSelector
+        catalog={catalog}
+        focusedBodyId="overview"
+        isExpanded
+        onClose={vi.fn()}
+        onFocusTarget={vi.fn()}
+        onReturnToOverview={vi.fn()}
+        onToggleExpanded={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Jump to Jupiter system' }))
+      .toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Jump to Saturn system' }))
+      .toBeInTheDocument();
+  });
+
+  it('selects a system target and closes the panel', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    const onFocusTarget = vi.fn();
+
+    render(
+      <JumpToSelector
+        catalog={catalog}
+        focusedBodyId="overview"
+        isExpanded
+        onClose={onClose}
+        onFocusTarget={onFocusTarget}
+        onReturnToOverview={vi.fn()}
+        onToggleExpanded={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Jump to Jupiter system' }));
+
+    expect(onFocusTarget).toHaveBeenCalledWith('system:jupiter');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show system rows without a loaded parent and satellite pair', () => {
+    const partialCatalog = createCatalogForBodyIds(['sun', 'jupiter', 'ganymede']);
+    const missingParentCatalog = createCatalogForBodyIds(['ganymede']);
+
+    const { rerender } = render(
+      <JumpToSelector
+        catalog={partialCatalog}
+        focusedBodyId="overview"
+        isExpanded
+        onClose={vi.fn()}
+        onFocusTarget={vi.fn()}
+        onReturnToOverview={vi.fn()}
+        onToggleExpanded={vi.fn()}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Jump to Jupiter system' }))
+      .toBeInTheDocument();
+
+    rerender(
+      <JumpToSelector
+        catalog={missingParentCatalog}
+        focusedBodyId="overview"
+        isExpanded
+        onClose={vi.fn()}
+        onFocusTarget={vi.fn()}
+        onReturnToOverview={vi.fn()}
+        onToggleExpanded={vi.fn()}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: 'Jump to Jupiter system' }))
+      .not.toBeInTheDocument();
+  });
 });
+
+function createCatalogForBodyIds(bodyIds: BodyId[]) {
+  const metadata = presentationBodyMetadata.filter((body) => bodyIds.includes(body.id));
+
+  return resolveBodyCatalog(
+    metadata,
+    {
+      capturedAt: '2000-01-01T12:00:00.000Z',
+      bodies: metadata.map((body, index) => ({
+        id: body.id,
+        position: [index * 10, 0, 0] as [number, number, number]
+      })),
+      trails: []
+    }
+  );
+}

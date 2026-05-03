@@ -1,4 +1,4 @@
-import { type ViewTargetId } from '../../solar-system/domain/body';
+import { isSystemTargetId, type ViewTargetId } from '../../solar-system/domain/body';
 import { type FocusedBodyFacts } from '../domain/bodyFacts';
 import { type ResolvedBodyCatalogStatus } from '../state/useResolvedBodyCatalog';
 import './experience-hud.css';
@@ -27,6 +27,7 @@ export function ExperienceHud({
   onClose
 }: ExperienceHudProps) {
   const showingOverview = focusedBodyId === 'overview';
+  const showingSystem = isSystemTargetId(focusedBodyId);
   const statusMessage =
     rangeWarning
       ? null
@@ -52,7 +53,9 @@ export function ExperienceHud({
       <div className="experience-hud__subtitle">
         {showingOverview
           ? 'Interactive solar system overview'
-          : 'Focused body view'}
+          : showingSystem
+            ? 'Planetary system view'
+            : 'Focused body view'}
       </div>
       {statusMessage ? (
         <div className="experience-hud__status" aria-live="polite">
