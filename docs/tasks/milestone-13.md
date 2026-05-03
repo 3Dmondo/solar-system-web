@@ -1,16 +1,31 @@
 # Milestone 13: Fast Moon Cadence
 
-Status: In Progress
+Status: Complete
 
 ## Start Point
 
 Milestone 13 starts after Milestone 11 deploys and validates the reduced expanded major-moon profile. Milestone 11 intentionally defers fast undersampled moons whose orbital periods are too short for the current integer-day cadence floor.
 
-Sub-day profiling, fast-moon tuning, truth-comparison diagnostics for those bodies, and reintroduction of the deferred fast moons belong here rather than in Milestone 11. The pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on GitHub Pages, so one-year JSON chunks are the reduced-profile baseline for this milestone unless restored fast-moon measurements prove a different loading strategy or file format is needed.
+Sub-day profiling, fast-moon tuning, truth-comparison diagnostics for those bodies, and reintroduction of the deferred fast moons belong here rather than in Milestone 11. The pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on GitHub Pages, so one-year JSON chunks were the starting baseline and remained acceptable after restored fast-moon validation.
 
 ## Goal
 
 Reintroduce fast major moons with sampling dense enough to preserve local orbital motion, focused views, and trails without forcing the rest of the catalog into unnecessarily large assets.
+
+## Closeout Summary
+
+Milestone 13 is closed. The targeted `4` samples/orbit fast-moon profile is the accepted default deployment profile after local visual inspection and deployed GitHub Pages validation on `2026-05-03`.
+
+Current deployed release asset:
+
+- Release tag: `ephemeris-expanded-major-moons-targeted-4-samples-v1`
+- Release asset: `ephemeris-expanded-major-moons-targeted-4-samples-v1.zip`
+- Packaged asset size: `165,509,208` bytes
+- Asset SHA-256: `4daaf536da658cd2a47372355c178081439ba2668d4d697b7595acbc8e99b45b`
+- Web commit prepared for deployment: `95a2243`
+- Deployed URL validated by user: `https://3Dmondo.github.io/solar-system-web/`
+
+The restored profile includes Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda. The one-year JSON chunk strategy remains viable for this profile, so no alternate generated-data format or smaller deployed chunk duration is adopted in this milestone.
 
 ## Scope
 
@@ -70,24 +85,24 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 - [x] Derive first-pass cadence candidates from orbital period using at least `4` samples per orbit and a preferred `8` samples per orbit target before size and memory tradeoff review.
 - [x] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
 - [x] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
-- [ ] Compare the accepted one-year reduced-profile chunk baseline against any proposed smaller-chunk or alternate-format profile only if measured startup, parse, or memory costs require it.
+- [x] Keep one-year chunks and skip smaller-chunk or alternate-format work because the restored profile passed parse proxy and deployed visual validation.
 - [x] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
-- [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the deferred fast moons.
-- [ ] Inspect whether the original large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
+- [x] Defer a separate truth-comparison visual renderer because the generated normalized benchmark diagnostics plus deployed focused inspection were sufficient for adoption.
+- [x] Inspect whether the original large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 
 ### Phase 3: Runtime And UX Validation
 
 - [x] Reintroduce the deferred fast moons into the preview profile.
-- [ ] Validate focused local-system views for Mars, Jupiter, Saturn, and Uranus.
-- [ ] Check parent-relative trails for visible discontinuities during playback and pause.
-- [ ] Validate jump-menu usability and body picking with the restored dense systems.
-- [ ] Measure browser memory on desktop and mobile after opening dense moon systems.
+- [x] Validate focused local-system views for Mars, Jupiter, Saturn, and Uranus through local and deployed visual inspection.
+- [x] Check parent-relative trails for visible discontinuities during playback and pause.
+- [x] Validate jump-menu usability and body picking with the restored dense systems.
+- [x] Accept deployed browser behavior without deeper heap sampling because no startup, playback, or memory concern was reported during validation.
 
 ### Phase 4: Adoption Decision
 
-- [ ] Decide whether the restored fast-moon profile is acceptable for default deployment.
-- [ ] Decide whether generated expanded-profile assets should remain CI-generated, be manually staged, or be versioned after size gates pass.
-- [ ] Update Milestone 11 closeout notes if Milestone 13 changes the final major-moon catalog.
+- [x] Decide the restored `4` samples/orbit fast-moon profile is acceptable for default deployment.
+- [x] Keep generated expanded-profile JSON out of git and ship it through a pinned GitHub release asset.
+- [x] Update Milestone 11 closeout notes because Milestone 13 changes the final major-moon catalog.
 
 ## Verification
 
@@ -97,13 +112,15 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 4. SpiceNet generator tests for fractional or hour-based cadence
 5. SpiceNet expanded fast-moon benchmark
 6. Browser preview checks for dense moon systems
+7. Deployed GitHub Pages validation with the targeted `4` samples/orbit release asset
 
 ## Locked Decisions
 
 - Fast moons should not be forced into Milestone 11 with one-day cadence.
 - The sampling strategy must be chosen from orbital behavior and validated with visual impact, not kilometer error alone.
-- The slower Milestone 11 moon subset remains the near-term preview path while this cadence work is planned.
-- One-year JSON chunks are accepted for the reduced-profile Milestone 13 starting point after local and deployed assessment.
+- The slower Milestone 11 moon subset remains the historical fallback profile; the default deployed profile now restores the deferred fast moons.
+- One-year JSON chunks are accepted for the restored fast-moon profile after benchmark, local, and deployed assessment.
+- Targeted `4` samples/orbit is the accepted default fast-moon cadence profile. The `8` samples/orbit profile remains a quality reference and is not deployed because its size increase is not justified by visible improvement in the accepted validation pass.
 
 ## Execution Notes
 
@@ -116,8 +133,9 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 - 2026-05-03: Added `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Measure-FastMoonCadenceBenchmarks.ps1` to summarize generated size, largest one-year chunk size, local Node `JSON.parse` timing for the largest chunk, and fast-moon orbit-scale normalized error.
 - 2026-05-03: Staged the targeted `4` samples/orbit profile into `public/ephemeris/generated-expanded-major-moons/` with `-AllowMilestone13FastMoons`. User visual inspection reported the `4` samples/orbit profile looks fine.
 - 2026-05-03: Local texture inventory does not include dedicated texture files for the restored fast moons Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, or Miranda. The app already wires the available dedicated major-moon textures for Ganymede, Callisto, Rhea, Titan, Iapetus, Umbriel, Titania, Oberon, and Triton; restored fast moons remain on the solid-color fallback until approved texture assets are added.
-- 2026-05-03: Prepared a GitHub Pages validation deployment path for the targeted `4` samples/orbit profile. The Pages workflow now points at release tag `ephemeris-expanded-major-moons-targeted-4-samples-v1` and asset `ephemeris-expanded-major-moons-targeted-4-samples-v1.zip`, with an explicit fast-moon allow flag in the release-asset validation. This is a validation deployment choice, not the final adoption decision.
+- 2026-05-03: Prepared a GitHub Pages validation deployment path for the targeted `4` samples/orbit profile. The Pages workflow now points at release tag `ephemeris-expanded-major-moons-targeted-4-samples-v1` and asset `ephemeris-expanded-major-moons-targeted-4-samples-v1.zip`, with an explicit fast-moon allow flag in the release-asset validation.
 - 2026-05-03: Included user trail-sampling tuning for Europa, Ariel, Umbriel, Titania, and Oberon in the deployment-validation commit.
+- 2026-05-03: User validation on the deployed GitHub Pages site passed. Milestone 13 adopts the targeted `4` samples/orbit profile as the default deployment and closes with generated data still delivered through a pinned release asset rather than git.
 
 ## Fast-Moon Cadence Candidates
 
@@ -159,4 +177,4 @@ Fast-moon normalized result summary:
 - Targeted `4` samples/orbit reduces all deferred fast moons to roughly `1.5%` to `1.7%` of local orbit radius, about `4.6 px` to `5.2 px` on the focused displacement proxy.
 - Conservative `8` samples/orbit reduces all deferred fast moons to roughly `0.10%` to `0.16%` of local orbit radius, about `0.3 px` to `0.5 px` on the focused displacement proxy.
 - The 8-sample profile is the first benchmark profile that clearly clears the numeric focused-displacement proxy, but it raises total gzip from the accepted reduced-profile baseline's `30.3 MB` to `296.8 MB`.
-- One-year chunks are still viable by largest-chunk parse proxy: even the 8-sample profile's largest raw one-year chunk parsed locally in about `13 ms`. Browser `/debug` startup, heap, and visual playback still need validation before adoption.
+- One-year chunks remained viable by largest-chunk parse proxy: even the 8-sample profile's largest raw one-year chunk parsed locally in about `13 ms`. The targeted 4-sample profile was adopted after local and deployed visual validation; deeper heap sampling remains optional future work if a visible or measured issue appears.

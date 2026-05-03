@@ -37,7 +37,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Ran the reduced-profile chunk-duration size benchmark for `25`, `10`, `5`, and `1` year chunks; browser parse time, request behavior, and cache churn are postponed to Milestone 13 if the deployed or restored fast-moon profile needs it.
 - Tuned runtime chunk prefetch and cache budgeting so reduced-profile previews can keep the active chunk, next chunk, and loaded-catalog trail-history chunks ready without relying on the old fixed two-previous-chunk assumption.
 - Added debug-only browser timing hooks for manifest load, metadata load, chunk JSON load, chunk parse, and JS heap display so the user-run reduced preview can record startup, prefetch, boundary, and memory observations without adopting generated assets.
-- The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation.
+- The expanded preview staging helper now defaults to the reduced `SpiceNet` output and refuses to stage the Milestone 13 fast-moon ids unless explicitly overridden; Milestone 13 later used that override for the restored fast-moon profile.
 - Added provider-level coverage that verifies satellite trails are sampled relative to their parent body by default, which covers the retained reduced-preview moons through the registry hierarchy.
 - Added a satellite layer toggle and distance-gated satellite indicators and labels so the reduced-preview moons stay out of the global overview clutter while remaining visible in parent or satellite focused views.
 - Docked the mobile reference-frame selector above the layer selector to avoid the previous overlapping touch targets during reduced-preview validation.
@@ -54,6 +54,7 @@ Milestone 11 starts after the Milestone 10 trail-rendering scope closed. Deferre
 - Closed Milestone 11 after user inspection accepted the selectable planetary-system view pass.
 - Deferred deeper generated-data optimization, including smaller chunks and alternate file formats, to Milestone 13 rather than keeping it in Milestone 11.
 - Phase 2B is closed for local reduced-preview adoption into Phase 3: local debug performance looked acceptable, retained-moon visual checks passed, the GitHub Pages deployment starts in about `4` seconds, and chunk-size or file-format optimization is deferred to Milestone 13.
+- Post-closeout update from Milestone 13: the targeted `4` samples/orbit profile restored Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda into the current default GitHub Pages deployment while retaining one-year JSON chunks and release-asset delivery.
 
 ## Goal
 
@@ -79,14 +80,14 @@ Original curated expansion:
 - Uranus: Ariel `701`, Umbriel `702`, Titania `703`, Oberon `704`, Miranda `705`
 - Neptune: Triton `801`
 
-Temporary Milestone 11 reduced preview target:
+Temporary Milestone 11 reduced preview target, now superseded by Milestone 13:
 
 - Jupiter: Ganymede `503`, Callisto `504`
 - Saturn: Rhea `605`, Titan `606`, Iapetus `608`
 - Uranus: Umbriel `702`, Titania `703`, Oberon `704`
 - Neptune: Triton `801`
 
-Deferred to Milestone 13 for sub-day sampling:
+Resolved by Milestone 13 with targeted `4` samples/orbit cadence:
 
 - Mars: Phobos `401`, Deimos `402`
 - Jupiter: Io `501`, Europa `502`
@@ -246,10 +247,10 @@ Expanded benchmark problem list:
 
 ### Phase 3: Web Runtime Integration
 
-Status: Closed. The reduced major-moon profile is deployed through GitHub Pages from a pinned release artifact, and the observed startup time is acceptable for Milestone 11. Deeper data optimization is deferred to Milestone 13.
+Status: Closed. The reduced major-moon profile was deployed through GitHub Pages from a pinned release artifact, and the observed startup time was acceptable for Milestone 11. Milestone 13 later restored the fast moons and kept one-year JSON chunks; deeper data optimization remains optional.
 
 - [x] Add an opt-in local preview path that consumes the expanded generated profile through the existing static asset flow without making it the deployed default.
-- [x] Consume the reduced Milestone 11 preview dataset that excludes fast undersampled moons until Milestone 13 sub-day cadence support exists.
+- [x] Consume the reduced Milestone 11 preview dataset that excluded fast undersampled moons until Milestone 13 sub-day cadence support existed.
 - [x] Remove temporarily deferred fast moons from Milestone 11 discovery groups, indicators, labels, focus targets, and generated preview adoption checks without deleting the long-term registry plan.
 - [x] Deploy the reduced expanded generated profile through GitHub Pages after Phase 3 UI gates pass, then repeat debug timing and memory observations on the deployed site. The release-asset deployment is live, and startup is about `4` seconds.
 - [x] Add presentation metadata for the curated major moons with conservative default trail windows and shared material behavior.
@@ -309,6 +310,7 @@ Status: Closed. Milestone 11 is complete; remaining fast-moon cadence and data-f
 - [x] Keep documentation aligned as Phase 4 changes the HUD, selectors, and playback controls.
 - [x] Document any deferred body categories or exploration features explicitly.
 - [x] Close Milestone 11 after Phase 6 user inspection.
+- [x] Record the Milestone 13 post-closeout update that restored the deferred fast moons into the current deployed catalog.
 
 ## Verification
 
@@ -331,11 +333,11 @@ Status: Closed. Milestone 11 is complete; remaining fast-moon cadence and data-f
 
 - Milestone 11 starts after Milestone 10 trail-rendering closeout.
 - The first catalog expansion prioritizes recognizable major moons over completeness.
-- The Milestone 11 preview may temporarily ship a reduced major-moon subset to avoid known-bad fast moon interpolation.
-- Fast undersampled moons are deferred to Milestone 13 rather than forced into Milestone 11 with one-day cadence.
-- The deployed generated-data profile is the reduced major-moon release asset; the original baseline remains a local historical comparison path.
+- The Milestone 11 preview temporarily shipped a reduced major-moon subset to avoid known-bad fast moon interpolation.
+- Fast undersampled moons were deferred to Milestone 13 rather than forced into Milestone 11 with one-day cadence, and are now restored in the current default deployment.
+- The Milestone 11 deployed generated-data profile was the reduced major-moon release asset; the original baseline remains a local historical comparison path.
 - Educational context and richer exploration are lower-priority proposals for review, not blockers for the first catalog-expansion pass.
 - Upstream kernels remain non-versioned.
 - The first expanded-profile generated manifest and chunks will not be versioned yet because the measured output came from a cadence profile that failed fast-moon accuracy gates.
-- Milestone 11 no longer owns sub-day profiling, fast-moon tuning, or fast-moon reintroduction; that work belongs to Milestone 13.
-- Milestone 11 no longer owns reduced-profile chunk-size or file-format optimization; the deployed `25` year chunk release is acceptable for now, and optimization moves to Milestone 13 if later measurements justify it.
+- Milestone 11 no longer owns sub-day profiling, fast-moon tuning, or fast-moon reintroduction; that work was completed in Milestone 13.
+- Milestone 11 no longer owns reduced-profile chunk-size or file-format optimization; Milestone 13 kept one-year JSON chunks for the restored fast-moon profile, and deeper format work remains optional if future measurements justify it.

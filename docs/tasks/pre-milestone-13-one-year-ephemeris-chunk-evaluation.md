@@ -10,6 +10,8 @@ The final local and GitHub Pages assessments passed using a temporary evaluation
 
 Decision: keep one-year JSON chunks as the reduced-profile baseline for Milestone 13 fast-moon cadence work unless later restored fast-moon measurements prove a different format or loading strategy is needed.
 
+Post-Milestone 13 note: the later restored targeted `4` samples/orbit fast-moon profile also passed with one-year JSON chunks and became the default GitHub Pages deployment.
+
 ## Goals
 
 - Generate a reduced major-moon evaluation dataset with `ChunkYears = 1`.
@@ -106,7 +108,7 @@ Decision: keep one-year JSON chunks as the reduced-profile baseline for Mileston
 - Local verification passed: `pnpm lint`, `pnpm test`, and `pnpm build`.
 - Local `/debug` assessment with the one-year evaluation dataset passed.
 - GitHub Pages deployed assessment with the temporary one-year evaluation release asset passed.
-- The deployment workflow is currently pointed at the evaluation tag and asset for the closed assessment pass.
+- The deployment workflow was temporarily pointed at the evaluation tag and asset for the closed assessment pass. It later moved to the Milestone 13 targeted fast-moon release asset.
 - Exact stopwatch timing breakdowns were not preserved in the docs; the closeout records the observed pass/fail assessment results and any visible runtime concerns.
 
 ## Acceptance Criteria
@@ -127,4 +129,4 @@ Decision: keep one-year JSON chunks as the reduced-profile baseline for Mileston
 - Playback preload buffer: `5` one-year chunks before and after the active chunk.
 - Trail preload: additional past chunks as needed for configured trail windows.
 - Final assessment: temporary GitHub release asset consumed by GitHub Pages.
-- Fast-moon reintroduction, sub-day cadence, and binary or alternate file formats remain Milestone 13 work; one-year JSON chunks are the accepted starting point unless restored fast-moon measurements prove otherwise.
+- Fast-moon reintroduction and sub-day cadence were completed in Milestone 13; one-year JSON chunks remained acceptable for the restored profile, so binary or alternate file formats are optional future work only if later measurements justify them.

@@ -11,9 +11,9 @@
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 - Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring.
 - Milestone 10 rendering and performance refinement is complete for the shipped trail-rendering scope, with pole-artifact audit and deeper `/debug` validation deferred to an optional unnumbered milestone.
-- Milestone 11 full solar system explorer work is complete. The reduced major-moon profile is deployed through GitHub Pages from a pinned release asset; the HUD, selector, playback-control, ephemeris-range, educational context, and selectable planetary-system view passes are closed; and the follow-up one-year chunk assessment accepted one-year JSON chunks as the reduced-profile Milestone 13 baseline.
+- Milestone 11 full solar system explorer work is complete. It delivered the central registry, reduced major-moon deployment path, HUD, selector, playback-control, ephemeris-range, educational context, and selectable planetary-system view passes; Milestone 13 later restored the deferred fast moons into the current default deployment.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
-- Milestone 13 fast moon cadence work is planned to reintroduce major moons whose orbital periods are too short for Milestone 11's current integer-day sampling. The pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on GitHub Pages, so one-year JSON chunks are the current reduced-profile baseline for that work.
+- Milestone 13 fast moon cadence work is complete. The current GitHub Pages deployment uses the targeted `4` samples/orbit expanded major-moons release asset with one-year JSON chunks and restored Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -247,7 +247,7 @@ Goals:
 Delivered:
 
 - central current-body registry now drives `BodyId`, NAIF lookups, hierarchy, presentation metadata, and HUD jump-menu grouping
-- curated major-moon registry entries are loaded from the reduced deployed generated-data profile while fast undersampled moons remain filtered out until Milestone 13
+- curated major-moon registry entries were first loaded from the reduced deployed generated-data profile; Milestone 13 later restored the fast undersampled moons in the current default profile
 - reference-frame options now derive from loaded satellite systems, so expanded catalogs can expose parent-centered frames without hard-coding each system into the UI
 - schema-1 generated-data parsing now tolerates partial generated physical metadata for staged expanded bodies while preserving full baseline metadata behavior
 - remaining catalog-growth runtime assumptions needed for this phase are now registry-driven, including Earth prime-meridian spin initialization metadata
@@ -261,14 +261,14 @@ Delivered:
 - Phase 4 closed the HUD and discovery UI redesign: Quick picks were removed, `Jump to` moved into an isolated selector with `Overview` as the first row, selectors are height-constrained and scrollable when needed, simulation time and playback controls moved to the bottom center, playback now uses one play or pause action plus explicit direction and bounded speed controls, ephemeris range boundaries clamp and pause with a clear HUD warning, help moved near fullscreen, and the main HUD is informational
 - Phase 5 closed the lower-priority educational context proposal with a read-only focused-body facts drawer backed by generated physical facts and two short Wikipedia-sourced description paragraphs; quizzes, tours, and long-form pages remain deferred
 - Phase 6 closed with selectable planetary-system rows in `Jump to`; selecting a system keeps the active reference frame unchanged while transitioning to the parent planet from a padded distance that frames the loaded satellites
-- the pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on the deployed GitHub Pages build; the assessment keeps one-year JSON chunks as the reduced-profile baseline for Milestone 13 unless restored fast-moon measurements prove otherwise
-- Milestone 11 closeout is complete, with remaining fast-moon cadence and data-format work explicitly moved to Milestone 13
+- the pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on the deployed GitHub Pages build; Milestone 13 kept one-year JSON chunks for the restored fast-moon profile
+- Milestone 11 closeout is complete; its fast-moon cadence follow-up was resolved in Milestone 13
 
-Deferred to Milestone 13:
+Resolved By Milestone 13:
 
-- chunk-duration browser parse-time and cache-churn tuning only if restored fast-moon measurements make the accepted one-year reduced-profile baseline insufficient
-- compact JSON versus binary numeric-array format comparison
-- Float64, Float32, quantized, or delta-encoded generated-data experiments
+- sub-day fast-moon cadence support and restored fast-moon deployment
+- one-year chunk adoption for the restored profile after benchmark and deployed validation
+- data-format changes were not needed for the accepted restored profile
 
 Optional follow-up:
 
@@ -303,7 +303,7 @@ Delivered:
 
 ## Milestone 13: Fast Moon Cadence
 
-Status: Planned
+Status: Complete
 
 Goals:
 
@@ -313,3 +313,12 @@ Goals:
 - benchmark restored fast-moon output size, interpolation error, parse cost, and browser memory
 - use the accepted one-year reduced-profile chunk assessment as the starting static-delivery baseline
 - validate dense local-system views, parent-relative trails, jump-menu behavior, and focused playback before default adoption
+
+Delivered:
+
+- fractional-day `SampleDays` support in the sibling `SpiceNet` web-data generator without a manifest schema change
+- benchmark tooling for integer-day, targeted `4` samples/orbit, and high-quality `8` samples/orbit profiles
+- restored fast moons in the deployed expanded major-moons profile: Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda
+- targeted `4` samples/orbit profile adopted after normalized error review, local visual inspection, and deployed GitHub Pages validation
+- one-year JSON chunks retained for the restored profile, with generated data still shipped through a pinned GitHub release asset rather than committed to git
+- available texture inventory reviewed; restored fast moons without local dedicated assets use the solid-color fallback

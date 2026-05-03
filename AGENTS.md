@@ -6,9 +6,9 @@ These instructions apply to every session in this repository.
 
 - Static React, TypeScript, and Vite app intended for GitHub Pages.
 - Experience starts in a solar-system overview, not a single-body close-up.
-- The mocked scene includes the Sun, all 8 planets, and the Moon.
-- Interaction currently centers on orbit controls, double click or double tap focus, a minimal HUD, a help overlay, a star background, and mocked orbital trails.
-- Custom rendering passes exist for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-driven materials.
+- The current scene loads generated real ephemeris data at startup and includes the Sun, all 8 planets, the Moon, and the expanded major-moon catalog with Milestone 13 fast moons restored.
+- Interaction currently centers on orbit controls, double click or double tap focus, the `Jump to` selector, reference-frame and layer selectors, playback controls, a help overlay, real star and Milky Way sky layers, and generated-data orbital trails.
+- Custom rendering passes exist for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-driven materials when texture assets exist and a solid-color fallback otherwise.
 - `pnpm lint`, `pnpm test`, and `pnpm build` currently pass.
 - `pnpm test:e2e` is not a trusted source of truth until Playwright browsers are installed and the overview-first flow is covered by the smoke test.
 

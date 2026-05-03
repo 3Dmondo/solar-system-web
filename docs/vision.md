@@ -9,7 +9,7 @@ Build a static web-based solar system explorer that feels polished, readable, an
 The repository currently ships an overview-first solar-system scene with real-data startup and:
 
 - generated ephemeris-driven positions loaded at startup, with explicit loading or error messaging when local or deployed data is unavailable
-- Sun, all 8 planets, the Moon, and the reduced Milestone 11 major-moon set
+- Sun, all 8 planets, the Moon, and the expanded major-moon set with the Milestone 13 fast moons restored
 - overview-to-body and planetary-system focus transitions driven by a dedicated `Jump to` selector plus double click or double tap for individual bodies, with `Jump to` still available while focused for direct switches and overview recovery
 - directional camera easing that snaps the target onto the selected body center, approaches from the authored focus direction at about `10 x` body radius, and pulls back more decisively to overview
 - orbit controls tuned separately for fine and coarse pointers
@@ -23,26 +23,25 @@ The repository currently ships an overview-first solar-system scene with real-da
 ## Current Constraints
 
 - The app starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
-- The current deployed generated dataset is the one-year reduced major-moons profile accepted by the pre-Milestone 13 local and deployed assessment; fast undersampled moons remain deferred to Milestone 13.
+- The current deployed generated dataset is the one-year Milestone 13 targeted `4` samples/orbit major-moons profile, delivered through a pinned GitHub release asset.
 - The experience uses a cinematic scale model only.
-- Discovery aids are functional for the reduced major-moon catalog, with selectable planetary-system rows plus dedicated selector and playback surfaces instead of embedded HUD controls.
+- Discovery aids are functional for the expanded major-moon catalog, with selectable planetary-system rows plus dedicated selector and playback surfaces instead of embedded HUD controls.
 - Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
 - The current rendering controls are limited to the layer panel and still need optional brightness tuning controls.
 - Cross-device interaction still needs a final closeout verification pass.
 
 ## Next Experience
 
-The current implementation focus moves from Milestone 11 closeout to Milestone 13 fast-moon cadence work.
+The current implementation focus moves past Milestone 13 into optional rendering validation, data optimization only if future measurements justify it, and later catalog or educational expansion.
 
 Focus areas:
 
-- keep the current Sun, planet, Moon, and reduced major-moon behavior stable while fast undersampled moons are evaluated
-- use the accepted one-year reduced-profile chunk baseline as the starting delivery shape for Milestone 13
+- keep the current Sun, planet, Moon, and expanded major-moon behavior stable
+- keep the accepted one-year JSON chunk delivery shape unless deployed measurements show a real user-facing issue
 - keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
-- reintroduce fast undersampled moons only after sub-day or equivalent cadence validation passes
 - keep discovery and playback controls in dedicated, mobile-safe selector and control surfaces
-- revisit generated-data chunking or file format only in Milestone 13 if restored fast-moon measurements show the accepted one-year JSON chunk baseline is insufficient
-- keep optional rendering validation and deeper data-format optimization separate from the closed Milestone 11 scope
+- revisit generated-data chunking or file format only if a later larger profile or deployed measurement shows the accepted one-year JSON chunk baseline is insufficient
+- keep optional rendering validation and deeper data-format optimization separate from closed numbered milestones
 
 ## Long-Term Direction
 
@@ -56,9 +55,9 @@ Focus areas:
 
 - live astronomy APIs or server-backed simulation
 - realistic distances and sizes as the default presentation
-- every minor moon, asteroid, dwarf planet, or spacecraft trajectory in the next fast-moon pass
+- every minor moon, asteroid, dwarf planet, or spacecraft trajectory in the current deployed catalog
 - generated ephemeris assets or upstream kernels committed to git
-- long-form encyclopedia pages, quizzes, or guided tours in the fast-moon cadence pass
+- long-form encyclopedia pages, quizzes, or guided tours in the current deployed catalog pass
 
 ## Workflow Expectations
 
