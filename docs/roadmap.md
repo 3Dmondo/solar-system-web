@@ -15,6 +15,8 @@
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 - Milestone 13 fast moon cadence work is complete. The current GitHub Pages deployment uses the targeted `4` samples/orbit expanded major-moons release asset with one-year JSON chunks and restored Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
 - Milestone 14 satellite texture and metadata work is complete. The current deployed major-moon set has approved NASA texture coverage where assets were available, and the committed body metadata snapshot now includes generated physical metadata for all current major moons.
+- Milestone 15 non-spherical moon shape work is planned. It will prototype mesh-backed rendering for selected irregular moons, starting with Phobos and Deimos.
+- Milestone 16 dwarf-planet and major-asteroid catalog work is planned. It will add a curated small-body expansion after kernel, metadata, UI-density, and static-delivery review.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -341,3 +343,27 @@ Delivered:
 - refreshed `public/ephemeris/body-metadata.json` for all 29 current deployed body ids
 - updated the sibling SpiceNet metadata snapshot script so future refreshes request the full current web body set
 - documented Phobos and Deimos as the first future non-spherical mesh candidates, with other moon GLTF/USDZ sizes recorded for later review
+
+## Milestone 15: Non-Spherical Moon Shapes
+
+Status: Planned
+
+Goals:
+
+- add a production-ready non-spherical rendering path for selected irregular moons
+- start with Phobos and Deimos using the NASA model inventory documented in Milestone 14
+- preserve the existing physical pole, spin, lighting, focus, selection, label, indicator, and trail contracts
+- keep spherical rendering as the fallback for every body without an approved runtime mesh
+- measure mesh asset and bundle impact for the static GitHub Pages delivery path
+
+## Milestone 16: Dwarf Planets And Major Asteroids
+
+Status: Planned
+
+Goals:
+
+- add a curated small-body generated-data profile for dwarf planets and major asteroids
+- review Pluto, Charon, Ceres, and Vesta as the first candidate tier
+- add registry, selector, facts, trail, label, and indicator support for accepted bodies
+- keep generated assets static and release-asset-backed by default
+- defer broad minor-body catalogs, spacecraft trajectories, and asteroid-belt particle clouds
