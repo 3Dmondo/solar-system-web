@@ -1,6 +1,6 @@
 # Solar System Web
 
-Static web-based solar-system explorer built for GitHub Pages. The current repo now expects generated real ephemeris assets at startup, surfaces explicit loading or error states when they are unavailable, and keeps the cinematic presentation scale while real trail rendering is still pending.
+Static web-based solar-system explorer built for GitHub Pages. The current repo expects generated real ephemeris assets at startup, surfaces explicit loading or error states when they are unavailable, and keeps a cinematic presentation scale with generated-data orbital trails.
 
 ## Current Experience
 
@@ -20,7 +20,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - Missing local generated ephemeris assets now surface an explicit runtime error instead of silently substituting fallback positions.
 - Orbital trails render from generated chunk data, including parent-relative satellite trails.
 - The scene still routes through the provider-backed `bodyStateStore.ts` boundary, with shared presentation metadata plus async-loaded snapshots merged at the catalog seam.
-- Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder. The deployed default uses the reduced major-moons release asset.
+- Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder. The deployed default uses the one-year reduced major-moons release asset accepted for pre-Milestone 13.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
 - `pnpm test:e2e` requires Playwright browsers and a local preview server.
@@ -49,7 +49,7 @@ pnpm build
 
 The local ephemeris helper reuses the pinned external `SpiceNet` workflow and defaults to a sibling checkout at `../SpiceNet`. It now defaults `de440s.bsp` to the JPL SSD URL `https://ssd.jpl.nasa.gov/ftp/eph/planets/bsp/de440s.bsp`; pass `-SpiceNetRepoRoot`, `-SpkUrl`, or `-SpkFileName` if your local setup differs. If `public/ephemeris/generated/` is still missing when you run the app locally, the HUD now surfaces an explicit real-data error instead of a placeholder scene.
 
-Milestone 11 ships a reduced major-moons generated profile by default on GitHub Pages. Local expanded-profile inspection still uses `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1` to copy ignored preview assets into `public/ephemeris/generated-expanded-major-moons/`, then starts Vite with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`. The staging helper rejects the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation. `.\scripts\Package-ReducedMajorMoonsReleaseAsset.ps1` packages staged preview assets into the release zip consumed by the Pages workflow.
+GitHub Pages currently ships the accepted one-year reduced major-moons generated profile. Local expanded-profile inspection still uses `.\scripts\Stage-ExpandedMajorMoonsPreview.ps1` to copy ignored preview assets into `public/ephemeris/generated-expanded-major-moons/`, then starts Vite with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`. The staging helper rejects the Milestone 13 fast-moon ids unless explicitly overridden for future sub-day validation. `.\scripts\Package-ReducedMajorMoonsReleaseAsset.ps1` packages staged preview assets into the release zip consumed by the Pages workflow.
 
 For Playwright:
 

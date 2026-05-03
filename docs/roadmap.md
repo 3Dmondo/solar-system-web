@@ -11,9 +11,9 @@
 - Milestone 7 reference frames and trail UX work is complete, with reference frame selection (SSB/Earth-centered), satellite parent-relative trails, glowing trail rendering, UI selector, performance optimizations, and extended chunk prefetch.
 - Milestone 9 sky catalog and rendering controls is complete, with real HYG star data, deterministic curated constellation overlays, and camera-centered sky anchoring.
 - Milestone 10 rendering and performance refinement is complete for the shipped trail-rendering scope, with pole-artifact audit and deeper `/debug` validation deferred to an optional unnumbered milestone.
-- Milestone 11 full solar system explorer work is now in progress. The reduced major-moon profile is deployed through GitHub Pages from a pinned release asset, with about `4` seconds of startup time accepted for now; Phase 4 HUD, selector, playback-control, and ephemeris-range UX work is closed, Phase 5 added the lightweight focused-body facts drawer, and chunk-size or file-format optimization is deferred to Milestone 13.
+- Milestone 11 full solar system explorer work is now in progress. The reduced major-moon profile is deployed through GitHub Pages from a pinned release asset; Phase 4 HUD, selector, playback-control, and ephemeris-range UX work is closed, Phase 5 added the lightweight focused-body facts drawer, and the follow-up one-year chunk assessment accepted one-year JSON chunks as the reduced-profile Milestone 13 baseline.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
-- Milestone 13 fast moon cadence work is planned to reintroduce major moons whose orbital periods are too short for Milestone 11's current integer-day sampling.
+- Milestone 13 fast moon cadence work is planned to reintroduce major moons whose orbital periods are too short for Milestone 11's current integer-day sampling. The pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on GitHub Pages, so one-year JSON chunks are the current reduced-profile baseline for that work.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -260,10 +260,11 @@ Started:
 - Phase 3 UI/readability work delivered satellite indicator and label distance gating, a satellite visibility toggle, mobile control layout fixes, deployed reduced-profile validation, and static Pages compatibility
 - Phase 4 closed the HUD and discovery UI redesign: Quick picks were removed, `Jump to` moved into an isolated selector with `Overview` as the first row, selectors are height-constrained and scrollable when needed, simulation time and playback controls moved to the bottom center, playback now uses one play or pause action plus explicit direction and bounded speed controls, ephemeris range boundaries clamp and pause with a clear HUD warning, help moved near fullscreen, and the main HUD is informational
 - Phase 5 closed the lower-priority educational context proposal with a read-only focused-body facts drawer backed by generated physical facts and two short Wikipedia-sourced description paragraphs; quizzes, tours, and long-form pages remain deferred
+- the pre-Milestone 13 one-year reduced-profile chunk evaluation passed locally and on the deployed GitHub Pages build; the assessment keeps one-year JSON chunks as the reduced-profile baseline for Milestone 13 unless restored fast-moon measurements prove otherwise
 
 Deferred to Milestone 13:
 
-- chunk-duration browser parse-time and cache-churn tuning if deployed startup or memory becomes a real issue
+- chunk-duration browser parse-time and cache-churn tuning only if restored fast-moon measurements make the accepted one-year reduced-profile baseline insufficient
 - compact JSON versus binary numeric-array format comparison
 - Float64, Float32, quantized, or delta-encoded generated-data experiments
 
@@ -308,4 +309,5 @@ Goals:
 - own fast-moon profiling, tuning, truth diagnostics, and cadence selection that were removed from Milestone 11
 - reintroduce Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda after cadence validation
 - benchmark restored fast-moon output size, interpolation error, parse cost, and browser memory
+- use the accepted one-year reduced-profile chunk assessment as the starting static-delivery baseline
 - validate dense local-system views, parent-relative trails, jump-menu behavior, and focused playback before default adoption

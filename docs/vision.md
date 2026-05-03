@@ -23,7 +23,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 ## Current Constraints
 
 - The app starts from generated real snapshot data, but local development still requires generated assets in `public/ephemeris/generated/`.
-- The current deployed generated dataset is the reduced major-moons profile; fast undersampled moons remain deferred to Milestone 13.
+- The current deployed generated dataset is the one-year reduced major-moons profile accepted by the pre-Milestone 13 local and deployed assessment; fast undersampled moons remain deferred to Milestone 13.
 - The experience uses a cinematic scale model only.
 - Discovery aids are functional for the reduced major-moon catalog, with dedicated selector and playback surfaces instead of embedded HUD controls.
 - Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
@@ -41,7 +41,7 @@ Focus areas:
 - keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
 - keep the reduced major-moon deployment stable while deferring fast undersampled moons to Milestone 13 sub-day cadence work
 - keep discovery and playback controls in dedicated, mobile-safe selector and control surfaces
-- revisit generated-data chunking or file format only in Milestone 13 if the accepted `4` second deployed startup becomes a measured problem
+- revisit generated-data chunking or file format only in Milestone 13 if restored fast-moon measurements show the accepted one-year JSON chunk baseline is insufficient
 - keep educational context and richer exploration modes as lower-priority proposals until the major-moon path is validated
 
 ## Long-Term Direction

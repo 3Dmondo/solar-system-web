@@ -9,7 +9,7 @@
 
 - GitHub Pages deploys on pushes to `master`.
 - Manual runs are also allowed through `workflow_dispatch`.
-- The build job installs dependencies with `pnpm install --frozen-lockfile`, downloads the pinned reduced major-moons ephemeris release asset, expands it into `public/ephemeris/generated/`, validates the reduced body set, and then runs `pnpm build`.
+- The build job installs dependencies with `pnpm install --frozen-lockfile`, downloads the pinned one-year reduced major-moons ephemeris release asset, expands it into `public/ephemeris/generated/`, validates the reduced body set, and then runs `pnpm build`.
 - `actions/configure-pages@v5` is used with `enablement: true`.
 - The deploy job publishes the `dist/` artifact.
 - The release-asset ephemeris files are copied into `dist/ephemeris/generated/` through Vite's normal `public/` handling, and the deployed app now consumes the reduced major-moons profile through the default real-data runtime path.
@@ -50,8 +50,8 @@ pnpm preview -- --host
 - Large assets are bundled into the static build, so deployment size is driven by textures, the main JavaScript bundle, and the downloaded ephemeris release asset.
 - Local generated Milestone 5 ephemeris assets belong under the ignored `public/ephemeris/generated/` folder so Vite can serve and bundle them without versioning them in git.
 - The Milestone 11 expanded major-moons preview uses ignored local assets under `public/ephemeris/generated-expanded-major-moons/` and is selected locally with `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons`.
-- The deployment workflow consumes release tag `ephemeris-expanded-major-moons-reduced-v1` and asset `ephemeris-expanded-major-moons-reduced-v1.zip`; it no longer downloads multi-gigabyte SPK kernels or runs `SpiceNet` during every Pages build.
-- The deployed reduced major-moons profile currently starts in about `4` seconds, which is acceptable for Milestone 11. Chunk-size and file-format optimization are deferred to Milestone 13.
+- The deployment workflow currently consumes release tag `ephemeris-expanded-major-moons-reduced-1y-eval-v1` and asset `ephemeris-expanded-major-moons-reduced-1y-eval-v1.zip`; it no longer downloads multi-gigabyte SPK kernels or runs `SpiceNet` during every Pages build.
+- The deployed one-year reduced major-moons profile passed the pre-Milestone 13 local and GitHub Pages assessment. Chunk-size and file-format optimization are deferred to Milestone 13 only if restored fast-moon measurements justify it.
 
 ## Ephemeris Data Delivery
 

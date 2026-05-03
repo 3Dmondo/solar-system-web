@@ -27,7 +27,7 @@
 
 ## Current Runtime Shape
 
-- `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides. The deployed `./ephemeris/generated` profile is the reduced expanded-major-moons release artifact. `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` remains an opt-in local preview path that points at ignored assets staged under `./ephemeris/generated-expanded-major-moons`.
+- `App` renders `SolarSystemExperience` and now defaults to the generated web-data catalog at `./ephemeris/generated`, with `VITE_WEB_EPHEMERIS_DATA_BASE_URL` plus `VITE_WEB_EPHEMERIS_SCENE_UNITS_PER_KILOMETER` available as overrides. The deployed `./ephemeris/generated` profile is currently the one-year reduced expanded-major-moons release artifact accepted by the pre-Milestone 13 assessment. `VITE_WEB_EPHEMERIS_PROFILE=expanded-major-moons` remains an opt-in local preview path that points at ignored assets staged under `./ephemeris/generated-expanded-major-moons`.
 - Visiting `/debug` on the current host enables a lightweight FPS overlay for local performance sampling, starts the clock from the Milestone 5.1 benchmark timestamp by default, and adds debug-only timing samples across generated-data loads, chunk parsing, and the main runtime phases without changing the normal route behavior. The overlay also shows JS heap use when the browser exposes `performance.memory`.
 - When the external source is enabled, the runtime loads generated manifest and chunk assets from the configured data base URL and uses the committed `public/ephemeris/body-metadata.json` snapshot by default, with an optional explicit metadata-URL override.
 - The agreed local generated-asset convention is `public/ephemeris/generated/`, which is served from `./ephemeris/generated` when the runtime is pointed at local generated data.
@@ -123,13 +123,13 @@ Additional notes:
 - `pnpm test` runs Vitest only. It does not cover live canvas interaction in a real browser.
 - `pnpm test:e2e` is separate and requires `pnpm exec playwright install` plus a local preview server at `http://127.0.0.1:4173`.
 - The checked-in Playwright smoke spec now covers the overview HUD startup flow on desktop and mobile browser projects.
-- The deployed reduced major-moon profile currently starts in about `4` seconds, which is acceptable for Milestone 11; chunk-size and file-format optimization are deferred to Milestone 13.
+- The deployed reduced major-moon profile passed local and GitHub Pages assessment with one-year JSON chunks; chunk-size and file-format optimization are deferred to Milestone 13 only if restored fast-moon measurements justify it.
 
 ## Deployment
 
 - GitHub Pages deployment is defined in `.github/workflows/deploy-pages.yml`.
 - The workflow builds on pushes to `master` and on manual dispatch.
-- The workflow downloads the pinned GitHub release asset `ephemeris-expanded-major-moons-reduced-v1.zip` from release tag `ephemeris-expanded-major-moons-reduced-v1`, expands it into `public/ephemeris/generated/`, validates that deferred Milestone 13 fast-moon ids are absent, and publishes those generated assets through the normal `dist/` artifact without committing them to git. `scripts/Package-ReducedMajorMoonsReleaseAsset.ps1` packages the ignored staged preview assets into that release-asset shape.
+- The workflow downloads the pinned GitHub release asset `ephemeris-expanded-major-moons-reduced-1y-eval-v1.zip` from release tag `ephemeris-expanded-major-moons-reduced-1y-eval-v1`, expands it into `public/ephemeris/generated/`, validates that deferred Milestone 13 fast-moon ids are absent, and publishes those generated assets through the normal `dist/` artifact without committing them to git. `scripts/Package-ReducedMajorMoonsReleaseAsset.ps1` packages the ignored staged preview assets into that release-asset shape.
 - `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
 - Static texture imports are bundled through Vite so they work from the project-site base path.
 
@@ -140,4 +140,4 @@ Additional notes:
 - Extend the minimized rendering-settings UI with sky-specific controls such as brightness.
 - Address visible pole artifacts on some body textures.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
-- Revisit reduced major-moon chunk duration and data format in Milestone 13 only if later measurements justify it.
+- Revisit reduced major-moon data format in Milestone 13 only if later measurements show the accepted one-year JSON chunk baseline is insufficient.

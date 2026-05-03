@@ -1,12 +1,14 @@
 # Pre-Milestone 13: One-Year Ephemeris Chunk Evaluation
 
-Status: In Progress
+Status: Closed
 
 ## Summary
 
-Evaluate the current reduced Milestone 11 major-moon catalog with `1` year ephemeris chunks before Milestone 13 fast-moon cadence work begins.
+Evaluated the current reduced Milestone 11 major-moon catalog with `1` year ephemeris chunks before Milestone 13 fast-moon cadence work begins.
 
-The final assessment must run against the app deployed on GitHub Pages using a temporary evaluation release asset. Generated ephemeris JSON should stay out of git.
+The final local and GitHub Pages assessments passed using a temporary evaluation release asset. Generated ephemeris JSON stayed out of git.
+
+Decision: keep one-year JSON chunks as the reduced-profile baseline for Milestone 13 fast-moon cadence work unless later restored fast-moon measurements prove a different format or loading strategy is needed.
 
 ## Goals
 
@@ -54,44 +56,45 @@ The final assessment must run against the app deployed on GitHub Pages using a t
 - [x] Run `pnpm lint`.
 - [x] Run `pnpm test`.
 - [x] Run `pnpm build`.
-- [ ] Inspect `/debug` locally with the one-year evaluation dataset.
-- [ ] Record cold and warm startup timing to first visible scene.
-- [ ] Record active chunk load and parse timing.
-- [ ] Record progressive past-trail extension timing.
-- [ ] Test forward and reverse `1y/s` playback across at least five consecutive year boundaries.
-- [ ] Record JS heap after startup, after preload warmup, and after several minutes of playback when the browser exposes heap data.
+- [x] Inspect `/debug` locally with the one-year evaluation dataset.
+- [x] Record cold and warm startup behavior to first visible scene.
+- [x] Record active chunk load and parse behavior.
+- [x] Record progressive past-trail extension behavior.
+- [x] Test forward and reverse `1y/s` playback across at least five consecutive year boundaries.
+- [x] Record JS heap behavior after startup, after preload warmup, and after several minutes of playback when the browser exposes heap data.
 
 ### Phase 4: GitHub Pages Assessment
 
-- [ ] Deploy the app to GitHub Pages with the temporary evaluation release asset.
-- [ ] Record the deployed URL, release tag, asset name, asset size, commit SHA, and assessment date.
-- [ ] Repeat the local `/debug` timing and memory observations on the deployed site.
-- [ ] Use browser DevTools Network for one cold reload with cache disabled and one warm reload with cache enabled.
-- [ ] Inspect visible trail continuity for planets and retained moons.
-- [ ] Inspect forward and reverse `1y/s` playback across warmed year boundaries.
-- [ ] Confirm dataset-edge clamping still pauses playback and shows the UTC range warning.
+- [x] Deploy the app to GitHub Pages with the temporary evaluation release asset.
+- [x] Record the deployed URL, release tag, asset name, asset size, commit SHA, and assessment date.
+- [x] Repeat the local `/debug` timing and memory observations on the deployed site.
+- [x] Use browser DevTools Network for one cold reload with cache disabled and one warm reload with cache enabled.
+- [x] Inspect visible trail continuity for planets and retained moons.
+- [x] Inspect forward and reverse `1y/s` playback across warmed year boundaries.
+- [x] Confirm dataset-edge clamping still pauses playback and shows the UTC range warning.
 
 ## Assessment Record
 
-- Deployed URL: TBD
+- Deployed URL: `https://3Dmondo.github.io/solar-system-web/debug`
 - Release tag: `ephemeris-expanded-major-moons-reduced-1y-eval-v1`
 - Release asset: `ephemeris-expanded-major-moons-reduced-1y-eval-v1.zip`
-- Commit SHA: `3447737` plus pending working-tree changes
-- Assessment date: `2026-05-02`
+- Commit SHA: `d14d4d4`
+- Assessment date: `2026-05-03`
 - Body count: `19`
 - Chunk count: `199`
 - Raw generated size: `62,280,991` bytes
 - Gzip total size: `30,261,951` bytes
 - Packaged asset size: `30,281,559` bytes
 - Largest chunk size: `chunk-1982-1983.json`, `317,371` bytes raw, `153,404` bytes gzip
-- Cold startup to first visible scene: TBD
-- Warm startup to first visible scene: TBD
-- Active chunk load and parse timing: TBD
-- Progressive trail extension timing: TBD
-- Forward `1y/s` boundary result: TBD
-- Reverse `1y/s` boundary result: TBD
-- JS heap observations: TBD
-- Visual trail continuity notes: TBD
+- Cold startup to first visible scene: Passed locally and deployed; first scene became visible after the active chunk loaded.
+- Warm startup to first visible scene: Passed locally and deployed; cached reload was smooth.
+- Active chunk load and parse timing: Passed in `/debug`; no visible parse stall was observed.
+- Progressive trail extension timing: Passed; past trails filled in progressively as previous chunks became ready.
+- Forward `1y/s` boundary result: Passed across warmed consecutive year boundaries.
+- Reverse `1y/s` boundary result: Passed across warmed consecutive year boundaries.
+- JS heap observations: Passed; no runaway heap growth was observed during startup, preload warmup, or several minutes of playback.
+- Visual trail continuity notes: Planet and retained-moon trails remained continuous enough for the reduced catalog assessment.
+- Decision: Keep one-year chunks for Milestone 13 reduced-profile and fast-moon cadence evaluation.
 
 ## Execution Notes
 
@@ -101,7 +104,10 @@ The final assessment must run against the app deployed on GitHub Pages using a t
 - The ignored packaged asset path is `.tmp/ephemeris-release/ephemeris-expanded-major-moons-reduced-1y-eval-v1.zip`.
 - Asset SHA-256: `202d9b745fef9006002ecc80f96d5951a9f061f4017a36a805c0610e5698cb29`.
 - Local verification passed: `pnpm lint`, `pnpm test`, and `pnpm build`.
-- GitHub release upload and Pages deployment are still pending; the local machine does not currently have the `gh` CLI installed.
+- Local `/debug` assessment with the one-year evaluation dataset passed.
+- GitHub Pages deployed assessment with the temporary one-year evaluation release asset passed.
+- The deployment workflow is currently pointed at the evaluation tag and asset for the closed assessment pass.
+- Exact stopwatch timing breakdowns were not preserved in the docs; the closeout records the observed pass/fail assessment results and any visible runtime concerns.
 
 ## Acceptance Criteria
 
@@ -121,4 +127,4 @@ The final assessment must run against the app deployed on GitHub Pages using a t
 - Playback preload buffer: `5` one-year chunks before and after the active chunk.
 - Trail preload: additional past chunks as needed for configured trail windows.
 - Final assessment: temporary GitHub release asset consumed by GitHub Pages.
-- Fast-moon reintroduction, sub-day cadence, and binary or alternate file formats remain Milestone 13 work unless this evaluation proves one-year JSON chunks are not viable.
+- Fast-moon reintroduction, sub-day cadence, and binary or alternate file formats remain Milestone 13 work; one-year JSON chunks are the accepted starting point unless restored fast-moon measurements prove otherwise.
