@@ -17,6 +17,8 @@
 - Local generated ephemeris asset root: `public/ephemeris/generated/`
 - Generated Milky Way sky texture target: `public/sky/milky-way.etc1s.ktx2`
 - Basis Universal transcoder runtime files for KTX2 sky textures: `public/basis/`
+- Runtime irregular-body mesh assets: `public/meshes/`
+- Mesh asset attribution and processing notes: `assets/meshes/ATTRIBUTION.txt`
 - Local ephemeris helper: `scripts/Ensure-LocalWebEphemerisData.ps1`
 - Expanded major-moons preview helper: `scripts/Stage-ExpandedMajorMoonsPreview.ps1`
 - Experience shell, HUD, selector rail, and playback controls: `src/features/experience`
@@ -39,6 +41,7 @@
 - `ExperienceScene` creates the `Canvas`, lighting, focus camera rig, the sky layers, orbital trails, and the planet list from the current resolved catalog.
 - The Milky Way sky texture layer is wired as a KTX2 asset at `./sky/milky-way.etc1s.ktx2`, defaults visible, and remains user-toggleable. Missing generated texture assets fail quietly so normal development remains usable if the generated asset is absent.
 - The focus camera now keeps the authored overview angle but derives overview framing distance, orbit-control zoom bounds, and camera clip planes from the loaded scene extents so the physically scaled Milestone 5 catalog remains navigable.
+- Focused-body zoom limits are radius-aware, allowing close inspection of tiny bodies such as Phobos and Deimos while preserving the broader overview zoom limits.
 - Overview mode now keeps the broad scene framing but allows a much closer minimum zoom distance in the physically scaled runtime so planets can be inspected manually without leaving overview.
 - Entering focus mode now snaps the orbit target directly onto the selected body's center and uses a simple default focused framing distance of about `10 x` the planet radius from the authored focus direction. Selecting a planetary-system target from `Jump to` keeps the current reference frame, targets the parent planet, and frames the currently loaded satellites from a larger padded distance.
 - Focused-body tracking now uses a split update path: live ephemeris refreshes keep the target snapped to the live body center while the camera eases into the authored focused framing, and the transition path is translated with live body motion before the settled translated-follow path takes over so manual orbit and zoom adjustments are preserved, with those focused follow updates applied in a layout-synchronized pass before paint rather than after paint.
@@ -100,15 +103,18 @@
 - Star and constellation vertex data remains static after upload; only the shared sky anchor transform is updated each frame.
 - The planned sky evolution still includes better visual tuning, possible star brightness controls, proper motion animation, star name labels, and constellation name overlays.
 - Orbital trails now render interpolated history from the active loaded chunk plus any contiguous ready previous chunks, clipped by body-specific default trail windows, resampled with per-body cadence multipliers from presentation metadata, and styled as constant-width opaque screen-space ribbons so sampled point joins do not create additive hot spots. Runtime prefetch warms the active chunk, up to `5` previous and `5` future playback chunks, and any additional trail-history previous chunks required by the loaded catalog; the default cache budget expands from a minimum of `6` chunks to cover loaded trail history plus the active and playback-buffer chunks for smaller chunk-year profiles without unbounded growth.
-- `PlanetBody` routes each body to either a custom material pipeline, the shared textured-material path, or the shared solid-color fallback.
+- `PlanetBody` routes each body to either a custom material pipeline, an approved mesh-backed shape path, the shared textured-material path, or the shared solid-color fallback.
+- `bodyShapeAssets.ts` maps approved non-spherical runtime meshes. Phobos and Deimos currently use optimized NASA-derived GLB files served from `public/meshes/`; source originals stay out of git, and attribution plus conversion notes live in `assets/meshes/ATTRIBUTION.txt`.
+- `IrregularBodyMesh` loads approved GLBs through Three's `GLTFLoader`, decomposes nested mesh transforms, centers the imported bounds on the body origin, and uniformly scales the source bounding radius to the app's `body.radius`. This keeps focus distance, labels, indicators, and screen-space radius on the existing body metadata contract.
+- `BodySurfaceMaterial` centralizes the surface material routing so sphere-backed and mesh-backed bodies share the same textured, solid, and custom material behavior. Phobos and Deimos reuse the approved NASA texture assets from `bodyTextures.ts` rather than the source GLB texture payload.
 - Bodies with `material: 'basic'` use `SolidBodyMaterial` only when `bodyTextures.ts` has no approved texture for that body. The deployed major moons now use NASA-sourced texture assets through the same shared world-space lighting path as the standard textured planets: Phobos, Deimos, Io, Europa, Ganymede, Callisto, Mimas, Enceladus, Tethys, Dione, Rhea, Titan, Iapetus, Ariel, Umbriel, Titania, Oberon, Miranda, and Triton.
-- Every body mesh now rotates around its physical north-pole axis at its physical sidereal rate via a quaternion composed of a pole-alignment quaternion and a per-frame spin quaternion. Rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)` so it stays consistent with the simulation clock.
+- Every rendered body shape now rotates around its physical north-pole axis at its physical sidereal rate via a quaternion composed of a pole-alignment quaternion and a per-frame spin quaternion. Rotation is driven by `simDelta = delta × playbackRateMultiplier × (isPaused ? 0 : 1)` so it stays consistent with the simulation clock.
 - The Moon is tidally locked: its spin angle is derived each frame from the Moon-to-Earth direction projected onto its equatorial plane, keeping the same face toward Earth at all simulation speeds.
 - Saturn uses a custom surface material and a ring mesh whose plane is kept perpendicular to Saturn's physical spin axis by orienting it with a quaternion derived from the metadata pole direction. The `ringNormal` shader uniform in `SaturnSurfaceMaterial` uses the same pole vector so ring shadows remain geometrically consistent with the ring mesh.
 - Earth uses day, night, normal, specular, and cloud layers. The cloud shell and the cloud-shadow UV offset in the surface shader advance in sync around Earth's tilted pole axis at the same angular rate. The surface shader samples cloud shadows using an `earthPoleDirection` uniform (from metadata) instead of world Y so shadow latitude rings track the correct axis. Earth's prime meridian is anchored to solar noon at simulation start and advances at the physical sidereal rate.
 - Venus uses a textured surface plus a cloud shell that rotates retrograde around Venus's tilted pole, drifting relative to the surface for visible atmospheric super-rotation.
 - Moon uses texture and height data for extra relief.
-- The remaining bodies use shared texture-driven materials from `bodyTextures.ts`.
+- The remaining non-mesh bodies use shared texture-driven materials from `bodyTextures.ts`.
 
 ## Testing And Validation
 
@@ -124,6 +130,7 @@ Additional notes:
 - `pnpm test:e2e` is separate and requires `pnpm exec playwright install` plus a local preview server at `http://127.0.0.1:4173`.
 - The checked-in Playwright smoke spec now covers the overview HUD startup flow on desktop and mobile browser projects.
 - Milestone 13 is complete. The deployed targeted `4` samples/orbit fast-moon profile passed local and GitHub Pages validation with one-year JSON chunks; chunk-size and file-format optimization remains optional future work only if later measurements justify it.
+- Milestone 15 is complete. Phobos and Deimos use reviewed mesh-backed shapes, and the runtime GLBs are copied to `dist/meshes/` during production builds.
 
 ## Deployment
 
@@ -132,6 +139,7 @@ Additional notes:
 - The workflow downloads the pinned GitHub release asset `ephemeris-expanded-major-moons-targeted-4-samples-v1.zip` from release tag `ephemeris-expanded-major-moons-targeted-4-samples-v1`, expands it into `public/ephemeris/generated/`, validates the generated body set with the explicit fast-moon allow flag, and publishes those generated assets through the normal `dist/` artifact without committing them to git. `scripts/Package-ReducedMajorMoonsReleaseAsset.ps1` packages the ignored staged preview assets into that release-asset shape.
 - `vite.config.ts` uses `/solar-system-web/` as the base during GitHub Actions builds and `./` locally.
 - Static texture imports are bundled through Vite so they work from the project-site base path.
+- Static mesh assets in `public/meshes/` are copied through Vite's public asset path and served relative to the configured base URL.
 
 ## Known Gaps And Planned Refactors
 
@@ -140,4 +148,5 @@ Additional notes:
 - Extend the minimized rendering-settings UI with sky-specific controls such as brightness.
 - Address visible pole artifacts on some body textures.
 - Evaluate bundle-size reductions if the current single chunk keeps growing.
+- Evaluate additional moon meshes such as Miranda and Ariel only after size, orientation, and visible-value review.
 - Revisit generated-data format only if later measurements show the accepted one-year JSON chunk baseline is insufficient.

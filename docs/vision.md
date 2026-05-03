@@ -19,6 +19,7 @@ The repository currently ships an overview-first solar-system scene with real-da
 - a real star-catalog sky layer with default-on constellation overlays, an aligned Milky Way texture background, and layer toggles
 - continuous body self-rotation
 - custom rendering passes for Venus, Earth, Moon, and Saturn
+- reviewed mesh-backed non-spherical shapes for Phobos and Deimos, sharing the existing lighting, focus, label, indicator, selection, and trail behavior
 
 ## Current Constraints
 
@@ -28,11 +29,12 @@ The repository currently ships an overview-first solar-system scene with real-da
 - Discovery aids are functional for the expanded major-moon catalog, with selectable planetary-system rows plus dedicated selector and playback surfaces instead of embedded HUD controls.
 - Deferred rendering audit work, including pole-artifact review and deeper `/debug` checks, is tracked as an optional unnumbered milestone.
 - The current rendering controls are limited to the layer panel and still need optional brightness tuning controls.
-- Cross-device interaction still needs a final closeout verification pass.
+- Phobos and Deimos are the only mesh-backed moons in the current deployed catalog; additional moon meshes are deferred until size, orientation, and visible-value review.
+- Cross-device interaction still needs ongoing regression checks as the catalog expands.
 
 ## Next Experience
 
-The current implementation focus moves past Milestone 13 into optional rendering validation, data optimization only if future measurements justify it, and later catalog or educational expansion.
+The current implementation focus moves past Milestone 15 into the curated small-body expansion planned for Milestone 16, with optional rendering validation and data optimization only if future measurements justify it.
 
 Focus areas:
 
@@ -40,6 +42,7 @@ Focus areas:
 - keep the accepted one-year JSON chunk delivery shape unless deployed measurements show a real user-facing issue
 - keep fixed body assumptions behind a central registry that can drive ids, hierarchy, discovery groups, trails, labels, special presentation behavior, and future system views
 - keep discovery and playback controls in dedicated, mobile-safe selector and control surfaces
+- keep the Phobos and Deimos mesh path stable while preserving spherical fallback behavior for bodies without approved meshes
 - revisit generated-data chunking or file format only if a later larger profile or deployed measurement shows the accepted one-year JSON chunk baseline is insufficient
 - keep optional rendering validation and deeper data-format optimization separate from closed numbered milestones
 

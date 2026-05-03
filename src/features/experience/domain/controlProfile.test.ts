@@ -37,6 +37,25 @@ const physicallyScaledCatalog: ResolvedBodyCatalog = {
   ]
 };
 
+const smallBodyCatalog: ResolvedBodyCatalog = {
+  metadata: [],
+  snapshot: {
+    capturedAt: '2026-04-22T00:00:00.000Z',
+    bodies: [],
+    trails: []
+  },
+  bodies: [
+    {
+      id: 'phobos',
+      displayName: 'Phobos',
+      color: '#8c7467',
+      radius: 0.055,
+      focusOffset: [0, 0.03, 0.55],
+      position: [10, 0, 0]
+    }
+  ]
+};
+
 describe('getControlProfile', () => {
   it('returns a mobile-friendly profile for coarse pointers', () => {
     expect(getControlProfile(true)).toMatchObject({
@@ -69,5 +88,12 @@ describe('getControlProfile', () => {
     expect(earth).toBeDefined();
     expect(range.minDistance).toBeGreaterThan(earth?.radius ?? 0);
     expect(range.maxDistance).toBeGreaterThan(10_000_000);
+  });
+
+  it('allows close inspection of tiny focused bodies', () => {
+    const range = getControlDistanceRange('phobos', smallBodyCatalog, false);
+
+    expect(range.minDistance).toBeGreaterThan(0.055);
+    expect(range.minDistance).toBeLessThan(0.14);
   });
 });

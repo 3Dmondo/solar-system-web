@@ -1,18 +1,15 @@
-import { useMemo, useRef } from 'react';
+import { Suspense, useMemo, useRef } from 'react';
 import { useFrame, type ThreeElements } from '@react-three/fiber';
 import { type ThreeEvent } from '@react-three/fiber';
-import { Mesh, Quaternion, Vector3 } from 'three';
+import { Group, Quaternion, Vector3 } from 'three';
 import { type BodyDefinition, type BodyId } from '../domain/body';
 import { useSimulationClockContext } from '../../experience/state/SimulationClockContext';
+import { BodySurfaceMaterial } from './BodySurfaceMaterial';
 import { EarthCloudLayer } from './EarthCloudLayer';
-import { EarthSurfaceMaterial } from './EarthSurfaceMaterial';
-import { MoonSurfaceMaterial } from './MoonSurfaceMaterial';
+import { IrregularBodyMesh } from './IrregularBodyMesh';
 import { SaturnRings } from './SaturnRings';
-import { SaturnSurfaceMaterial } from './SaturnSurfaceMaterial';
-import { SolidBodyMaterial } from './SolidBodyMaterial'
-import { TexturedPlanetMaterial } from './TexturedPlanetMaterial'
 import { VenusCloudLayer } from './VenusCloudLayer';
-import { hasBodyTexture } from '../rendering/bodyTextures'
+import { getRenderableBodyShapeAsset } from '../rendering/bodyShapeAssets'
 
 // Module-level reusable objects to avoid allocating per frame.
 const Y_UP = new Vector3(0, 1, 0)
@@ -35,10 +32,10 @@ export function PlanetBody({
   ...meshProps
 }: PlanetBodyProps) {
   const lastTouchTapRef = useRef(0);
-  const meshRef = useRef<Mesh>(null);
+  const bodyRotationRef = useRef<Group>(null);
   const sphereSegments = body.material === 'sun' ? 96 : body.material === 'moon' ? 128 : 64;
   const { playbackRateMultiplier, isPaused, simulationInitialUtcMs } = useSimulationClockContext();
-  const useSolidMaterial = body.material === 'basic' && !hasBodyTexture(body.id)
+  const bodyShapeAsset = getRenderableBodyShapeAsset(body.id)
 
   // Quaternion aligning the body Y axis to its physical north pole direction.
   const poleAlignQuat = useMemo(() => {
@@ -57,7 +54,7 @@ export function PlanetBody({
   const isSpinInitializedRef = useRef(false)
 
   useFrame((_, delta) => {
-    if (!meshRef.current || !body.poleDirectionRender || body.angularVelocityRadPerSec == null) {
+    if (!bodyRotationRef.current || !body.poleDirectionRender || body.angularVelocityRadPerSec == null) {
       return;
     }
 
@@ -102,7 +99,7 @@ export function PlanetBody({
       spinQuat.setFromAxisAngle(Y_UP, spinAngleRef.current)
     }
 
-    meshRef.current.quaternion.copy(poleAlignQuat).multiply(spinQuat)
+    bodyRotationRef.current.quaternion.copy(poleAlignQuat).multiply(spinQuat)
   });
 
   const handleDoubleClick = (event: ThreeEvent<MouseEvent>) => {
@@ -130,41 +127,47 @@ export function PlanetBody({
 
   return (
     <group position={body.position}>
-      <mesh
-        castShadow
-        {...meshProps}
-        ref={meshRef}
-        onDoubleClick={handleDoubleClick}
-        onPointerDown={handlePointerDown}
-        receiveShadow
+      <group
+        ref={bodyRotationRef}
         scale={focused ? 1.04 : 1}
       >
-        <sphereGeometry args={[body.radius, sphereSegments, sphereSegments]} />
-        {body.material === 'saturn' ? (
-          <SaturnSurfaceMaterial
-            bodyPosition={body.position}
-            poleDirectionRender={body.poleDirectionRender}
-            radius={body.radius}
-            sunPosition={sunPosition}
-          />
-        ) : body.material === 'earth' ? (
-          <EarthSurfaceMaterial bodyPosition={body.position} poleDirectionRender={body.poleDirectionRender} sunPosition={sunPosition} />
-        ) : body.material === 'moon' ? (
-          <MoonSurfaceMaterial bodyPosition={body.position} sunPosition={sunPosition} />
-        ) : useSolidMaterial ? (
-          <SolidBodyMaterial
-            bodyPosition={body.position}
-            color={body.color}
-            sunPosition={sunPosition}
-          />
+        {bodyShapeAsset ? (
+          <Suspense
+            fallback={(
+              <mesh
+                castShadow
+                {...meshProps}
+                onDoubleClick={handleDoubleClick}
+                onPointerDown={handlePointerDown}
+                receiveShadow
+              >
+                <sphereGeometry args={[body.radius, sphereSegments, sphereSegments]} />
+                <BodySurfaceMaterial body={body} sunPosition={sunPosition} />
+              </mesh>
+            )}
+          >
+            <IrregularBodyMesh
+              asset={bodyShapeAsset}
+              body={body}
+              meshProps={meshProps}
+              onDoubleClick={handleDoubleClick}
+              onPointerDown={handlePointerDown}
+              sunPosition={sunPosition}
+            />
+          </Suspense>
         ) : (
-          <TexturedPlanetMaterial
-            bodyId={body.id}
-            bodyPosition={body.position}
-            sunPosition={sunPosition}
-          />
+          <mesh
+            castShadow
+            {...meshProps}
+            onDoubleClick={handleDoubleClick}
+            onPointerDown={handlePointerDown}
+            receiveShadow
+          >
+            <sphereGeometry args={[body.radius, sphereSegments, sphereSegments]} />
+            <BodySurfaceMaterial body={body} sunPosition={sunPosition} />
+          </mesh>
         )}
-      </mesh>
+      </group>
 
       {body.hasRings ? (
         <SaturnRings

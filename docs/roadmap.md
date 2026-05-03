@@ -15,8 +15,8 @@
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 - Milestone 13 fast moon cadence work is complete. The current GitHub Pages deployment uses the targeted `4` samples/orbit expanded major-moons release asset with one-year JSON chunks and restored Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
 - Milestone 14 satellite texture and metadata work is complete. The current deployed major-moon set has approved NASA texture coverage where assets were available, and the committed body metadata snapshot now includes generated physical metadata for all current major moons.
-- Milestone 15 non-spherical moon shape work is planned. It will prototype mesh-backed rendering for selected irregular moons, starting with Phobos and Deimos.
-- Milestone 16 dwarf-planet and major-asteroid catalog work is planned. It will add a curated small-body expansion after kernel, metadata, UI-density, and static-delivery review.
+- Milestone 15 non-spherical moon shape work is complete. Phobos and Deimos now use reviewed NASA mesh-backed geometry through the shared material, pole/spin, focus, selection, label, indicator, and trail contracts.
+- Milestone 16 dwarf-planet and major-asteroid catalog work is planned next. It will add a curated small-body expansion after kernel, metadata, UI-density, and static-delivery review.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -346,15 +346,20 @@ Delivered:
 
 ## Milestone 15: Non-Spherical Moon Shapes
 
-Status: Planned
+Status: Complete
 
-Goals:
+Delivered:
 
-- add a production-ready non-spherical rendering path for selected irregular moons
-- start with Phobos and Deimos using the NASA model inventory documented in Milestone 14
-- preserve the existing physical pole, spin, lighting, focus, selection, label, indicator, and trail contracts
-- keep spherical rendering as the fallback for every body without an approved runtime mesh
-- measure mesh asset and bundle impact for the static GitHub Pages delivery path
+- added a production-ready mesh-backed rendering path for selected irregular moons
+- shipped reviewed NASA-derived optimized GLB runtime assets for Phobos and Deimos under `public/meshes/`
+- preserved the existing physical pole, spin, lighting, focus, selection, label, indicator, and trail contracts
+- kept spherical rendering as the fallback for every body without an approved runtime mesh
+- added radius-aware close focused zoom so small irregular moons can be inspected
+- measured static mesh asset output in the production build: Phobos 633,020 bytes and Deimos 600,432 bytes
+
+Deferred:
+
+- Miranda and Ariel remain follow-up candidates after additional size, orientation, and visible-value review
 
 ## Milestone 16: Dwarf Planets And Major Asteroids
 

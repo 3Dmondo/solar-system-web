@@ -1,0 +1,73 @@
+NASA irregular moon mesh attribution:
+
+NASA 3D model resource pages
+https://science.nasa.gov/resource/phobos-mars-moon-3d-model/
+https://science.nasa.gov/resource/deimos-mars-moon-3d-model/
+
+NASA Images and Media Usage Guidelines
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+Source claim:
+NASA's media guidance covers files used in the rendition of 3-dimensional
+models, including polygon data in any format. The guidance says NASA content is
+generally not subject to U.S. copyright, can be used for computer graphical
+simulations and Internet web pages, should acknowledge NASA as the source, and
+must not imply NASA endorsement. The Phobos and Deimos model pages do not mark
+the files as third-party copyrighted.
+
+Adopted source candidates:
+
+- Phobos
+  Body: Phobos
+  Source URL: https://science.nasa.gov/resource/phobos-mars-moon-3d-model/
+  Source file: https://assets.science.nasa.gov/content/dam/science/psd/mars/resources/gltf_files/24878_Phobos_1_1000.glb
+  Source format: glTF File (3D Model), delivered as GLB
+  Source listed date: Mar 8, 2024
+  Source listed size: 3.68 MB
+  Credit line: NASA/JPL-Caltech
+  Runtime file: public/meshes/phobos.glb
+  Runtime size after processing: 633,020 bytes
+  Runtime decision: optimized local GLB with embedded source texture resized to
+  a 16x16 placeholder because the app applies the existing approved Phobos
+  runtime texture through the shared material path. Source originals stay
+  outside git.
+
+- Deimos
+  Body: Deimos
+  Source URL: https://science.nasa.gov/resource/deimos-mars-moon-3d-model/
+  Source file: https://assets.science.nasa.gov/content/dam/science/psd/mars/resources/gltf_files/24879_Deimos_1_1000.glb
+  Source format: glTF File (3D Model), delivered as GLB
+  Source listed date: Mar 8, 2024
+  Source listed size: 1.53 MB
+  Credit line: NASA/JPL-Caltech
+  Runtime file: public/meshes/deimos.glb
+  Runtime size after processing: 600,432 bytes
+  Runtime decision: optimized local GLB with embedded source texture resized to
+  a 16x16 placeholder because the app applies the existing approved Deimos
+  runtime texture through the shared material path. Source originals stay
+  outside git.
+
+Milestone 15 runtime tier:
+Use optimized GLB files served from public/meshes/ for the first runtime pass.
+Do not use Draco or Meshopt in the first pass; avoiding decoder assets keeps the
+static GitHub Pages build simpler while the orientation, scale, picking, and
+bundle-size path is still being proven. Review Draco or Meshopt only if the
+production bundle/static asset review shows the plain optimized GLB tier is too
+large.
+
+Conversion commands:
+npx --yes @gltf-transform/cli optimize <scratch>/phobos-source.glb public/meshes/phobos.glb --compress false
+npx --yes @gltf-transform/cli optimize <scratch>/deimos-source.glb public/meshes/deimos.glb --compress false
+npx --yes @gltf-transform/cli resize public/meshes/phobos.glb public/meshes/phobos-smalltex.glb --width 16 --height 16
+npx --yes @gltf-transform/cli resize public/meshes/deimos.glb public/meshes/deimos-smalltex.glb --width 16 --height 16
+Move the `*-smalltex.glb` outputs back to the runtime filenames after checking
+the size delta.
+
+Processing notes:
+- Keep downloaded NASA source originals in a local scratch directory outside
+  the repository unless explicitly approved.
+- Commit only reviewed runtime GLB outputs.
+- Reuse the existing approved Phobos and Deimos runtime texture maps, so texture
+  attribution remains in assets/textures/ATTRIBUTION.txt.
+- Final GLB inspection showed no required decoder extensions and no animations.
+  Phobos has 14,446 uploaded vertices; Deimos has 13,697 uploaded vertices.

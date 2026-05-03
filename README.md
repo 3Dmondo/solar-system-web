@@ -7,12 +7,13 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - Starts in a solar-system overview with the HUD title `Solar System`.
 - Loads real ephemeris-driven body positions from generated assets at startup and shows an explicit loading or error state when they are unavailable.
 - Renders the Sun, all 8 planets, the Moon, and the expanded major-moon set with the Milestone 13 fast moons restored.
+- Uses reviewed NASA mesh-backed shapes for Phobos and Deimos, with spherical rendering still available as the fallback for bodies without approved runtime meshes.
 - Supports desktop orbit plus wheel zoom and mobile drag plus pinch zoom.
 - Uses a `Jump to` HUD menu plus double click or double tap to focus a body, and keeps `Jump to` available while focused so another body can be selected directly.
 - Includes a HUD help overlay, a focused-mode overview return control, a real star catalog, default-on constellation overlays, an aligned Milky Way texture background, and continuous self-rotation.
 - Uses directional camera easing, snaps the focus target onto the selected body center, frames focused bodies from the authored focus direction at about `10 x` body radius, and pulls back more decisively when returning to overview.
 - Uses thicker opaque orbital trails so they read consistently even when they cross in front of planets.
-- Uses custom material pipelines for Venus, Earth, Moon, and Saturn. The remaining bodies use shared texture-based materials.
+- Uses custom material pipelines for Venus, Earth, Moon, and Saturn. Phobos and Deimos use mesh-backed geometry with the shared texture-based material path, and the remaining bodies use shared texture-based materials.
 
 ## Current Project State
 
@@ -21,6 +22,7 @@ Static web-based solar-system explorer built for GitHub Pages. The current repo 
 - Orbital trails render from generated chunk data, including parent-relative satellite trails.
 - The scene still routes through the provider-backed `bodyStateStore.ts` boundary, with shared presentation metadata plus async-loaded snapshots merged at the catalog seam.
 - Milestone 5 now versions `public/ephemeris/body-metadata.json`, and local generated manifest or chunk assets are expected in the ignored `public/ephemeris/generated/` folder. The deployed default uses the one-year Milestone 13 targeted `4` samples/orbit major-moons release asset.
+- Runtime Phobos and Deimos mesh assets live in `public/meshes/`; source attribution and processing notes live in `assets/meshes/ATTRIBUTION.txt`.
 - `ScaleMode` exists only as a small domain placeholder. There is no realistic-scale UI yet.
 - Default validation currently passes with `pnpm lint`, `pnpm test`, and `pnpm build`.
 - `pnpm test:e2e` requires Playwright browsers and a local preview server.

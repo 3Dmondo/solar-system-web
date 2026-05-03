@@ -20,6 +20,8 @@ export type ControlDistanceRange = {
 };
 
 const staticOverviewSceneRadiusThreshold = 36;
+const desktopFocusedMinDistance = 0.08;
+const coarseFocusedMinDistance = 0.12;
 
 export function getControlProfile(isCoarsePointer: boolean): ControlProfile {
   if (isCoarsePointer) {
@@ -52,7 +54,18 @@ export function getControlDistanceRange(
   const sceneRadius = getSceneOverviewRadius(catalog);
 
   if (sceneRadius <= staticOverviewSceneRadiusThreshold) {
-    return baseRange;
+    if (focusedBodyId === 'overview') {
+      return baseRange;
+    }
+
+    return {
+      minDistance: getFocusedMinDistance(
+        getViewTargetVisibleRadius(focusedBodyId, catalog),
+        getFocusDistance(focusedBodyId, catalog),
+        isCoarsePointer
+      ),
+      maxDistance: baseRange.maxDistance
+    };
   }
 
   const overviewDistance = getFocusDistance('overview', catalog);
@@ -68,9 +81,23 @@ export function getControlDistanceRange(
   const focusDistance = getFocusDistance(focusedBodyId, catalog);
 
   return {
-    minDistance: Math.max(baseRange.minDistance, visibleRadius * 1.15, focusDistance * 0.25),
+    minDistance: getFocusedMinDistance(visibleRadius, focusDistance, isCoarsePointer),
     maxDistance: Math.max(baseRange.maxDistance, overviewDistance * 1.25, focusDistance * 64)
   };
+}
+
+function getFocusedMinDistance(
+  visibleRadius: number,
+  focusDistance: number,
+  isCoarsePointer: boolean
+) {
+  const absoluteFloor = isCoarsePointer ? coarseFocusedMinDistance : desktopFocusedMinDistance;
+
+  return Math.max(
+    absoluteFloor,
+    visibleRadius * 1.35,
+    focusDistance * 0.14
+  );
 }
 
 function getOverviewMinDistance(
