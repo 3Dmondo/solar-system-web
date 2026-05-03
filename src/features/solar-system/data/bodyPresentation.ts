@@ -9,6 +9,7 @@ export const presentationBodyMetadata: BodyMetadata[] = BODY_IDS.map((bodyId) =>
     color: registryEntry.color,
     material: registryEntry.material,
     radius: registryEntry.radius,
+    orbitalPeriodDays: registryEntry.orbitalPeriodDays,
     defaultTrailWindowDays: registryEntry.defaultTrailWindowDays,
     trailSampleRateMultiplier: registryEntry.trailSampleRateMultiplier,
     focusOffset: [...registryEntry.focusOffset],

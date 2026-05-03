@@ -86,6 +86,16 @@ describe('webEphemerisTrails', () => {
     })
   })
 
+  it('accepts fractional-day trail windows', () => {
+    expect(sampleChunkBodyTrailAtTdbTime(manifest, chunk, 'earth', 86400, 0.25)).toEqual({
+      id: 'earth',
+      positionsKm: [
+        [64800, 0, 0],
+        [86400, 0, 0]
+      ]
+    })
+  })
+
   it('resamples interior trail points with the configured cadence multiplier', () => {
     expect(
       sampleChunkBodyTrailAtTdbTime(

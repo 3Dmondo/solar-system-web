@@ -21,6 +21,7 @@ type BodyRegistryEntry = {
   color: string;
   material?: BodyMaterial;
   radius: number;
+  orbitalPeriodDays?: number;
   defaultTrailWindowDays?: number;
   trailSampleRateMultiplier?: number;
   focusOffset: [number, number, number];
@@ -66,6 +67,7 @@ function majorMoonEntry({
   displayName,
   color,
   radius,
+  orbitalPeriodDays,
   defaultTrailWindowDays,
   trailSampleRateMultiplier = 6
 }: {
@@ -75,6 +77,7 @@ function majorMoonEntry({
   displayName: string;
   color: string;
   radius: number;
+  orbitalPeriodDays: number;
   defaultTrailWindowDays: number;
   trailSampleRateMultiplier?: number;
 }): BodyRegistryEntry {
@@ -87,6 +90,7 @@ function majorMoonEntry({
     color,
     material: 'basic',
     radius,
+    orbitalPeriodDays,
     defaultTrailWindowDays,
     trailSampleRateMultiplier,
     focusOffset: [0, Math.max(0.03, radius * 0.5), Math.max(0.55, radius * 7.7)]
@@ -114,7 +118,8 @@ export const BODY_REGISTRY = {
     displayName: 'Mercury',
     color: '#9f9183',
     radius: 0.25,
-    defaultTrailWindowDays: 120,
+    orbitalPeriodDays: 87.9691,
+    defaultTrailWindowDays: 87.9691,
     trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.12, 1.8]
   },
@@ -127,7 +132,8 @@ export const BODY_REGISTRY = {
     color: '#d2a777',
     material: 'venus',
     radius: 0.52,
-    defaultTrailWindowDays: 240,
+    orbitalPeriodDays: 224.701,
+    defaultTrailWindowDays: 224.701,
     trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.18, 2.6]
   },
@@ -140,6 +146,7 @@ export const BODY_REGISTRY = {
     color: '#3a7bd5',
     material: 'earth',
     radius: 0.72,
+    orbitalPeriodDays: 365.256,
     defaultTrailWindowDays: 365,
     trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.25, 3.2],
@@ -154,6 +161,7 @@ export const BODY_REGISTRY = {
     color: '#b0b4be',
     material: 'moon',
     radius: 0.22,
+    orbitalPeriodDays: 27.321662,
     defaultTrailWindowDays: 27,
     trailSampleRateMultiplier: 5,
     focusOffset: [0, 0.12, 1.7]
@@ -166,7 +174,8 @@ export const BODY_REGISTRY = {
     displayName: 'Mars',
     color: '#bf6c4e',
     radius: 0.38,
-    defaultTrailWindowDays: 720,
+    orbitalPeriodDays: 686.98,
+    defaultTrailWindowDays: 686.98,
     trailSampleRateMultiplier: 2,
     focusOffset: [0, 0.14, 2.2]
   },
@@ -177,7 +186,8 @@ export const BODY_REGISTRY = {
     displayName: 'Phobos',
     color: '#8c7467',
     radius: 0.055,
-    defaultTrailWindowDays: 1,
+    orbitalPeriodDays: 0.31891,
+    defaultTrailWindowDays: 0.31891,
     trailSampleRateMultiplier: 10
   }),
   deimos: majorMoonEntry({
@@ -187,7 +197,8 @@ export const BODY_REGISTRY = {
     displayName: 'Deimos',
     color: '#9a8778',
     radius: 0.045,
-    defaultTrailWindowDays: 2,
+    orbitalPeriodDays: 1.262441,
+    defaultTrailWindowDays: 1.262441,
     trailSampleRateMultiplier: 10
   }),
   jupiter: {
@@ -198,6 +209,7 @@ export const BODY_REGISTRY = {
     displayName: 'Jupiter',
     color: '#c9a678',
     radius: 1.55,
+    orbitalPeriodDays: 4_332.589,
     defaultTrailWindowDays: 4_332,
     focusOffset: [0, 0.52, 6.4]
   },
@@ -208,7 +220,8 @@ export const BODY_REGISTRY = {
     displayName: 'Io',
     color: '#d6c76a',
     radius: 0.18,
-    defaultTrailWindowDays: 2,
+    orbitalPeriodDays: 1.769138,
+    defaultTrailWindowDays: 1.769138,
     trailSampleRateMultiplier: 10
   }),
   europa: majorMoonEntry({
@@ -218,7 +231,8 @@ export const BODY_REGISTRY = {
     displayName: 'Europa',
     color: '#d7c5ad',
     radius: 0.16,
-    defaultTrailWindowDays: 4,
+    orbitalPeriodDays: 3.551181,
+    defaultTrailWindowDays: 3.551181,
     trailSampleRateMultiplier: 10
   }),
   ganymede: majorMoonEntry({
@@ -228,7 +242,8 @@ export const BODY_REGISTRY = {
     displayName: 'Ganymede',
     color: '#a99078',
     radius: 0.24,
-    defaultTrailWindowDays: 8,
+    orbitalPeriodDays: 7.154553,
+    defaultTrailWindowDays: 7.154553,
     trailSampleRateMultiplier: 8
   }),
   callisto: majorMoonEntry({
@@ -238,7 +253,8 @@ export const BODY_REGISTRY = {
     displayName: 'Callisto',
     color: '#796b62',
     radius: 0.22,
-    defaultTrailWindowDays: 17,
+    orbitalPeriodDays: 16.689018,
+    defaultTrailWindowDays: 16.689018,
     trailSampleRateMultiplier: 6
   }),
   saturn: {
@@ -250,6 +266,7 @@ export const BODY_REGISTRY = {
     color: '#cdb075',
     material: 'saturn',
     radius: 1.35,
+    orbitalPeriodDays: 10_759.22,
     defaultTrailWindowDays: 8_000,
     focusOffset: [0, 0.45, 5.8],
     hasRings: true
@@ -261,7 +278,8 @@ export const BODY_REGISTRY = {
     displayName: 'Mimas',
     color: '#bdb7aa',
     radius: 0.06,
-    defaultTrailWindowDays: 1,
+    orbitalPeriodDays: 0.942422,
+    defaultTrailWindowDays: 0.942422,
     trailSampleRateMultiplier: 10
   }),
   enceladus: majorMoonEntry({
@@ -271,7 +289,8 @@ export const BODY_REGISTRY = {
     displayName: 'Enceladus',
     color: '#dfe3e4',
     radius: 0.075,
-    defaultTrailWindowDays: 2,
+    orbitalPeriodDays: 1.370218,
+    defaultTrailWindowDays: 1.370218,
     trailSampleRateMultiplier: 10
   }),
   tethys: majorMoonEntry({
@@ -281,7 +300,8 @@ export const BODY_REGISTRY = {
     displayName: 'Tethys',
     color: '#c9c3b9',
     radius: 0.09,
-    defaultTrailWindowDays: 2,
+    orbitalPeriodDays: 1.887803,
+    defaultTrailWindowDays: 1.887803,
     trailSampleRateMultiplier: 10
   }),
   dione: majorMoonEntry({
@@ -291,7 +311,8 @@ export const BODY_REGISTRY = {
     displayName: 'Dione',
     color: '#beb8ae',
     radius: 0.095,
-    defaultTrailWindowDays: 3,
+    orbitalPeriodDays: 2.736916,
+    defaultTrailWindowDays: 2.736916,
     trailSampleRateMultiplier: 8
   }),
   rhea: majorMoonEntry({
@@ -301,7 +322,8 @@ export const BODY_REGISTRY = {
     displayName: 'Rhea',
     color: '#b4afa5',
     radius: 0.12,
-    defaultTrailWindowDays: 5,
+    orbitalPeriodDays: 4.517503,
+    defaultTrailWindowDays: 4.517503,
     trailSampleRateMultiplier: 8
   }),
   titan: majorMoonEntry({
@@ -311,7 +333,8 @@ export const BODY_REGISTRY = {
     displayName: 'Titan',
     color: '#c7934e',
     radius: 0.24,
-    defaultTrailWindowDays: 16,
+    orbitalPeriodDays: 15.945448,
+    defaultTrailWindowDays: 15.945448,
     trailSampleRateMultiplier: 6
   }),
   iapetus: majorMoonEntry({
@@ -321,6 +344,7 @@ export const BODY_REGISTRY = {
     displayName: 'Iapetus',
     color: '#9d9182',
     radius: 0.115,
+    orbitalPeriodDays: 79.33085,
     defaultTrailWindowDays: 79,
     trailSampleRateMultiplier: 4
   }),
@@ -332,6 +356,7 @@ export const BODY_REGISTRY = {
     displayName: 'Uranus',
     color: '#92c9d6',
     radius: 0.92,
+    orbitalPeriodDays: 30_688.5,
     defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.3, 4]
   },
@@ -342,7 +367,8 @@ export const BODY_REGISTRY = {
     displayName: 'Ariel',
     color: '#bfc7ca',
     radius: 0.095,
-    defaultTrailWindowDays: 3,
+    orbitalPeriodDays: 2.520379,
+    defaultTrailWindowDays: 2.520379,
     trailSampleRateMultiplier: 9
   }),
   umbriel: majorMoonEntry({
@@ -352,6 +378,7 @@ export const BODY_REGISTRY = {
     displayName: 'Umbriel',
     color: '#777d82',
     radius: 0.095,
+    orbitalPeriodDays: 4.144176,
     defaultTrailWindowDays: 4,
     trailSampleRateMultiplier: 9
   }),
@@ -362,7 +389,8 @@ export const BODY_REGISTRY = {
     displayName: 'Titania',
     color: '#a5adb0',
     radius: 0.13,
-    defaultTrailWindowDays: 9,
+    orbitalPeriodDays: 8.705865,
+    defaultTrailWindowDays: 8.705865,
     trailSampleRateMultiplier: 9
   }),
   oberon: majorMoonEntry({
@@ -372,7 +400,8 @@ export const BODY_REGISTRY = {
     displayName: 'Oberon',
     color: '#928a83',
     radius: 0.125,
-    defaultTrailWindowDays: 14,
+    orbitalPeriodDays: 13.463232,
+    defaultTrailWindowDays: 13.463232,
     trailSampleRateMultiplier: 8
   }),
   miranda: majorMoonEntry({
@@ -382,7 +411,8 @@ export const BODY_REGISTRY = {
     displayName: 'Miranda',
     color: '#aeb6b8',
     radius: 0.065,
-    defaultTrailWindowDays: 2,
+    orbitalPeriodDays: 1.413479,
+    defaultTrailWindowDays: 1.413479,
     trailSampleRateMultiplier: 10
   }),
   neptune: {
@@ -393,6 +423,7 @@ export const BODY_REGISTRY = {
     displayName: 'Neptune',
     color: '#557fda',
     radius: 0.88,
+    orbitalPeriodDays: 60_182,
     defaultTrailWindowDays: 9_125,
     focusOffset: [0, 0.28, 3.8]
   },
@@ -403,7 +434,8 @@ export const BODY_REGISTRY = {
     displayName: 'Triton',
     color: '#b9bec5',
     radius: 0.16,
-    defaultTrailWindowDays: 6,
+    orbitalPeriodDays: 5.876854,
+    defaultTrailWindowDays: 5.876854,
     trailSampleRateMultiplier: 8
   })
 } satisfies Record<string, BodyRegistryEntry>;
@@ -529,6 +561,7 @@ export type BodyMetadata = {
   color: string;
   material?: BodyMaterial;
   radius: number;
+  orbitalPeriodDays?: number;
   defaultTrailWindowDays?: number;
   /**
    * Multiplier applied to the source ephemeris cadence when preparing trail points.

@@ -58,6 +58,38 @@ describe('body registry', () => {
     expect(isSatellite('moon')).toBe(true);
   });
 
+  it('documents orbital periods for non-star trail windows', () => {
+    expect(getBodyRegistryEntry('sun').orbitalPeriodDays).toBeUndefined();
+    expect(getBodyRegistryEntry('sun').defaultTrailWindowDays).toBe(0);
+
+    for (const bodyId of BODY_IDS) {
+      if (isStar(bodyId)) {
+        continue;
+      }
+
+      const orbitalPeriodDays = getBodyRegistryEntry(bodyId).orbitalPeriodDays;
+
+      expect(orbitalPeriodDays).toEqual(expect.any(Number));
+      if (orbitalPeriodDays === undefined) {
+        throw new Error(`${bodyId} is missing orbitalPeriodDays`);
+      }
+      expect(orbitalPeriodDays).toBeGreaterThan(0);
+      expect(Number.isFinite(orbitalPeriodDays)).toBe(true);
+    }
+  });
+
+  it('keeps default trail windows no longer than one orbit', () => {
+    for (const bodyId of BODY_IDS) {
+      const body = getBodyRegistryEntry(bodyId);
+
+      if (body.orbitalPeriodDays === undefined) {
+        continue;
+      }
+
+      expect(body.defaultTrailWindowDays ?? 0).toBeLessThanOrEqual(body.orbitalPeriodDays);
+    }
+  });
+
   it('keeps jump groups removed for the Phase 4 selector model', () => {
     const groupedBodyIds = new Set<string>();
 
