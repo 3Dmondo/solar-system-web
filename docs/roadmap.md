@@ -14,6 +14,7 @@
 - Milestone 11 full solar system explorer work is complete. It delivered the central registry, reduced major-moon deployment path, HUD, selector, playback-control, ephemeris-range, educational context, and selectable planetary-system view passes; Milestone 13 later restored the deferred fast moons into the current default deployment.
 - Milestone 12 Milky Way sky texture work is complete, with an aligned KTX2 Milky Way background, default-on constellations, default-on Milky Way layer, and 4k texture target after 8k browser memory testing.
 - Milestone 13 fast moon cadence work is complete. The current GitHub Pages deployment uses the targeted `4` samples/orbit expanded major-moons release asset with one-year JSON chunks and restored Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
+- Milestone 14 satellite texture and metadata work is complete. The current deployed major-moon set has approved NASA texture coverage where assets were available, and the committed body metadata snapshot now includes generated physical metadata for all current major moons.
 
 ## Milestone 1: Foundation And Planet Showcase
 
@@ -322,3 +323,21 @@ Delivered:
 - targeted `4` samples/orbit profile adopted after normalized error review, local visual inspection, and deployed GitHub Pages validation
 - one-year JSON chunks retained for the restored profile, with generated data still shipped through a pinned GitHub release asset rather than committed to git
 - available texture inventory reviewed; restored fast moons without local dedicated assets use the solid-color fallback
+
+## Milestone 14: Satellite Textures And Physical Metadata
+
+Status: Complete
+
+Goals:
+
+- adopt approved NASA texture assets for the full currently deployed major-moon catalog
+- refresh committed generated physical metadata so current satellites receive radii, shape fields, pole orientation, rotation, and GM-derived facts when SPICE provides them
+- inventory NASA 3D moon model availability without adding production GLTF rendering
+
+Delivered:
+
+- added NASA 3D Resources JPG textures for Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda
+- preserved the existing reduced major-moon texture assets and routed the full deployed major-moon set through the shared texture-backed material path
+- refreshed `public/ephemeris/body-metadata.json` for all 29 current deployed body ids
+- updated the sibling SpiceNet metadata snapshot script so future refreshes request the full current web body set
+- documented Phobos and Deimos as the first future non-spherical mesh candidates, with other moon GLTF/USDZ sizes recorded for later review

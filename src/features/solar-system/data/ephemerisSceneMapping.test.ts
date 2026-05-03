@@ -240,6 +240,59 @@ describe('ephemerisSceneMapping', () => {
     expect(moon?.poleDirectionRender).toBeUndefined()
     expect(moon?.angularVelocityRadPerSec).toBeUndefined()
   })
+
+  it('maps satellite physical metadata into radius, facts, pole, and spin fields', () => {
+    const phobosMetadata: BodyMetadata = {
+      id: 'phobos',
+      displayName: 'Phobos',
+      color: '#8c7467',
+      material: 'basic',
+      radius: 0.055,
+      focusOffset: [0, 0.03, 0.55]
+    }
+    const phobosPhysicalMetadata: BodyPhysicalMetadata = {
+      id: 'phobos',
+      naifBodyId: 401,
+      radiiKm: [13, 11.4, 9.1],
+      meanRadiusKm: 11.166666666666666,
+      gravitationalParameterKm3PerSec2: 0.0007087,
+      physicalProperties: {
+        referenceRadiusKm: 11.166666666666666,
+        approximateMassKg: 1.061e16,
+        approximateSurfaceGravityMps2: 0.0057,
+        approximateEscapeVelocityKmPerSec: 0.011,
+        approximateBulkDensityKgPerM3: 1860
+      },
+      poleOrientation: {
+        referenceEpoch: 'J2000',
+        northPoleUnitVectorJ2000: [0, 0, 1]
+      },
+      rotationModel: {
+        siderealRotationPeriodHours: 7.65,
+        isRetrograde: false
+      }
+    }
+
+    const mappedMetadata = mapPhysicalMetadataToScaledBodyMetadata(
+      [phobosPhysicalMetadata],
+      createPhysicalSceneScale(0.001),
+      [phobosMetadata]
+    )
+    const phobos = mappedMetadata[0]
+
+    expect(phobos?.radius).toBeCloseTo(0.011166666666666667, 12)
+    expect(phobos?.focusOffset[2]).toBeCloseTo(0.11166666666666666, 12)
+    expect(phobos?.facts).toEqual({
+      meanRadiusKm: 11.166666666666666,
+      approximateSurfaceGravityMps2: 0.0057,
+      approximateBulkDensityKgPerM3: 1860,
+      provenance: 'Generated physical metadata, NAIF 401'
+    })
+    expect(phobos?.poleDirectionRender?.[0]).toBeCloseTo(0, 12)
+    expect(phobos?.poleDirectionRender?.[1]).toBeCloseTo(0.9174820621, 10)
+    expect(phobos?.poleDirectionRender?.[2]).toBeCloseTo(-0.3977771559, 10)
+    expect(phobos?.angularVelocityRadPerSec).toBeGreaterThan(0)
+  })
 })
 
 function getDistance(
