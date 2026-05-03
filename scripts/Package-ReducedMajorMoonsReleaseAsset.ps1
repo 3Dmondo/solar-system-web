@@ -1,7 +1,8 @@
 param(
   [string]$InputRoot = (Join-Path $PSScriptRoot "..\public\ephemeris\generated-expanded-major-moons"),
   [string]$OutputRoot = (Join-Path $PSScriptRoot "..\.tmp\ephemeris-release"),
-  [string]$AssetName = "ephemeris-expanded-major-moons-reduced-v1.zip"
+  [string]$AssetName = "ephemeris-expanded-major-moons-reduced-v1.zip",
+  [switch]$AllowMilestone13FastMoons
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,9 +29,9 @@ $deferredFastMoonIds = @(401, 402, 501, 502, 601, 602, 603, 604, 701, 705)
 $manifestBodyIds = @($manifest.Bodies | ForEach-Object { [int]$_.BodyId })
 $includedDeferredFastMoonIds = @($manifestBodyIds | Where-Object { $deferredFastMoonIds -contains $_ })
 
-if ($includedDeferredFastMoonIds.Count -gt 0) {
+if ($includedDeferredFastMoonIds.Count -gt 0 -and -not $AllowMilestone13FastMoons) {
   $blockedIds = ($includedDeferredFastMoonIds | Sort-Object -Unique) -join ", "
-  throw "Refusing to package release data with Milestone 13 fast-moon ids: $blockedIds."
+  throw "Refusing to package release data with Milestone 13 fast-moon ids: $blockedIds. Pass -AllowMilestone13FastMoons only for Milestone 13 validation assets."
 }
 
 New-Item -ItemType Directory -Force -Path $OutputRoot | Out-Null

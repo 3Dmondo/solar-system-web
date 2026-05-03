@@ -14,7 +14,7 @@ describe('body textures', () => {
     expect(hasBodyTexture('triton')).toBe(true)
   })
 
-  it('keeps deferred fast moons on the solid fallback path', () => {
+  it('keeps fast moons without dedicated local texture assets on the solid fallback path', () => {
     expect(hasBodyTexture('phobos')).toBe(false)
     expect(hasBodyTexture('deimos')).toBe(false)
     expect(hasBodyTexture('io')).toBe(false)

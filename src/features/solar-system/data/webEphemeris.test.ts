@@ -4,6 +4,7 @@ import {
   getChunkBodyById,
   getChunkBodySampleAt,
   getChunkBodySampleTime,
+  getExpectedChunkBodySampleCount,
   getManifestBodyById,
   getNaifBodyId,
   parseWebEphemerisChunk,
@@ -134,6 +135,34 @@ describe('webEphemeris', () => {
       positionKm: [110, 111, 112],
       velocityKmPerSecond: [4, 5, 6]
     })
+  })
+
+  it('reconstructs fractional-day cadence sample times', () => {
+    const chunkRange = {
+      fileName: 'chunk-2026-2027.json',
+      startUtc: '2026-01-01T12:00:00+00:00',
+      endUtc: '2026-01-02T12:00:00+00:00',
+      startTdbSecondsFromJ2000: 0,
+      endTdbSecondsFromJ2000: 86_400
+    }
+    const manifestBody = {
+      bodyId: 'moon' as const,
+      naifBodyId: 301,
+      bodyName: 'Moon',
+      sourceNaifBodyId: 301,
+      sourceBodyName: 'Moon',
+      sampleDays: 0.25
+    }
+    const chunk = {
+      schemaVersion: 1,
+      centerNaifBodyId: 0,
+      range: chunkRange,
+      bodies: []
+    }
+
+    expect(getExpectedChunkBodySampleCount(chunkRange, manifestBody)).toBe(5)
+    expect(getChunkBodySampleTime(chunk, manifestBody, 1)).toBe(21_600)
+    expect(getChunkBodySampleTime(chunk, manifestBody, 4)).toBe(86_400)
   })
 
   it('rejects unsupported runtime layouts', () => {

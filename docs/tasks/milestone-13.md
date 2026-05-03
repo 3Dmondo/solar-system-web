@@ -1,6 +1,6 @@
 # Milestone 13: Fast Moon Cadence
 
-Status: Planned
+Status: In Progress
 
 ## Start Point
 
@@ -60,24 +60,24 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 
 ### Phase 1: Generator Cadence Support
 
-- [ ] Add fractional-day or hour-based cadence support to the expanded `SpiceNet` profile path.
-- [ ] Add generator tests for fractional cadence sample counts, terminal chunk-end samples, and manifest output.
-- [ ] Confirm the current web runtime can parse and interpolate fractional `SampleDays` without schema changes.
+- [x] Add fractional-day cadence support to the expanded `SpiceNet` profile path.
+- [x] Add generator tests for fractional cadence sample counts, terminal chunk-end samples, and manifest output.
+- [x] Confirm the current web runtime can parse and interpolate fractional `SampleDays` without schema changes.
 
 ### Phase 2: Fast Moon Benchmark
 
-- [ ] Define per-body cadence candidates for Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
-- [ ] Derive first-pass cadence candidates from orbital period using at least `4` samples per orbit and a preferred `8` samples per orbit target before size and memory tradeoff review.
-- [ ] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
-- [ ] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
+- [x] Define per-body cadence candidates for Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, and Miranda.
+- [x] Derive first-pass cadence candidates from orbital period using at least `4` samples per orbit and a preferred `8` samples per orbit target before size and memory tradeoff review.
+- [x] Run at least three profile variants: current integer-day baseline for comparison, targeted fast-moon sub-day profile, and conservative high-quality profile.
+- [x] Report raw size, gzip size, largest chunk gzip size, request count, parse time, and generation time.
 - [ ] Compare the accepted one-year reduced-profile chunk baseline against any proposed smaller-chunk or alternate-format profile only if measured startup, parse, or memory costs require it.
-- [ ] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
+- [x] Normalize interpolation error by local orbit scale and estimate focused-view screen displacement.
 - [ ] Build a truth-comparison visual diagnostic for selected timestamps that can render sampled/interpolated positions against direct `SpiceNet` truth for the deferred fast moons.
 - [ ] Inspect whether the original large kilometer errors are visible in actual focused local-system views at normal playback speeds, fast playback, and paused trail inspection.
 
 ### Phase 3: Runtime And UX Validation
 
-- [ ] Reintroduce the deferred fast moons into the preview profile.
+- [x] Reintroduce the deferred fast moons into the preview profile.
 - [ ] Validate focused local-system views for Mars, Jupiter, Saturn, and Uranus.
 - [ ] Check parent-relative trails for visible discontinuities during playback and pause.
 - [ ] Validate jump-menu usability and body picking with the restored dense systems.
@@ -104,3 +104,59 @@ Europa, Dione, and Ariel are the most plausible first candidates for a permissiv
 - The sampling strategy must be chosen from orbital behavior and validated with visual impact, not kilometer error alone.
 - The slower Milestone 11 moon subset remains the near-term preview path while this cadence work is planned.
 - One-year JSON chunks are accepted for the reduced-profile Milestone 13 starting point after local and deployed assessment.
+
+## Execution Notes
+
+- 2026-05-03: Phase 1 generator support is implemented in the sibling `SpiceNet` checkout. `Spice.WebDataGenerator` now carries `SampleDays` as a fractional numeric value for default cadence, per-body cadence overrides, manifest body cadence, and configured-cadence benchmark reports. The generator retains the existing manifest schema and runtime layout string.
+- 2026-05-03: Added `SpiceNet` unit coverage for fractional cadence parsing, sub-day sample timelines, terminal chunk-end samples, and manifest cadence field types.
+- 2026-05-03: The web runtime already accepted positive numeric `SampleDays`; added a regression test for fractional-day sample-time reconstruction and removed integer cadence casts from the local reduced-moon diagnostic script.
+- 2026-05-03: Added `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Generate-WebDataFastMoonCadenceBenchmarks.ps1` for the Phase 2 benchmark run. The script preserves the accepted pre-Milestone 13 one-year JSON chunk baseline by using `--chunk-years 1` for all variants and keeps outputs under ignored `SpiceNet\artifacts\web-data\milestone-13-fast-moon-cadence\`.
+- 2026-05-03: The Phase 2 runner defines three variants but has only been validated with `-PrintOnly` so far: `IntegerDayBaseline`, `TargetedFastMoons`, and `ConservativeHighQuality`.
+- 2026-05-03: Ran all three Phase 2 variants from cached kernels with one-year chunks. Total wall-clock time for the combined run was about `7` minutes. Outputs remain ignored under `C:\Dev\repos\3Dmondo\SpiceNet\artifacts\web-data\milestone-13-fast-moon-cadence\`.
+- 2026-05-03: Added `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Measure-FastMoonCadenceBenchmarks.ps1` to summarize generated size, largest one-year chunk size, local Node `JSON.parse` timing for the largest chunk, and fast-moon orbit-scale normalized error.
+- 2026-05-03: Staged the targeted `4` samples/orbit profile into `public/ephemeris/generated-expanded-major-moons/` with `-AllowMilestone13FastMoons`. User visual inspection reported the `4` samples/orbit profile looks fine.
+- 2026-05-03: Local texture inventory does not include dedicated texture files for the restored fast moons Phobos, Deimos, Io, Europa, Mimas, Enceladus, Tethys, Dione, Ariel, or Miranda. The app already wires the available dedicated major-moon textures for Ganymede, Callisto, Rhea, Titan, Iapetus, Umbriel, Titania, Oberon, and Triton; restored fast moons remain on the solid-color fallback until approved texture assets are added.
+- 2026-05-03: Prepared a GitHub Pages validation deployment path for the targeted `4` samples/orbit profile. The Pages workflow now points at release tag `ephemeris-expanded-major-moons-targeted-4-samples-v1` and asset `ephemeris-expanded-major-moons-targeted-4-samples-v1.zip`, with an explicit fast-moon allow flag in the release-asset validation. This is a validation deployment choice, not the final adoption decision.
+- 2026-05-03: Included user trail-sampling tuning for Europa, Ariel, Umbriel, Titania, and Oberon in the deployment-validation commit.
+
+## Fast-Moon Cadence Candidates
+
+These first-pass candidates are period-derived. `TargetedDays` provides at least `4` samples per orbit; `HighQualityDays` is the preferred `8` samples per orbit starting point before size, parse, memory, and visual review.
+
+| Body | NAIF id | Approx period days | TargetedDays | HighQualityDays |
+| --- | ---: | ---: | ---: | ---: |
+| Phobos | `401` | `0.319` | `0.080` | `0.040` |
+| Deimos | `402` | `1.263` | `0.316` | `0.158` |
+| Io | `501` | `1.769` | `0.442` | `0.221` |
+| Europa | `502` | `3.551` | `0.888` | `0.444` |
+| Mimas | `601` | `0.942` | `0.235` | `0.118` |
+| Enceladus | `602` | `1.370` | `0.343` | `0.171` |
+| Tethys | `603` | `1.888` | `0.472` | `0.236` |
+| Dione | `604` | `2.737` | `0.684` | `0.342` |
+| Ariel | `701` | `2.520` | `0.630` | `0.315` |
+| Miranda | `705` | `1.413` | `0.353` | `0.177` |
+
+## Phase 2 Benchmark Record
+
+Inputs:
+
+- Source: `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Generate-WebDataFastMoonCadenceBenchmarks.ps1 -Variant All`
+- Measurement: `C:\Dev\repos\3Dmondo\SpiceNet\scripts\Measure-FastMoonCadenceBenchmarks.ps1 -AsJson`
+- Coverage: `1901` through `2099`, emitted as `199` one-year chunks per variant.
+- Truth sampling: `6` hours.
+- Parse timing: local Node `JSON.parse` of each variant's largest raw JSON chunk; this is a local parse proxy, not a browser `/debug` measurement.
+- Focused displacement proxy: max interpolation error normalized by mean local orbit radius from `chunk-2026-2027.json`, projected onto a `300 px` focused orbit radius.
+
+| Variant | Raw bytes | Gzip bytes | Largest chunk | Largest gzip bytes | Largest JSON.parse ms |
+| --- | ---: | ---: | --- | ---: | ---: |
+| Integer day baseline | `145,120,405` | `69,731,109` | `chunk-1980-1981.json` | `353,264` | `3.62` |
+| Targeted fast moons, 4 samples/orbit | `345,253,693` | `164,242,990` | `chunk-2040-2041.json` | `832,232` | `8.23` |
+| Conservative high quality, 8 samples/orbit | `627,504,807` | `296,833,013` | `chunk-2040-2041.json` | `1,504,551` | `12.69` |
+
+Fast-moon normalized result summary:
+
+- Integer-day baseline remains visibly invalid for fast moons: Phobos, Mimas, Enceladus, and Miranda exceed `70%` of mean local orbit radius, and several others exceed a `20 px` focused displacement proxy.
+- Targeted `4` samples/orbit reduces all deferred fast moons to roughly `1.5%` to `1.7%` of local orbit radius, about `4.6 px` to `5.2 px` on the focused displacement proxy.
+- Conservative `8` samples/orbit reduces all deferred fast moons to roughly `0.10%` to `0.16%` of local orbit radius, about `0.3 px` to `0.5 px` on the focused displacement proxy.
+- The 8-sample profile is the first benchmark profile that clearly clears the numeric focused-displacement proxy, but it raises total gzip from the accepted reduced-profile baseline's `30.3 MB` to `296.8 MB`.
+- One-year chunks are still viable by largest-chunk parse proxy: even the 8-sample profile's largest raw one-year chunk parsed locally in about `13 ms`. Browser `/debug` startup, heap, and visual playback still need validation before adoption.

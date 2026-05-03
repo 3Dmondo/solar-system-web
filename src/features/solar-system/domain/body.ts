@@ -219,7 +219,7 @@ export const BODY_REGISTRY = {
     color: '#d7c5ad',
     radius: 0.16,
     defaultTrailWindowDays: 4,
-    trailSampleRateMultiplier: 8
+    trailSampleRateMultiplier: 10
   }),
   ganymede: majorMoonEntry({
     naifBodyId: 503,
@@ -343,7 +343,7 @@ export const BODY_REGISTRY = {
     color: '#bfc7ca',
     radius: 0.095,
     defaultTrailWindowDays: 3,
-    trailSampleRateMultiplier: 8
+    trailSampleRateMultiplier: 9
   }),
   umbriel: majorMoonEntry({
     naifBodyId: 702,
@@ -353,7 +353,7 @@ export const BODY_REGISTRY = {
     color: '#777d82',
     radius: 0.095,
     defaultTrailWindowDays: 4,
-    trailSampleRateMultiplier: 8
+    trailSampleRateMultiplier: 9
   }),
   titania: majorMoonEntry({
     naifBodyId: 703,
@@ -363,7 +363,7 @@ export const BODY_REGISTRY = {
     color: '#a5adb0',
     radius: 0.13,
     defaultTrailWindowDays: 9,
-    trailSampleRateMultiplier: 6
+    trailSampleRateMultiplier: 9
   }),
   oberon: majorMoonEntry({
     naifBodyId: 704,
@@ -373,7 +373,7 @@ export const BODY_REGISTRY = {
     color: '#928a83',
     radius: 0.125,
     defaultTrailWindowDays: 14,
-    trailSampleRateMultiplier: 6
+    trailSampleRateMultiplier: 8
   }),
   miranda: majorMoonEntry({
     naifBodyId: 705,

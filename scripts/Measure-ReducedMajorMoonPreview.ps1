@@ -47,7 +47,7 @@ function Get-BodyPositionAtTime {
   param(
     [Parameter(Mandatory = $true)]$Body,
     [Parameter(Mandatory = $true)][double]$Time,
-    [Parameter(Mandatory = $true)][int]$SampleDays,
+    [Parameter(Mandatory = $true)][double]$SampleDays,
     [Parameter(Mandatory = $true)][double]$ChunkStart,
     [Parameter(Mandatory = $true)][double]$ChunkEnd
   )
@@ -165,13 +165,13 @@ $diagnostics = foreach ($moonBodyId in ($retainedMoonParentIds.Keys | Sort-Objec
       $chunkEnd
     }
     else {
-      $chunkStart + ([double]$sampleIndex * [int]$moonManifest.SampleDays * $secondsPerDay)
+      $chunkStart + ([double]$sampleIndex * [double]$moonManifest.SampleDays * $secondsPerDay)
     }
 
     $parentPosition = Get-BodyPositionAtTime `
       -Body $parentChunkBody `
       -Time $sampleTime `
-      -SampleDays ([int]$parentManifest.SampleDays) `
+      -SampleDays ([double]$parentManifest.SampleDays) `
       -ChunkStart $chunkStart `
       -ChunkEnd $chunkEnd
 
@@ -201,7 +201,7 @@ $diagnostics = foreach ($moonBodyId in ($retainedMoonParentIds.Keys | Sort-Objec
     BodyId = [int]$moonBodyId
     BodyName = [string]$benchmarkResult.RequestedBodyName
     ParentBodyId = [int]$parentBodyId
-    SampleDays = [int]$benchmarkResult.SampleDays
+    SampleDays = [double]$benchmarkResult.SampleDays
     MaxErrorKm = [Math]::Round($maxErrorKm, 0)
     MeanErrorKm = [Math]::Round($meanErrorKm, 0)
     MeanOrbitKm = [Math]::Round($meanOrbitKm, 0)
